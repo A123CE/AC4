@@ -1,0 +1,125 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "2024-01-01",
+    "description": "中国古代建筑信息可视化系统 - 建筑详细信息数据库"
+  },
+  
+  "buildings": [
+    {
+      "id": "foguangtemple-easthall",
+      "name": "佛光寺东大殿",
+      "nameEnglish": "East Hall of Foguang Temple",
+      "period": "tang",
+      "periodName": "唐代",
+      "year": "857",
+      "location": {
+        "province": "山西省",
+        "city": "忻州市",
+        "county": "五台县",
+        "address": "五台山佛光寺",
+        "coordinates": {
+          "latitude": 38.8744,
+          "longitude": 113.3847
+        }
+      },
+      "category": "religious",
+      "categoryName": "宗教建筑",
+      "type": "wooden-structure",
+      "typeName": "木结构建筑",
+      "dimensions": {
+        "length": 34.0,
+        "width": 17.66,
+        "height": 12.0,
+        "area": 600.44,
+        "unit": "平方米"
+      },
+      "architecturalFeatures": [
+        "单檐庑殿顶",
+        "七开间",
+        "四阿顶",
+        "金厢斗底槽",
+        "柱头铺作",
+        "补间铺作"
+      ],
+      "structuralSystem": {
+        "frameType": "抬梁式木构架",
+        "roofType": "庑殿顶",
+        "bracketSet": "七铺作双抄双下昂",
+        "foundation": "石质柱础",
+        "walls": "土坯墙"
+      },
+      "historicalSignificance": "中国现存最早的木结构建筑之一，唐代建筑的代表作，梁思成发现",
+      "preservationStatus": "全国重点文物保护单位",
+      "discovery": {
+        "year": "1937",
+        "discoverer": "梁思成、林徽因",
+        "story": "1937 年，梁思成和林徽因根据敦煌壁画中的线索，在五台山发现了佛光寺东大殿，这是中国建筑史上的重大发现。"
+      },
+      "relatedFigures": [
+        {
+          "name": "梁思成",
+          "role": "发现者",
+          "contribution": "发现并研究佛光寺"
+        },
+        {
+          "name": "林徽因",
+          "role": "发现者",
+          "contribution": "协助发现和记录"
+        }
+      ],
+      "images": [
+        {
+          "url": "images/temple/foguangtemple/exterior-1.jpg",
+          "caption": "佛光寺东大殿外观",
+          "type": "exterior",
+          "photographer": "摄影师名",
+          "date": "2023-05-15"
+        },
+        {
+          "url": "images/temple/foguangtemple/interior-1.jpg",
+          "caption": "殿内木构架",
+          "type": "interior"
+        },
+        {
+          "url": "images/temple/foguangtemple/bracket-1.jpg",
+          "caption": "斗拱细节",
+          "type": "detail"
+        }
+      ],
+      "videos": [
+        {
+          "url": "videos/foguangtempe-intro.mp4",
+          "title": "佛光寺东大殿介绍",
+          "duration": "5:30",
+          "description": "详细介绍佛光寺的历史和建筑特色"
+        }
+      ],
+      "audioGuides": [
+        {
+          "url": "audio/foguangtempe-guide.mp3",
+          "title": "佛光寺语音导览",
+          "language": "zh-CN",
+          "duration": "8:00"
+        }
+      ],
+      "3dModel": {
+        "available": true,
+        "url": "models/foguangtemple.glb",
+        "polygonCount": 50000,
+        "textureResolution": "2048x2048"
+      },
+      "references": [
+        "梁思成，《中国建筑史》",
+        "《文物》杂志，1979 年第 2 期"
+      ],
+      "tags": ["唐代", "木结构", "宗教建筑", "全国重点文物", "五台山"],
+      "visitInfo": {
+        "openingHours": "8:00-18:00",
+        "ticketPrice": "成人票 68 元",
+        "bestSeason": "5-10 月",
+        "transportation": "从太原乘坐大巴到五台县，转乘景区公交"
+      }
+    }
+  ]
+}

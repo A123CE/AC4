@@ -1,0 +1,222 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "description": "中国古代建筑术语词典"
+  },
+  
+  "categories": [
+    {
+      "id": "structure",
+      "name": "结构体系",
+      "icon": "🏗️",
+      "terms": [
+        {
+          "id": "wooden-frame",
+          "term": "木构架",
+          "pinyin": "mù jià gòu",
+          "definition": "中国古代建筑的主要结构形式，以木材为主要建筑材料，通过榫卯连接形成框架结构。",
+          "englishTerm": "Wooden Frame Structure",
+          "history": "木构架技术起源于新石器时代，经过商周、秦汉的发展，到唐宋时期达到成熟。",
+          "types": [
+            {
+              "name": "抬梁式",
+              "description": "在立柱上架梁，梁上再立短柱，短柱上再架梁，层层叠加。",
+              "usage": "多用于宫殿、庙宇等大型建筑"
+            },
+            {
+              "name": "穿斗式",
+              "description": "用穿枋将柱子串联起来，形成一榀榀房架。",
+              "usage": "多用于南方民居"
+            },
+            {
+              "name": "井干式",
+              "description": "用木材层层相叠，形成围墙承重。",
+              "usage": "多用于林区"
+            }
+          ],
+          "relatedTerms": ["斗拱", "榫卯", "梁柱"],
+          "images": [
+            {
+              "url": "images/terms/wooden-frame-1.jpg",
+              "caption": "抬梁式木构架示意图"
+            }
+          ],
+          "diagrams": [
+            {
+              "url": "images/diagrams/wooden-frame-structure.svg",
+              "caption": "木构架结构分解图"
+            }
+          ]
+        },
+        {
+          "id": "dougong",
+          "term": "斗拱",
+          "pinyin": "dǒu gǒng",
+          "definition": "中国古代建筑特有的结构构件，由斗形木块和弓形肘木纵横交错层叠构成，用于柱顶、额枋和屋檐或构架间。",
+          "englishTerm": "Dougong (Bracket Set)",
+          "history": "斗拱起源于西周，成熟于唐代，宋代达到高峰，明清时期装饰性增强。",
+          "types": [
+            {
+              "name": "柱头铺作",
+              "description": "位于柱头上的斗拱"
+            },
+            {
+              "name": "补间铺作",
+              "description": "位于两柱之间额枋上的斗拱"
+            },
+            {
+              "name": "转角铺作",
+              "description": "位于建筑转角处的斗拱"
+            }
+          ],
+          "components": [
+            "斗",
+            "拱",
+            "昂",
+            "耍头",
+            "衬方头"
+          ],
+          "functions": [
+            "承重作用：将屋檐荷载传递到柱子",
+            "装饰作用：增强建筑艺术效果",
+            "抗震作用：通过柔性连接减少地震破坏"
+          ],
+          "relatedTerms": ["铺作", "昂", "栱"],
+          "images": [
+            {
+              "url": "images/terms/dougong-1.jpg",
+              "caption": "唐代斗拱"
+            }
+          ]
+        },
+        {
+          "id": "sunmao",
+          "term": "榫卯",
+          "pinyin": "sǔn mǎo",
+          "definition": "中国古代木构建筑中不使用钉子，利用木材之间的凹凸结合来连接构件的技术。凸出部分叫榫，凹进部分叫卯。",
+          "englishTerm": "Mortise and Tenon Joint",
+          "history": "榫卯技术起源于新石器时代，河姆渡文化中已有发现，是中国古代木构建筑的核心技术。",
+          "types": [
+            {
+              "name": "燕尾榫",
+              "description": "榫头呈燕尾形，用于板材连接"
+            },
+            {
+              "name": "穿带榫",
+              "description": "用于板材拼接"
+            },
+            {
+              "name": "粽角榫",
+              "description": "用于框架角部连接"
+            }
+          ],
+          "advantages": [
+            "结构牢固",
+            "便于拆卸和维修",
+            "有一定的抗震性能"
+          ],
+          "relatedTerms": ["木构架", "斗拱"],
+          "images": [
+            {
+              "url": "images/terms/sunmao-types.jpg",
+              "caption": "常见榫卯类型"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "roof",
+      "name": "屋顶形式",
+      "icon": "🏠",
+      "terms": [
+        {
+          "id": "wudian",
+          "term": "庑殿顶",
+          "pinyin": "wǔ diàn dǐng",
+          "definition": "中国古代建筑中等级最高的屋顶形式，四面斜坡，一条正脊和四条垂脊，又称四阿顶。",
+          "englishTerm": "Hip Roof",
+          "usage": "用于宫殿、庙宇等重要建筑",
+          "features": [
+            "等级最高",
+            "四面斜坡",
+            "五条屋脊"
+          ],
+          "examples": ["太和殿", "佛光寺东大殿"],
+          "images": [
+            {
+              "url": "images/terms/wudian-roof.jpg",
+              "caption": "庑殿顶示意图"
+            }
+          ]
+        },
+        {
+          "id": "xieshan",
+          "term": "歇山顶",
+          "pinyin": "xiē shān dǐng",
+          "definition": "由一条正脊、四条垂脊和四条戗脊组成，上半部分为悬山或硬山，下半部分为庑殿。",
+          "englishTerm": "Xieshan Roof (Gable and Hip Roof)",
+          "usage": "用于宫殿、园林建筑",
+          "features": [
+            "等级次于庑殿顶",
+            "九条屋脊",
+            "造型优美"
+          ],
+          "examples": ["保和殿", "颐和园建筑"],
+          "images": [
+            {
+              "url": "images/terms/xieshan-roof.jpg",
+              "caption": "歇山顶示意图"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "layout",
+      "name": "布局规制",
+      "icon": "📐",
+      "terms": [
+        {
+          "id": "zhongzhou",
+          "term": "中轴对称",
+          "pinyin": "zhōng zhóu duì chèn",
+          "definition": "以中轴线为中心，左右两侧建筑对称布局的形式，体现中国传统礼制思想。",
+          "englishTerm": "Axial Symmetry",
+          "significance": "体现等级秩序和礼制思想",
+          "examples": ["紫禁城", "孔庙", "天坛"],
+          "images": [
+            {
+              "url": "images/terms/axis-symmetry.jpg",
+              "caption": "紫禁城中轴线布局"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  
+  "glossary": {
+    "A": [
+      {
+        "term": "昂",
+        "pinyin": "áng",
+        "definition": "斗拱中的斜向构件，前端向下倾斜，后端延伸至梁下。"
+      }
+    ],
+    "B": [
+      {
+        "term": "抱厦",
+        "pinyin": "bào shà",
+        "definition": "附于主体建筑前后的小屋，用于扩大使用空间。"
+      }
+    ],
+    "C": [
+      {
+        "term": "穿枋",
+        "pinyin": "chuān fāng",
+        "definition": "穿斗式结构中串联柱子的水平构件。"
+      }
+    ]
+  }
+}
