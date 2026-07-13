@@ -2,6 +2,8 @@
 .vscode/
 # 依赖目录
 node_modules/
+# 构建输出
+client/dist/
 # 系统缓存文件
 .DS_Store
 Thumbs.db

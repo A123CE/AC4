@@ -1,34 +1,23 @@
 {
-  "name": "ancient-architecture-visualization",
-  "version": "1.0.0",
-  "description": "中国古代建筑结构对比可视化项目 - 以抬梁式与穿斗式为例",
-  "main": "index.html",
+  "name": "ac4-palace-visualization",
+  "version": "2.0.0",
+  "description": "故宫可视化系统 - 前后端全栈应用",
   "scripts": {
-    "start": "npx http-server -p 8000 -o",
-    "serve": "python -m http.server 8000",
-    "test": "echo \"No tests specified\""
+    "server": "cd server && npm start",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "cd client && npm run build",
+    "db:init": "mysql -u root -p < server/db/init.sql"
   },
   "keywords": [
     "visualization",
-    "echarts",
-    "chinese-architecture",
-    "data-visualization",
-    "ancient-building"
+    "forbidden-city",
+    "threejs",
+    "react"
   ],
-  "author": "6V AI Assistant",
+  "author": "",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
-  "dependencies": {
-    "echarts": "^5.4.3"
-  },
   "devDependencies": {
-    "@gltf-transform/cli": "^4.4.1",
-    "http-server": "^14.1.1"
-  },
-  "engines": {
-    "node": ">=12.0.0"
+    "concurrently": "^8.2.2"
   }
 }
