@@ -80,9 +80,9 @@ INSERT INTO palaces VALUES
  0, NULL, '关隘');
 
 INSERT INTO palace_images VALUES
-(1, 'wumen', 'images/forbidden-city/wumen/exterior-1.jpg', 1),
-(2, 'wumen', 'images/forbidden-city/wumen/exterior-2.jpg', 2),
-(3, 'wumen', 'images/forbidden-city/wumen/detail-1.jpg', 3);
+(1, 'wumen', 'images/forbidden-city/general-1.png.jpeg', 1),
+(2, 'wumen', 'images/forbidden-city/general-2.png.jpeg', 2),
+(3, 'wumen', 'images/forbidden-city/general-3.png.jpeg', 3);
 
 INSERT INTO palace_timeline VALUES
 (1, 'wumen', '1420', '午门建成,作为紫禁城的正门'),
@@ -106,9 +106,9 @@ INSERT INTO palaces VALUES
  0, NULL, '关隘');
 
 INSERT INTO palace_images VALUES
-(1, 'taihemen', 'images/forbidden-city/taihemen/exterior-1.jpg', 1),
-(2, 'taihemen', 'images/forbidden-city/taihemen/exterior-2.jpg', 2),
-(3, 'taihemen', 'images/forbidden-city/taihemen/detail-1.jpg', 3);
+(1, 'taihemen', 'images/forbidden-city/general-1.png.jpeg', 1),
+(2, 'taihemen', 'images/forbidden-city/general-2.png.jpeg', 2),
+(3, 'taihemen', 'images/forbidden-city/general-3.png.jpeg', 3);
 
 INSERT INTO palace_timeline VALUES
 (1, 'taihemen', '1420', '太和门初建,原名奉天门'),
@@ -132,10 +132,9 @@ INSERT INTO palaces VALUES
  0, NULL, '宫殿');
 
 INSERT INTO palace_images VALUES
-(1, 'taihedian', 'images/forbidden-city/taihedian/exterior-1.jpg', 1),
-(2, 'taihedian', 'images/forbidden-city/taihedian/exterior-2.jpg', 2),
-(3, 'taihedian', 'images/forbidden-city/taihedian/interior-1.jpg', 3),
-(4, 'taihedian', 'images/forbidden-city/taihedian/detail-1.jpg', 4);
+(1, 'taihedian', 'images/forbidden-city/general-1.png.jpeg', 1),
+(2, 'taihedian', 'images/forbidden-city/general-2.png.jpeg', 2),
+(3, 'taihedian', 'images/forbidden-city/general-3.png.jpeg', 3);
 
 INSERT INTO palace_timeline VALUES
 (1, 'taihedian', '1420', '太和殿初建,原名奉天殿'),
@@ -160,9 +159,9 @@ INSERT INTO palaces VALUES
  0, NULL, '宫殿');
 
 INSERT INTO palace_images VALUES
-(1, 'zhonghedian', 'images/forbidden-city/zhonghedian/exterior-1.jpg', 1),
-(2, 'zhonghedian', 'images/forbidden-city/zhonghedian/interior-1.jpg', 2),
-(3, 'zhonghedian', 'images/forbidden-city/zhonghedian/detail-1.jpg', 3);
+(1, 'zhonghedian', 'images/forbidden-city/general-1.png.jpeg', 1),
+(2, 'zhonghedian', 'images/forbidden-city/general-2.png.jpeg', 2),
+(3, 'zhonghedian', 'images/forbidden-city/general-3.png.jpeg', 3);
 
 INSERT INTO palace_timeline VALUES
 (1, 'zhonghedian', '1420', '中和殿初建,原名华盖殿'),
@@ -186,9 +185,9 @@ INSERT INTO palaces VALUES
  0, NULL, '宫殿');
 
 INSERT INTO palace_images VALUES
-(1, 'baohedian', 'images/forbidden-city/baohedian/exterior-1.jpg', 1),
-(2, 'baohedian', 'images/forbidden-city/baohedian/interior-1.jpg', 2),
-(3, 'baohedian', 'images/forbidden-city/baohedian/detail-1.jpg', 3);
+(1, 'baohedian', 'images/forbidden-city/general-1.png.jpeg', 1),
+(2, 'baohedian', 'images/forbidden-city/general-2.png.jpeg', 2),
+(3, 'baohedian', 'images/forbidden-city/general-3.png.jpeg', 3);
 
 INSERT INTO palace_timeline VALUES
 (1, 'baohedian', '1420', '保和殿初建,原名谨身殿'),
@@ -212,9 +211,9 @@ INSERT INTO palaces VALUES
  0, NULL, '关隘');
 
 INSERT INTO palace_images VALUES
-(1, 'qianqingmen', 'images/forbidden-city/qianqingmen/exterior-1.jpg', 1),
-(2, 'qianqingmen', 'images/forbidden-city/qianqingmen/exterior-2.jpg', 2),
-(3, 'qianqingmen', 'images/forbidden-city/qianqingmen/detail-1.jpg', 3);
+(1, 'qianqingmen', 'images/forbidden-city/general-1.png.jpeg', 1),
+(2, 'qianqingmen', 'images/forbidden-city/general-2.png.jpeg', 2),
+(3, 'qianqingmen', 'images/forbidden-city/general-3.png.jpeg', 3);
 
 INSERT INTO palace_timeline VALUES
 (1, 'qianqingmen', '1420', '乾清门初建'),
@@ -238,10 +237,9 @@ INSERT INTO palaces VALUES
  1, 'videos/forbidden-city/qiangqinggong_growth.mp4', '宫殿');
 
 INSERT INTO palace_images VALUES
-(1, 'qianqinggong', 'images/forbidden-city/qianqinggong/exterior-1.jpg', 1),
-(2, 'qianqinggong', 'images/forbidden-city/qianqinggong/interior-1.jpg', 2),
-(3, 'qianqinggong', 'images/forbidden-city/qianqinggong/interior-2.jpg', 3),
-(4, 'qianqinggong', 'images/forbidden-city/qianqinggong/detail-1.jpg', 4);
+(1, 'qianqinggong', 'images/forbidden-city/general-1.png.jpeg', 1),
+(2, 'qianqinggong', 'images/forbidden-city/general-2.png.jpeg', 2),
+(3, 'qianqinggong', 'images/forbidden-city/general-3.png.jpeg', 3);
 
 INSERT INTO palace_timeline VALUES
 (1, 'qianqinggong', '1420', '乾清宫初建'),
@@ -267,9 +265,9 @@ INSERT INTO palaces VALUES
  0, NULL, '宫殿');
 
 INSERT INTO palace_images VALUES
-(1, 'jiaotaidian', 'images/forbidden-city/jiaotaidian/exterior-1.jpg', 1),
-(2, 'jiaotaidian', 'images/forbidden-city/jiaotaidian/interior-1.jpg', 2),
-(3, 'jiaotaidian', 'images/forbidden-city/jiaotaidian/detail-1.jpg', 3);
+(1, 'jiaotaidian', 'images/forbidden-city/general-1.png.jpeg', 1),
+(2, 'jiaotaidian', 'images/forbidden-city/general-2.png.jpeg', 2),
+(3, 'jiaotaidian', 'images/forbidden-city/general-3.png.jpeg', 3);
 
 INSERT INTO palace_timeline VALUES
 (1, 'jiaotaidian', '1420', '交泰殿初建'),
@@ -293,9 +291,9 @@ INSERT INTO palaces VALUES
  0, NULL, '宫殿');
 
 INSERT INTO palace_images VALUES
-(1, 'kunninggong', 'images/forbidden-city/kunninggong/exterior-1.jpg', 1),
-(2, 'kunninggong', 'images/forbidden-city/kunninggong/interior-1.jpg', 2),
-(3, 'kunninggong', 'images/forbidden-city/kunninggong/detail-1.jpg', 3);
+(1, 'kunninggong', 'images/forbidden-city/general-1.png.jpeg', 1),
+(2, 'kunninggong', 'images/forbidden-city/general-2.png.jpeg', 2),
+(3, 'kunninggong', 'images/forbidden-city/general-3.png.jpeg', 3);
 
 INSERT INTO palace_timeline VALUES
 (1, 'kunninggong', '1420', '坤宁宫初建'),
@@ -320,9 +318,9 @@ INSERT INTO palaces VALUES
  0, NULL, '关隘');
 
 INSERT INTO palace_images VALUES
-(1, 'shenwumen', 'images/forbidden-city/shenwumen/exterior-1.jpg', 1),
-(2, 'shenwumen', 'images/forbidden-city/shenwumen/exterior-2.jpg', 2),
-(3, 'shenwumen', 'images/forbidden-city/shenwumen/detail-1.jpg', 3);
+(1, 'shenwumen', 'images/forbidden-city/general-1.png.jpeg', 1),
+(2, 'shenwumen', 'images/forbidden-city/general-2.png.jpeg', 2),
+(3, 'shenwumen', 'images/forbidden-city/general-3.png.jpeg', 3);
 
 INSERT INTO palace_timeline VALUES
 (1, 'shenwumen', '1420', '神武门初建,原名玄武门'),
