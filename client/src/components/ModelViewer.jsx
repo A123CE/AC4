@@ -1,7 +1,15 @@
-import { useRef, useState, Suspense, useMemo } from 'react';
+import { useRef, useState, Suspense, useMemo, useEffect, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
+
+/* ============================================
+   背景颜色映射
+   ============================================ */
+const BG_COLORS = {
+  warm: { bg: '#F0E8D8', ground: '#FFFFFF', ambient: '#FFF5E6', sun: '#FFF8F0', fill: '#FFE8D0' },
+  sky: { bg: '#B8D4E8', ground: '#E8E0D0', ambient: '#F0F5FF', sun: '#FFFAF5', fill: '#D0E0F0' },
+};
 
 /**
  * 克隆 GLTF 场景并设置阴影属性
@@ -18,51 +26,105 @@ function cloneWithShadows(scene) {
 }
 
 /**
- * 3D 模型加载器 — 读取后端 /models 路径下的 .glb 文件
- * 使用 primitive 挂载 GLTF 场景，wrapper group 处理缩放和居中
+ * 3D 模型加载器
  */
-function PalaceModel({ modelPath, onLoadStart, onProgress, onError }) {
+function PalaceModel({ modelPath }) {
   const { scene } = useGLTF(modelPath);
-
-  // 克隆场景并设置阴影属性（在渲染前执行，避免每次重渲染重复克隆）
   const clonedScene = useMemo(() => cloneWithShadows(scene), [scene]);
-
   const wrapperRef = useRef();
   const adjusted = useRef(false);
 
-  // 首次帧时：计算包围盒，应用缩放和居中变换
   useFrame(() => {
     if (adjusted.current || !wrapperRef.current) return;
     adjusted.current = true;
 
-    // 计算包含所有子对象的包围盒
     const box = new THREE.Box3().setFromObject(wrapperRef.current);
     const size = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
 
-    // 缩放到目标尺寸（6 单位）
     const targetSize = 6;
     const scale = targetSize / maxDim;
     wrapperRef.current.scale.setScalar(scale);
 
-    // 重新计算缩放后的包围盒
     const scaledBox = new THREE.Box3().setFromObject(wrapperRef.current);
     const center = scaledBox.getCenter(new THREE.Vector3());
 
-    // 居中：X/Z 居中，Y 底部对齐 0
     wrapperRef.current.position.set(-center.x, -scaledBox.min.y, -center.z);
   });
 
   return (
     <group ref={wrapperRef}>
-      {/* primitive 将克隆的场景挂载到 R3F 中 */}
       <primitive object={clonedScene} />
     </group>
   );
 }
 
 /**
- * 占位建筑模型 — 当真实GLTF模型不存在时显示
+ * 金砖铺地 — 带透视感的展示台
+ */
+function GoldenGround() {
+  return (
+    <group>
+      {/* 主展台 — 微暖色 */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.8, 0]} receiveShadow>
+        <planeGeometry args={[30, 30]} />
+        <meshStandardMaterial
+          color="#F5F0E5"
+          roughness={0.85}
+          metalness={0.05}
+        />
+      </mesh>
+
+      {/* 渐变网格 — 中心向四周渐隐 */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.78, 0]} receiveShadow>
+        <planeGeometry args={[14, 14]} />
+        <meshStandardMaterial
+          color="#EDE8D8"
+          roughness={0.9}
+          metalness={0.0}
+          transparent
+          opacity={0.6}
+        />
+      </mesh>
+
+      {/* 精细网格线 — "金砖"铺地效果 */}
+      <GridOverlay />
+    </group>
+  );
+}
+
+/**
+ * 透视网格 — 模拟金砖地面砖缝
+ */
+function GridOverlay() {
+  return (
+    <>
+      {/* X方向砖缝 */}
+      {Array.from({ length: 15 }, (_, i) => {
+        const x = (i - 7) * 0.8;
+        return (
+          <mesh key={`grid-x-${i}`} position={[x, -0.77, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[0.02, 11]} />
+            <meshBasicMaterial color="#D8D0C0" transparent opacity={0.5} />
+          </mesh>
+        );
+      })}
+      {/* Z方向砖缝 */}
+      {Array.from({ length: 15 }, (_, i) => {
+        const z = (i - 7) * 0.8;
+        return (
+          <mesh key={`grid-z-${i}`} position={[0, -0.77, z]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[11, 0.02]} />
+            <meshBasicMaterial color="#D8D0C0" transparent opacity={0.5} />
+          </mesh>
+        );
+      })}
+    </>
+  );
+}
+
+/**
+ * 占位建筑模型
  */
 function PlaceholderBuilding() {
   return (
@@ -72,19 +134,16 @@ function PlaceholderBuilding() {
         <boxGeometry args={[4, 0.3, 2.8]} />
         <meshStandardMaterial color="#D4C5A9" roughness={0.8} />
       </mesh>
-
       {/* 主体 */}
       <mesh position={[0, 0.8, 0]} castShadow>
         <boxGeometry args={[3.2, 2.2, 2]} />
         <meshStandardMaterial color="#B5655D" roughness={0.6} />
       </mesh>
-
-      {/* 屋顶 - 庑殿顶简化 */}
+      {/* 屋顶 */}
       <mesh position={[0, 2.4, 0]} castShadow>
         <coneGeometry args={[2.8, 1.3, 4]} />
         <meshStandardMaterial color="#DAA520" roughness={0.5} />
       </mesh>
-
       {/* 柱子 */}
       {[[-1.4, -0.9], [1.4, -0.9], [-1.4, 0.9], [1.4, 0.9]].map(([x, z], i) => (
         <mesh key={i} position={[x, 0.8, z]} castShadow>
@@ -97,118 +156,263 @@ function PlaceholderBuilding() {
 }
 
 /**
- * 加载状态指示器 — 显示进度和错误信息
+ * 注视检测组件 — 当用户持续注视模型超过5秒时触发答题
  */
-function LoadingIndicator({ modelPath }) {
-  const [progress, setProgress] = useState(0);
-  const [error, setError] = useState(null);
+function GazeDetector({ onGazeTrigger, isRotating }) {
+  const gazeStartRef = useRef(null);
+  const lastCheckRef = useRef(0);
+  const THRESHOLD = 5000; // 5秒
+  const CHECK_INTERVAL = 2000; // 每2秒检查一次
+
+  useFrame(({ camera }) => {
+    const now = Date.now();
+    if (now - lastCheckRef.current < CHECK_INTERVAL) return;
+    lastCheckRef.current = now;
+
+    if (isRotating) {
+      gazeStartRef.current = null;
+      return;
+    }
+
+    // 相机朝向是否大致对着模型
+    const target = new THREE.Vector3(0, 1.5, 0);
+    const cameraDir = camera.getWorldDirection(new THREE.Vector3());
+    const toTarget = target.clone().sub(camera.position).normalize();
+    const dot = cameraDir.dot(toTarget);
+
+    if (dot > 0.7) {
+      if (!gazeStartRef.current) {
+        gazeStartRef.current = now;
+      } else if (now - gazeStartRef.current >= THRESHOLD) {
+        onGazeTrigger?.();
+        gazeStartRef.current = null;
+      }
+    } else {
+      gazeStartRef.current = null;
+    }
+  });
+
+  return null;
+}
+
+/**
+ * 雪花粒子系统 — 雪景模式
+ */
+function SnowParticles({ active }) {
+  const count = 500;
+  const pointsRef = useRef();
+  const velocitiesRef = useRef([]);
+
+  useEffect(() => {
+    if (!active || !pointsRef.current) return;
+    const positions = pointsRef.current.geometry.attributes.position.array;
+    velocitiesRef.current = Array.from({ length: count }, () => ({
+      vy: -(0.3 + Math.random() * 0.7),
+      vx: (Math.random() - 0.5) * 0.3,
+    }));
+    for (let i = 0; i < count; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 12;
+      positions[i * 3 + 1] = Math.random() * 10;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+    }
+    pointsRef.current.geometry.attributes.position.needsUpdate = true;
+  }, [active]);
+
+  useFrame((_, delta) => {
+    if (!active || !pointsRef.current) return;
+    const positions = pointsRef.current.geometry.attributes.position.array;
+    const vels = velocitiesRef.current;
+    for (let i = 0; i < count; i++) {
+      positions[i * 3 + 1] += (vels[i]?.vy || -0.5) * delta;
+      positions[i * 3] += (vels[i]?.vx || 0) * delta;
+      if (positions[i * 3 + 1] < -1) {
+        positions[i * 3 + 1] = 8;
+        positions[i * 3] = (Math.random() - 0.5) * 12;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+      }
+    }
+    pointsRef.current.geometry.attributes.position.needsUpdate = true;
+  });
+
+  if (!active) return null;
 
   return (
-    <>
-      {/* 使用 drei 的 LoadProgress 显示加载进度 */}
-      <Html center>
-        <div style={{
-          background: 'rgba(255,255,255,0.9)',
-          borderRadius: 8,
-          padding: '16px 24px',
-          textAlign: 'center',
-          fontFamily: "'宋体', serif",
-          boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
-        }}>
-          <p style={{ margin: 0, color: '#5a4a3a', fontSize: 14, marginBottom: 8 }}>
-            正在加载模型...
-          </p>
-          <div style={{
-            width: 200, height: 4, background: '#e0d5c0', borderRadius: 2, overflow: 'hidden',
-          }}>
-            <div style={{
-              width: `${progress}%`, height: '100%', background: '#C23B22',
-              transition: 'width 0.3s ease',
-            }} />
-          </div>
-          <p style={{ margin: '4px 0 0', color: '#999', fontSize: 12 }}>
-            {modelPath ? modelPath.split('/').pop() : ''}
-          </p>
-          {error && (
-            <p style={{ color: '#c0392b', fontSize: 12, marginTop: 8 }}>
-              加载失败: {error}
-            </p>
-          )}
-        </div>
-      </Html>
-    </>
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={count}
+          array={new Float32Array(count * 3)}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.08}
+        color="#FFFFFF"
+        transparent
+        opacity={0.8}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </points>
   );
 }
 
 /**
- * Three.js 3D 查看器 — 加载真实宫殿模型
+ * 模型查看器主组件 — 沉浸式博物馆舞台 v2
+ * 新增：触摸交互、光标反馈、减少动画兼容、3D 悬停检测、皮肤支持
  */
-function ModelViewer({ palace }) {
+function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], onNavigate, onQuizTrigger, activeSkin = 'default' }) {
   const [autoRotate, setAutoRotate] = useState(true);
-  const [modelError, setModelError] = useState(false);
+  const [modelError] = useState(false);
+  const [noMotion, setNoMotion] = useState(false);
+  const canvasRef = useRef(null);
+  const gazeTimerRef = useRef(null);
+  const gazeActiveRef = useRef(false);
 
-  // 从宫殿数据中获取模型路径
   const modelPath = palace.model_path || '';
   const fullModelUrl = `/models/${modelPath}`;
+  const colors = BG_COLORS[bgMode] || BG_COLORS.warm;
+
+  // 检测用户减少动画偏好
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setNoMotion(mq.matches);
+    const handler = (e) => setNoMotion(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  // 当减少动画时关闭自转
+  useEffect(() => {
+    if (noMotion) setAutoRotate(false);
+  }, [noMotion]);
+
+  // 中轴线位置索引
+  const axisIndex = palace.axis_position || 0;
+  const totalBuildings = 10;
+
+  // 获取相邻建筑（用于推荐）
+  const currentIndex = palaces.findIndex(p => p.id === palace.id);
+  const prevPalace = currentIndex > 0 ? palaces[currentIndex - 1] : null;
+  const nextPalace = currentIndex < palaces.length - 1 ? palaces[currentIndex + 1] : null;
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       {/* 标题覆盖层 */}
-      <div style={{
-        position: 'absolute', top: 16, left: 20, zIndex: 10,
-        pointerEvents: 'none',
-      }}>
-        <h2 style={{
-          fontSize: 28, fontWeight: 'normal', color: '#3a3a3a',
-          letterSpacing: 4, margin: 0, fontFamily: "'宋体', serif",
-        }}>
-          {palace.name}
-        </h2>
-        <p style={{
-          fontSize: 13, color: '#888', margin: 0, letterSpacing: 1,
-          fontFamily: "'宋体', serif",
-        }}>
-          {palace.dynasty} · {palace.built_year}年建成 · {palace.category}
-        </p>
+      <div className="viewer-title-overlay">
+        <h2>{palace.name}</h2>
+        <p>{palace.dynasty} · {palace.built_year}年建成 · {palace.category}</p>
       </div>
 
-      {/* 操作提示 */}
-      <div style={{
-        position: 'absolute', top: 16, right: 20, zIndex: 10,
-        fontSize: 12, color: '#999', letterSpacing: 1,
-        fontFamily: "'宋体', serif",
-      }}>
-        拖拽旋转 · 滚轮缩放
+      {/* 操作HUD — 鼠标静止3秒后浮现 */}
+      <div className={`viewer-hud${showHud ? ' visible' : ''}`}>
+        <div className="viewer-hud-item">
+          <i className="fas fa-hand-pointer"></i>
+          <span>拖拽旋转</span>
+        </div>
+        <div className="viewer-hud-item">
+          <i className="fas fa-magnifying-glass-plus"></i>
+          <span>滚轮缩放</span>
+        </div>
+        <div className="viewer-hud-item">
+          <i className="fas fa-hand"></i>
+          <span>右键平移</span>
+        </div>
       </div>
 
-      {/* 自转开关 */}
-      <label style={{
-        position: 'absolute', top: 16, right: 160, zIndex: 10,
-        fontSize: 13, color: '#5a4a3a', cursor: 'pointer',
-        display: 'flex', alignItems: 'center', gap: 6,
-        fontFamily: "'宋体', serif",
-      }}>
-        <input
-          type="checkbox"
-          checked={autoRotate}
-          onChange={(e) => setAutoRotate(e.target.checked)}
-          style={{ accentColor: '#C23B22' }}
-        />
-        自转
-      </label>
+      {/* 自转开关 — 底部居中 */}
+      {!noMotion && (
+        <div
+          className={`auto-rotate-toggle${autoRotate ? ' active' : ''}`}
+          onClick={() => setAutoRotate(!autoRotate)}
+          role="switch"
+          aria-checked={autoRotate}
+          aria-label={autoRotate ? '暂停自动旋转' : '开启自动旋转'}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setAutoRotate(!autoRotate);
+            }
+          }}
+        >
+          <div className="toggle-dot" />
+          <span>{autoRotate ? '自转中' : '已暂停'}</span>
+        </div>
+      )}
+
+      {/* 中轴线迷你地图 */}
+      <div className="axis-minimap">
+        <div className="axis-minimap-label">中轴位置</div>
+        <div className="axis-minimap-line">
+          {Array.from({ length: totalBuildings }, (_, i) => (
+            <div
+              key={i}
+              className={`axis-minimap-dot${i === axisIndex ? ' highlight' : ''}`}
+              title={palaces[i]?.name || `建筑${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 导航箭头 — 上一个/下一个建筑 */}
+      {prevPalace && (
+        <button
+          style={{
+            position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
+            zIndex: 10, background: 'var(--surface-glass-heavy)',
+            backdropFilter: 'blur(8px)', border: '1px solid var(--border-warm)',
+            borderRadius: '50%', width: 36, height: 36,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', color: 'var(--ink-light)', fontSize: '0.9rem',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => onNavigate(prevPalace)}
+          title={prevPalace.name}
+        >
+          <i className="fas fa-chevron-left"></i>
+        </button>
+      )}
+      {nextPalace && (
+        <button
+          style={{
+            position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+            zIndex: 10, background: 'var(--surface-glass-heavy)',
+            backdropFilter: 'blur(8px)', border: '1px solid var(--border-warm)',
+            borderRadius: '50%', width: 36, height: 36,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', color: 'var(--ink-light)', fontSize: '0.9rem',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => onNavigate(nextPalace)}
+          title={nextPalace.name}
+        >
+          <i className="fas fa-chevron-right"></i>
+        </button>
+      )}
 
       <Canvas
+        ref={canvasRef}
         shadows
         camera={{ position: [8, 6, 10], fov: 45 }}
-        gl={{ antialias: true, alpha: false }}
+        gl={{
+          antialias: true,
+          alpha: false,
+          powerPreference: 'high-performance',
+        }}
+        // 触摸事件 — 移动端支持
+        onCreated={({ gl }) => {
+          gl.domElement.style.touchAction = 'none';
+        }}
       >
-        {/* 暖米色渐变背景 */}
-        <color attach="background" args={['#F0E8D8']} />
+        {/* 背景色 */}
+        <color attach="background" args={[colors.bg]} />
 
-        {/* 温暖环境光 */}
-        <ambientLight intensity={0.7} color="#FFF5E6" />
+        {/* 环境光照 */}
+        <ambientLight intensity={0.7} color={colors.ambient} />
 
-        {/* 主光源 — 模拟自然日光从左上方照射 */}
+        {/* 主光源 */}
         <directionalLight
           position={[-8, 12, 8]}
           intensity={1.2}
@@ -219,30 +423,31 @@ function ModelViewer({ palace }) {
           shadow-camera-right={10}
           shadow-camera-top={10}
           shadow-camera-bottom={-10}
-          color="#FFF8F0"
+          shadow-bias={-0.0001}
+          color={colors.sun}
         />
 
-        {/* 右侧补光 — 模拟反射光，减少暗部 */}
-        <directionalLight position={[6, 4, -4]} intensity={0.3} color="#FFE8D0" />
+        {/* 补光 */}
+        <directionalLight
+          position={[6, 4, -4]}
+          intensity={0.3}
+          color={colors.fill}
+        />
 
-        {/* 白色展示台 — 从中心向两侧延伸 */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-          <planeGeometry args={[30, 30]} />
-          <meshStandardMaterial color="#FFFFFF" roughness={0.9} metalness={0.0} />
-        </mesh>
+        {/* 底部补光 — 减少建筑底部的厚重阴影 */}
+        <directionalLight
+          position={[0, 2, 0]}
+          intensity={0.2}
+          color={colors.ambient}
+        />
 
-        <Suspense fallback={<LoadingIndicator modelPath={fullModelUrl} />}>
+        {/* 金砖地面 */}
+        <GoldenGround />
+
+        <Suspense fallback={null}>
           {!modelError && fullModelUrl ? (
             <>
-              {/* useGLTF 错误处理 */}
-              <PalaceModel
-                modelPath={fullModelUrl}
-                onError={(err) => {
-                  console.error('模型加载失败:', err);
-                  setModelError(true);
-                }}
-              />
-              {/* 加载失败时显示提示 */}
+              <PalaceModel modelPath={fullModelUrl} />
               {modelError && (
                 <Html center>
                   <div style={{
@@ -250,7 +455,7 @@ function ModelViewer({ palace }) {
                     borderRadius: 8,
                     padding: '16px 24px',
                     textAlign: 'center',
-                    fontFamily: "'宋体', serif",
+                    fontFamily: "'Noto Serif SC', serif",
                     boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
                   }}>
                     <p style={{ margin: 0, color: '#c0392b', fontSize: 14 }}>
@@ -270,21 +475,36 @@ function ModelViewer({ palace }) {
 
         <OrbitControls
           enableDamping
-          dampingFactor={0.05}
-          autoRotate={autoRotate}
-          autoRotateSpeed={1.5}
+          dampingFactor={0.08}
+          autoRotate={!noMotion && autoRotate}
+          autoRotateSpeed={noMotion ? 0 : 1.5}
           minDistance={3}
           maxDistance={30}
+          target={[0, 1.5, 0]}
+          // 触摸支持
+          enablePan={true}
+          enableZoom={true}
+          enableRotate={true}
+          touches={{
+            ONE: THREE.TOUCH.ROTATE,
+            TWO: THREE.TOUCH.DOLLY_PAN,
+          }}
         />
 
         <ContactShadows
-          position={[0, -0.48, 0]}
-          opacity={0.3}
-          scale={15}
-          blur={3}
+          position={[0, -0.76, 0]}
+          opacity={0.4}
+          scale={12}
+          blur={2.5}
           far={4}
           color="#000000"
         />
+
+        {/* 注视检测 */}
+        <GazeDetector onGazeTrigger={onQuizTrigger} isRotating={autoRotate} />
+
+        {/* 雪花粒子 */}
+        <SnowParticles active={activeSkin === 'snow'} />
       </Canvas>
     </div>
   );

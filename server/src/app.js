@@ -2,6 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const palaceRoutes = require('./routes/palaces');
+const authRoutes = require('./routes/auth');
+const encyclopediaRoutes = require('./routes/encyclopedia');
+const quizRoutes = require('./routes/quiz');
+const signinRoutes = require('./routes/signin');
+const skinRoutes = require('./routes/skins');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -16,8 +21,17 @@ app.use('/images', express.static(path.join(projectRoot, 'images')));
 app.use('/models', express.static(path.join(projectRoot, 'models')));
 app.use('/videos', express.static(path.join(projectRoot, 'videos')));
 
+// 生产环境下提供前端构建产物
+const clientDist = path.join(projectRoot, 'client', 'dist');
+app.use(express.static(clientDist));
+
 // API 路由
 app.use('/api/palaces', palaceRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/encyclopedia', encyclopediaRoutes);
+app.use('/api/quiz', quizRoutes);
+app.use('/api/signin', signinRoutes);
+app.use('/api/skins', skinRoutes);
 
 // 健康检查
 app.get('/api/health', (req, res) => {
