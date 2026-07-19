@@ -7,7 +7,7 @@
     "client": "cd client && npm run dev",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "cd client && npm run build",
-    "db:init": "mysql -u root -p < server/db/init.sql"
+    "db:init": "mysql -u root -p < server/db/init_full.sql"
   },
   "keywords": [
     "visualization",

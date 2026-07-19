@@ -19,3 +19,4 @@ images/**/*.jpeg
 images/**/*.png
 images/**/*.webp
 images/**/*.ktx2
+static-version

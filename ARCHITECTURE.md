@@ -12,7 +12,7 @@ acvisual 4/
 ├── server/                    # 后端
 │   ├── package.json
 │   ├── db/
-│   │   └── init.sql           # 数据库初始化脚本
+│   │   └── init_full.sql    # 数据库初始化脚本（整合版）
 │   ├── src/
 │   │   ├── app.js             # Express 入口
 │   │   ├── db.js              # MySQL 连接池

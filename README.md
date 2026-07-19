@@ -18,7 +18,7 @@
 ### 1. 初始化数据库
 
 ```bash
-mysql -u root -p < server/db/init.sql
+mysql -u root -p < server/db/init_full.sql
 ```
 
 ### 2. 启动后端服务
@@ -75,7 +75,7 @@ acvisual 4/
 │   │   └── routes/
 │   │       └── palaces.js
 │   └── db/
-│       └── init.sql     # 数据库初始化脚本
+│       └── init_full.sql   # 数据库初始化脚本（整合版）
 ├── client/              # 前端应用
 │   ├── src/
 │   │   ├── App.jsx      # 主组件
