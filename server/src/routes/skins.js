@@ -59,14 +59,18 @@ router.get('/', async (req, res) => {
       'SELECT skin_type, is_unlocked, unlocked_at FROM user_skins WHERE user_id = ?',
       [req.user.id]
     );
+    const safeUserSkins = userSkins || [];
     const userSkinMap = {};
-    userSkins.forEach(s => { userSkinMap[s.skin_type] = s; });
+    safeUserSkins.forEach(s => { userSkinMap[s.skin_type] = s; });
 
     // 获取用户当前激活皮肤
     const [users] = await pool.execute(
       'SELECT active_skin, points FROM users WHERE id = ?',
       [req.user.id]
     );
+    if (!users || users.length === 0) {
+      return res.status(404).json({ success: false, error: '用户不存在' });
+    }
 
     const skins = SKIN_DEFINITIONS.map(skin => ({
       ...skin,
@@ -115,7 +119,7 @@ router.post('/unlock', async (req, res) => {
       'SELECT id FROM user_skins WHERE user_id = ? AND skin_type = ? AND is_unlocked = 1',
       [req.user.id, skin_type]
     );
-    if (existing.length > 0) {
+    if (existing && existing.length > 0) {
       return res.status(400).json({ success: false, error: '该皮肤已解锁' });
     }
 
@@ -124,6 +128,9 @@ router.post('/unlock', async (req, res) => {
       'SELECT points FROM users WHERE id = ?',
       [req.user.id]
     );
+    if (!users || users.length === 0) {
+      return res.status(404).json({ success: false, error: '用户不存在' });
+    }
     if (users[0].points < skinDef.unlock_cost) {
       return res.status(400).json({
         success: false,
@@ -182,7 +189,7 @@ router.put('/activate', async (req, res) => {
         'SELECT id FROM user_skins WHERE user_id = ? AND skin_type = ? AND is_unlocked = 1',
         [req.user.id, skin_type]
       );
-      if (unlocked.length === 0) {
+      if (!unlocked || unlocked.length === 0) {
         return res.status(400).json({ success: false, error: '该皮肤尚未解锁' });
       }
     }
