@@ -1,6 +1,6 @@
 import { useRef, useState, Suspense, useMemo, useEffect, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, ContactShadows, useGLTF, Html } from '@react-three/drei';
+import { OrbitControls, useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
 
 /* ============================================
@@ -12,27 +12,25 @@ const BG_COLORS = {
 };
 
 /**
- * 克隆 GLTF 场景并设置阴影属性
+ * 克隆 GLTF 场景
  */
-function cloneWithShadows(scene) {
-  const cloned = scene.clone();
-  cloned.traverse((child) => {
-    if (child.isMesh) {
-      child.castShadow = true;
-      child.receiveShadow = true;
-    }
-  });
-  return cloned;
+function cloneScene(scene) {
+  return scene.clone();
 }
 
 /**
- * 3D 模型加载器
+ * 3D 模型加载器 — 可传入 modelRef 用于热点坐标计算
  */
-function PalaceModel({ modelPath }) {
+function PalaceModel({ modelPath, modelRef }) {
   const { scene } = useGLTF(modelPath);
-  const clonedScene = useMemo(() => cloneWithShadows(scene), [scene]);
+  const clonedScene = useMemo(() => cloneScene(scene), [scene]);
   const wrapperRef = useRef();
   const adjusted = useRef(false);
+
+  // 将 wrapperRef 同步到外部 modelRef
+  useEffect(() => {
+    if (modelRef) modelRef.current = wrapperRef.current;
+  }, [modelRef, wrapperRef.current]);
 
   useFrame(() => {
     if (adjusted.current || !wrapperRef.current) return;
@@ -60,66 +58,20 @@ function PalaceModel({ modelPath }) {
 }
 
 /**
- * 金砖铺地 — 带透视感的展示台
+ * 简洁展台地面 — 无网格、无阴影，模型自然落地
  */
-function GoldenGround() {
+function CleanGround() {
   return (
-    <group>
-      {/* 主展台 — 微暖色 */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.8, 0]} receiveShadow>
-        <planeGeometry args={[30, 30]} />
-        <meshStandardMaterial
-          color="#F5F0E5"
-          roughness={0.85}
-          metalness={0.05}
-        />
-      </mesh>
-
-      {/* 渐变网格 — 中心向四周渐隐 */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.78, 0]} receiveShadow>
-        <planeGeometry args={[14, 14]} />
-        <meshStandardMaterial
-          color="#EDE8D8"
-          roughness={0.9}
-          metalness={0.0}
-          transparent
-          opacity={0.6}
-        />
-      </mesh>
-
-      {/* 精细网格线 — "金砖"铺地效果 */}
-      <GridOverlay />
-    </group>
-  );
-}
-
-/**
- * 透视网格 — 模拟金砖地面砖缝
- */
-function GridOverlay() {
-  return (
-    <>
-      {/* X方向砖缝 */}
-      {Array.from({ length: 15 }, (_, i) => {
-        const x = (i - 7) * 0.8;
-        return (
-          <mesh key={`grid-x-${i}`} position={[x, -0.77, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-            <planeGeometry args={[0.02, 11]} />
-            <meshBasicMaterial color="#D8D0C0" transparent opacity={0.5} />
-          </mesh>
-        );
-      })}
-      {/* Z方向砖缝 */}
-      {Array.from({ length: 15 }, (_, i) => {
-        const z = (i - 7) * 0.8;
-        return (
-          <mesh key={`grid-z-${i}`} position={[0, -0.77, z]} rotation={[-Math.PI / 2, 0, 0]}>
-            <planeGeometry args={[11, 0.02]} />
-            <meshBasicMaterial color="#D8D0C0" transparent opacity={0.5} />
-          </mesh>
-        );
-      })}
-    </>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
+      <circleGeometry args={[8, 64]} />
+      <meshStandardMaterial
+        color="#F0EBE0"
+        roughness={0.9}
+        metalness={0.0}
+        transparent
+        opacity={0.35}
+      />
+    </mesh>
   );
 }
 
@@ -130,23 +82,23 @@ function PlaceholderBuilding() {
   return (
     <group>
       {/* 台基 */}
-      <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
+      <mesh position={[0, -0.4, 0]}>
         <boxGeometry args={[4, 0.3, 2.8]} />
         <meshStandardMaterial color="#D4C5A9" roughness={0.8} />
       </mesh>
       {/* 主体 */}
-      <mesh position={[0, 0.8, 0]} castShadow>
+      <mesh position={[0, 0.8, 0]}>
         <boxGeometry args={[3.2, 2.2, 2]} />
         <meshStandardMaterial color="#B5655D" roughness={0.6} />
       </mesh>
       {/* 屋顶 */}
-      <mesh position={[0, 2.4, 0]} castShadow>
+      <mesh position={[0, 2.4, 0]}>
         <coneGeometry args={[2.8, 1.3, 4]} />
         <meshStandardMaterial color="#DAA520" roughness={0.5} />
       </mesh>
       {/* 柱子 */}
       {[[-1.4, -0.9], [1.4, -0.9], [-1.4, 0.9], [1.4, 0.9]].map(([x, z], i) => (
-        <mesh key={i} position={[x, 0.8, z]} castShadow>
+        <mesh key={i} position={[x, 0.8, z]}>
           <cylinderGeometry args={[0.08, 0.08, 1.6, 8]} />
           <meshStandardMaterial color="#C23B22" roughness={0.7} />
         </mesh>
@@ -259,8 +211,9 @@ function SnowParticles({ active }) {
 }
 
 /**
- * 模型查看器主组件 — 沉浸式博物馆舞台 v2
- * 新增：触摸交互、光标反馈、减少动画兼容、3D 悬停检测、皮肤支持
+ * 模型查看器主组件 — 沉浸式博物馆舞台 v3
+ * 新增：触摸交互、光标反馈、减少动画兼容、3D 悬停检测、
+ *       皮肤支持、3D热点标注、点击模型构件展示讲解
  */
 function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], onNavigate, onQuizTrigger, activeSkin = 'default' }) {
   const [autoRotate, setAutoRotate] = useState(true);
@@ -394,7 +347,6 @@ function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], o
 
       <Canvas
         ref={canvasRef}
-        shadows
         camera={{ position: [8, 6, 10], fov: 45 }}
         gl={{
           antialias: true,
@@ -404,6 +356,8 @@ function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], o
         // 触摸事件 — 移动端支持
         onCreated={({ gl }) => {
           gl.domElement.style.touchAction = 'none';
+          // 禁止浏览器右键菜单，让 OrbitControls 右键平移正常工作
+          gl.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
         }}
       >
         {/* 背景色 */}
@@ -416,14 +370,6 @@ function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], o
         <directionalLight
           position={[-8, 12, 8]}
           intensity={1.2}
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-          shadow-camera-left={-10}
-          shadow-camera-right={10}
-          shadow-camera-top={10}
-          shadow-camera-bottom={-10}
-          shadow-bias={-0.0001}
           color={colors.sun}
         />
 
@@ -441,8 +387,8 @@ function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], o
           color={colors.ambient}
         />
 
-        {/* 金砖地面 */}
-        <GoldenGround />
+        {/* 简洁展台地面 */}
+        <CleanGround />
 
         <Suspense fallback={null}>
           {!modelError && fullModelUrl ? (
@@ -489,15 +435,6 @@ function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], o
             ONE: THREE.TOUCH.ROTATE,
             TWO: THREE.TOUCH.DOLLY_PAN,
           }}
-        />
-
-        <ContactShadows
-          position={[0, -0.76, 0]}
-          opacity={0.4}
-          scale={12}
-          blur={2.5}
-          far={4}
-          color="#000000"
         />
 
         {/* 注视检测 */}

@@ -7,6 +7,8 @@ import MapPage from './pages/MapPage';
 import TimelinePage from './pages/TimelinePage';
 import EncyclopediaPage from './pages/EncyclopediaPage';
 import ProfilePage from './pages/ProfilePage';
+import ExhibitionPage from './pages/ExhibitionPage';
+import EighteenDouPage from './pages/EighteenDouPage';
 import QuizPage from './pages/QuizPage';
 import QuizModal from './components/QuizModal';
 import './styles/global.css';
@@ -78,6 +80,26 @@ function App() {
           element={
             <ProtectedRoute>
               <QuizPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 沉浸式3D展览页 */}
+        <Route
+          path="/exhibition/:id"
+          element={
+            <ProtectedRoute>
+              <ExhibitionPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 清式十八斗独立单体展示 */}
+        <Route
+          path="/douba-eighteen"
+          element={
+            <ProtectedRoute>
+              <EighteenDouPage />
             </ProtectedRoute>
           }
         />

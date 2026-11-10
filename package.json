@@ -18,6 +18,10 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "playwright": "^1.61.1"
+  },
+  "dependencies": {
+    "liquid-glass-react": "^1.1.1"
   }
 }
