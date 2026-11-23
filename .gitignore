@@ -7,9 +7,15 @@ client/dist/
 # 系统缓存文件
 .DS_Store
 Thumbs.db
+# 门禁报告
+reports/
 # 日志、临时文件
 *.log
 npm-debug.log*
+# 本地临时脚本与运行痕迹
+.tmp-*
+.arts/
+server/scripts/_tmp-*
 # 大型二进制文件 - 单独存放，不提交到git
 models/**/*.glb
 models/**/*.gltf

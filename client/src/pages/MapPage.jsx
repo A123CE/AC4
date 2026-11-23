@@ -208,7 +208,7 @@ export default function MapPage() {
     if (!drag.current.moved) {
       var r = containerRef.current ? containerRef.current.getBoundingClientRect() : null; if (!r) return;
       var hit = hitTest(e.clientX - r.left, e.clientY - r.top);
-      if (hit) { setRipple({ t: Date.now(), sx: e.clientX - r.left, sy: e.clientY - r.top }); setTimeout(function() { nav('/', { state: { selectPalaceId: hit } }); }, 250); }
+      if (hit) { setRipple({ t: Date.now(), sx: e.clientX - r.left, sy: e.clientY - r.top }); setTimeout(function() { nav('/gallery', { state: { selectPalaceId: hit } }); }, 250); }
     }
   }
   function onML() { drag.current.on = false; setHoverId(null); needDraw.current = true; }

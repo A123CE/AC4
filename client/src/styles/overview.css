@@ -1,0 +1,1723 @@
+/* ============================================================
+   古建筑多维信息可视化 · 首页总览
+   国风编辑式 · 宣纸底 · 朱红单强调色 · 思源宋体
+   圆角规则: 卡片 12px / 按钮 8px / 筛选标签 pill
+   ============================================================ */
+
+.overview-page {
+  /* 全局 body 为 overflow:hidden 固定视口外壳(三栏展厅需要),
+     本页改为自身滚动容器, 不依赖 body 滚动 */
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--paper-white);
+  color: var(--ink);
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============ 下翻页面背景 — 液态以太 ============ */
+/* 固定满视口铺在内容之下: 首屏 Hero 不透明, 完全盖住它;
+   往下滚动后才显露, 鼠标划过时液体会跟着流动 */
+.ov-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.78;
+  pointer-events: none;
+}
+
+.ov-ambient-ether {
+  position: absolute;
+  inset: 0;
+}
+
+/* 宣纸薄纱 — 压住液体浓度, 保证文字与卡片的可读性 */
+.ov-ambient-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(115% 85% at 50% 45%, rgba(247, 243, 235, 0.34) 0%, rgba(247, 243, 235, 0.5) 100%),
+    linear-gradient(180deg, rgba(247, 243, 235, 0.28) 0%, rgba(247, 243, 235, 0.12) 100%);
+}
+
+/* ============ 应用侧栏导航 (App Sidebar) ============ */
+.ov-shell {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  min-height: 100%;
+}
+
+.ov-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.ov-sidebar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 268px;
+  flex: 0 0 268px;
+  height: 100dvh;
+  padding: 24px 16px 18px;
+  background: linear-gradient(180deg, #fbf7ee 0%, #f4ede0 100%);
+  border-right: 1px solid var(--border-warm);
+  transition:
+    width 0.3s cubic-bezier(0.33, 0, 0.2, 1),
+    flex-basis 0.3s cubic-bezier(0.33, 0, 0.2, 1),
+    padding 0.3s cubic-bezier(0.33, 0, 0.2, 1);
+}
+
+.ov-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+/* 桌面端折叠开关 */
+.ov-sidebar-collapse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.ov-sidebar-collapse:hover {
+  background: rgba(44, 44, 44, 0.06);
+  color: var(--ink);
+}
+
+/* 品牌 */
+.ov-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 0 4px;
+  cursor: pointer;
+}
+
+.ov-sidebar-seal {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: var(--vermillion);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.ov-sidebar-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.ov-sidebar-title h1 {
+  margin: 0;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ov-sidebar-title span {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--ink-muted);
+}
+
+/* 检索 */
+.ov-sidebar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 11px;
+  background: #fff;
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-md);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ov-sidebar-search:focus-within {
+  border-color: rgba(178, 58, 44, 0.5);
+  box-shadow: 0 0 0 3px rgba(178, 58, 44, 0.08);
+}
+
+.ov-sidebar-search i {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.ov-sidebar-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.ov-sidebar-search input::placeholder {
+  color: var(--ink-muted);
+}
+
+.ov-sidebar-search kbd {
+  flex-shrink: 0;
+  padding: 1px 5px;
+  border: 1px solid var(--border-warm);
+  border-radius: 4px;
+  background: #fbf8f1;
+  font-family: inherit;
+  font-size: 10px;
+  color: var(--ink-muted);
+}
+
+/* 分组导航 */
+.ov-sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+
+.ov-sidebar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ov-sidebar-group-label {
+  margin: 0 0 5px;
+  padding-left: 12px;
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  color: var(--ink-muted);
+}
+
+.ov-side-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink-light);
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.ov-side-item i {
+  width: 18px;
+  font-size: 13px;
+  text-align: center;
+  color: var(--ink-muted);
+  transition: color 0.18s ease;
+}
+
+.ov-side-item:hover {
+  background: rgba(44, 44, 44, 0.045);
+  color: var(--ink);
+}
+
+.ov-side-item:hover i {
+  color: var(--ink-light);
+}
+
+.ov-side-item.active {
+  background: rgba(178, 58, 44, 0.09);
+  color: var(--vermillion);
+  font-weight: 600;
+}
+
+.ov-side-item.active i {
+  color: var(--vermillion);
+}
+
+.ov-side-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--vermillion);
+}
+
+/* 用户 / 登录 */
+.ov-sidebar-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-warm);
+}
+
+.ov-side-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.ov-side-user:hover {
+  background: rgba(44, 44, 44, 0.04);
+}
+
+.ov-side-avatar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--stone-blue);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ov-side-user-meta {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.ov-side-user-name {
+  font-size: 13px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ov-side-user-role {
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+}
+
+.ov-side-logout {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.ov-side-logout:hover {
+  background: rgba(178, 58, 44, 0.1);
+  color: var(--vermillion);
+}
+
+.ov-side-admin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.ov-side-admin:hover {
+  background: rgba(44, 44, 44, 0.04);
+  color: var(--ink-light);
+}
+
+.ov-side-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--vermillion);
+  background: transparent;
+  color: var(--vermillion);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ov-side-login-icon {
+  display: none;
+}
+
+.ov-side-login:hover {
+  background: var(--vermillion);
+  color: #fff;
+}
+
+.ov-sidebar-copy {
+  margin: 2px 0 0;
+  padding-left: 4px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: rgba(120, 110, 96, 0.72);
+}
+
+/* 窄屏唤出按钮 / 抽屉关闭 / 遮罩 — 默认隐藏 */
+.ov-sidebar-toggle,
+.ov-sidebar-backdrop,
+.ov-side-close {
+  display: none;
+}
+
+.ov-sidebar-toggle.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ov-side-close {
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.ov-side-close:hover {
+  background: rgba(44, 44, 44, 0.06);
+  color: var(--ink);
+}
+
+/* ============ Hero 首屏 — 全屏曲面画廊 ============ */
+.ov-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 0 0;
+  /* 画廊水平中心 — 右移给左侧文案留出纯背景区 */
+  --ring-cx: 66%;
+  /* 视差位移(滚动时由 JS 写入) */
+  --ov-par: 0px;
+  --ov-par-text: 0px;
+  background:
+    radial-gradient(120% 90% at 62% 38%, #1a1a20 0%, #0b0b0f 62%),
+    #0b0b0f;
+}
+
+/* 全屏模糊背景 — 当前卡片图片实时联动(保留清晰可辨的色彩) */
+.ov-hero-bg {
+  position: absolute;
+  inset: -150px;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(24px) saturate(1.18) brightness(0.95);
+  transform: scale(1.06) translateY(var(--ov-par, 0px));
+  opacity: 0;
+  transition: opacity 1.1s ease;
+  pointer-events: none;
+}
+
+/* 蒙版 — 左侧压暗承托叠加文字, 右侧与中央保留背景色彩 */
+.ov-hero-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(8, 8, 12, 0.78) 0%,
+      rgba(8, 8, 12, 0.68) 18%,
+      rgba(8, 8, 12, 0.46) 34%,
+      rgba(8, 8, 12, 0.2) 52%,
+      rgba(8, 8, 12, 0.18) 76%,
+      rgba(8, 8, 12, 0.34) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 12, 0.36) 0%,
+      rgba(8, 8, 12, 0.06) 34%,
+      rgba(8, 8, 12, 0.5) 86%,
+      rgba(8, 8, 12, 0.86) 100%
+    );
+}
+
+.ov-hero-inner {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  max-width: 1180px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 40px;
+  flex: 1;
+}
+
+/* 文案 — 直接叠加在古建筑影像上(无玻璃容器) */
+.ov-hero-copy {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 470px;
+  transform: translateY(var(--ov-par-text, 0px));
+}
+
+.ov-hero-rule {
+  width: 52px;
+  height: 4px;
+  background: var(--vermillion);
+  margin-bottom: 34px;
+}
+
+.ov-hero-title {
+  margin: 0;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: clamp(32px, 3.4vw, 48px);
+  font-weight: 700;
+  line-height: 1.16;
+  letter-spacing: 0.01em;
+  /* 7.3em 精确容纳 7 个汉字: 固定在"古建筑多维信息 / 可视化"处断行 */
+  max-width: 7.3em;
+  color: #fff;
+  text-shadow: 0 4px 28px rgba(0, 0, 0, 0.55);
+}
+
+.ov-hero-sub {
+  margin: 18px 0 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.95;
+  max-width: 36ch;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* 信息附着 — 随画面切换的建筑名 / 年代标签 / 简介 */
+.ov-hero-attach {
+  margin-top: 26px;
+  padding-left: 18px;
+  border-left: 2px solid rgba(214, 178, 128, 0.6);
+  animation: ov-attach-in 0.65s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.ov-hero-attach-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.ov-hero-attach-name {
+  font-family: 'Noto Serif SC', serif;
+  font-size: clamp(22px, 1.9vw, 28px);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #fff;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
+}
+
+.ov-hero-attach-meta {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: rgba(233, 214, 186, 0.88);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.ov-hero-attach-desc {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 34ch;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes ov-attach-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ov-hero-cta {
+  margin-top: 32px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ov-hero-btn {
+  padding: 13px 32px;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  transition:
+    transform 0.28s cubic-bezier(0.33, 0, 0.2, 1),
+    box-shadow 0.28s ease,
+    background 0.24s ease,
+    border-color 0.24s ease,
+    color 0.24s ease;
+  font-family: 'Noto Serif SC', serif;
+}
+
+.ov-hero-btn:active {
+  transform: translateY(1px);
+}
+
+/* 主按钮 — 系统核心 3D 展厅入口 */
+.ov-hero-btn--primary {
+  background: var(--vermillion);
+  color: #fff;
+  border: 1px solid var(--vermillion);
+  box-shadow: 0 12px 30px rgba(178, 58, 44, 0.35);
+}
+
+.ov-hero-btn--primary:hover {
+  background: #a03022;
+  border-color: #a03022;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 20px 44px rgba(178, 58, 44, 0.5);
+}
+
+/* 编修入口按钮 — 带图标, 三枚按钮同排 */
+.ov-hero-btn--upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 22px;
+  font-size: 14px;
+}
+
+.ov-hero-btn--upload i {
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
+/* 次要按钮 — 线框国风样式 */
+.ov-hero-btn--outline {
+  background: transparent;
+  color: #f4ecdd;
+  border: 1px solid rgba(244, 236, 221, 0.52);
+}
+
+.ov-hero-btn--outline:hover {
+  background: rgba(244, 236, 221, 0.08);
+  color: #fff;
+  border-color: rgba(214, 178, 128, 0.95);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+/* ============ 全屏曲面画廊 ============ */
+.ov-ring {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  /* 每张卡的水平位移 */
+  --ring-spacing: clamp(180px, 24vw, 380px);
+  /* 3D 透视 — 让两侧卡片真正"转过去" */
+  perspective: 1500px;
+  perspective-origin: var(--ring-cx) 50%;
+  /* 左侧淡出 — 卡片向文案区融化进模糊背景 */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 14%,
+    rgba(0, 0, 0, 0.85) 24%,
+    #000 32%,
+    #000 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 14%,
+    rgba(0, 0, 0, 0.85) 24%,
+    #000 32%,
+    #000 100%
+  );
+}
+
+.ov-ring-panel {
+  --ring-w: min(42vw, 560px);
+  --ring-h: min(52vh, 400px);
+  position: absolute;
+  left: var(--ring-cx);
+  top: 50%;
+  width: var(--ring-w);
+  height: var(--ring-h);
+  margin-left: calc(var(--ring-w) / -2);
+  margin-top: calc(var(--ring-h) / -2);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #17171c;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.55);
+  transform: translateX(calc(var(--d) * var(--ring-spacing)))
+    rotateY(calc(var(--d) * -26deg))
+    scale(calc(1 - var(--d) * var(--d) * 0.055));
+  transition: transform 1s cubic-bezier(0.33, 0, 0.15, 1), opacity 1s ease;
+  opacity: calc(1 - var(--d) * var(--d) * 0.17);
+  will-change: transform;
+}
+
+/* 左侧卡片 — 向文案区淡出, 不遮挡叠加文字 */
+.ov-ring-panel--out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ov-ring-panel img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 弧面质感 — 高光 + 暗边模拟弯曲反射 */
+.ov-ring-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0.10) 0%,
+      rgba(255, 255, 255, 0.02) 22%,
+      transparent 46%,
+      rgba(0, 0, 0, 0.10) 78%,
+      rgba(0, 0, 0, 0.24) 100%
+    );
+  pointer-events: none;
+}
+
+/* 画廊下方 — 点状指示器 + 序号(与画廊中心对齐) */
+.ov-ring-caption {
+  position: absolute;
+  left: calc(var(--ring-cx) - 50%);
+  right: calc(50% - var(--ring-cx));
+  bottom: 38px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.ov-ring-dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.ov-ring-dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.26);
+  cursor: pointer;
+  transition: width 0.3s ease, background 0.3s ease, border-radius 0.3s ease;
+}
+
+.ov-ring-dot:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.ov-ring-dot.active {
+  width: 20px;
+  border-radius: 4px;
+  background: #d6b280;
+}
+
+.ov-ring-count {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: rgba(255, 255, 255, 0.4);
+  font-variant-numeric: tabular-nums;
+}
+
+.ov-ring-count-cur {
+  color: #e7d7b8;
+  font-weight: 600;
+}
+
+/* ============ 数据看板 — 多维信息可视化 ============ */
+.ov-stats {
+  padding: 44px 40px 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* 国风容器 — 淡宣纸底 + 细描边 + 角落回纹 */
+.ov-stats-panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.22fr) minmax(0, 1fr);
+  gap: 44px;
+  padding: 34px 46px;
+  background: linear-gradient(165deg, #fcf9f2 0%, #f6f0e3 100%);
+  border: 1px solid var(--border-warm);
+  border-radius: 2px;
+  box-shadow: 0 16px 36px rgba(44, 44, 44, 0.05);
+}
+
+/* 角落回纹 — 极简两笔, 不做繁复花纹 */
+.ov-stats-panel::before,
+.ov-stats-panel::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(178, 58, 44, 0.45);
+  pointer-events: none;
+}
+
+.ov-stats-panel::before {
+  top: 8px;
+  left: 8px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.ov-stats-panel::after {
+  right: 8px;
+  bottom: 8px;
+  border-left: none;
+  border-top: none;
+}
+
+.ov-stats-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+/* 编辑式数据卡：眉标 → 细线 → 大字号数字 → 说明 */
+.ov-stat {
+  display: flex;
+  flex-direction: column;
+  padding: 2px 18px;
+  border-left: 1px solid var(--border-warm);
+}
+
+.ov-stat:first-child {
+  border-left: none;
+  padding-left: 0;
+}
+
+.ov-stat-eyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--ink-muted);
+}
+
+.ov-stat-rule {
+  width: 100%;
+  margin: 12px 0 14px;
+  border: 0;
+  border-top: 1px solid var(--border-warm);
+}
+
+.ov-stat-line {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.ov-stat-value {
+  font-family: 'Noto Serif SC', 'Times New Roman', Georgia, serif;
+  font-size: clamp(40px, 3.4vw, 62px);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.ov-stat-unit {
+  margin-top: 0.32em;
+  font-size: clamp(13px, 0.9vw, 17px);
+  line-height: 1;
+  color: var(--vermillion);
+  letter-spacing: 0;
+}
+
+.ov-stat-caption {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin: 14px 0 0;
+  font-family: 'Noto Serif SC', 'Times New Roman', Georgia, serif;
+  font-size: 12.5px;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+  color: var(--ink-light);
+}
+
+.ov-stats-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding-left: 44px;
+  border-left: 1px solid var(--border-warm);
+}
+
+.ov-stats-chart-title {
+  margin: 0 0 6px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  color: var(--ink-light);
+}
+
+.ov-stats-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.ov-stats-row-label {
+  letter-spacing: 0.06em;
+}
+
+.ov-stats-row-track {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(178, 58, 44, 0.09);
+  overflow: hidden;
+}
+
+.ov-stats-row-track i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, rgba(178, 58, 44, 0.5), var(--vermillion));
+}
+
+.ov-stats-row-num {
+  text-align: right;
+  color: var(--ink-light);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============ 筛选区 ============ */
+.ov-filter {
+  padding: 44px 40px 4px;
+  max-width: 1400px;
+  margin: 0 auto;
+  scroll-margin-top: 76px; /* 避免锚点滚动后被固定导航栏遮挡 */
+}
+
+.ov-filter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.ov-filter-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.ov-filter-title::before {
+  content: '';
+  width: 4px;
+  height: 22px;
+  background: var(--vermillion);
+  border-radius: 2px;
+}
+
+.ov-filter-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.ov-filter-sort select {
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-md);
+  background: #fff;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+  cursor: pointer;
+}
+
+.ov-filter-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.ov-filter-label {
+  flex-shrink: 0;
+  width: 56px;
+  font-size: 14px;
+  color: var(--ink-light);
+  padding-top: 7px;
+  font-weight: 500;
+}
+
+.ov-filter-tags {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  /* 为底部硬阴影与按下位移留出空间 */
+  padding-bottom: 10px;
+}
+
+.ov-filter-tag {
+  --tag-bg: #fff;
+  --tag-fg: #a4182f;
+  --tag-edge: #d4a0a9;
+  --tag-glow: rgba(94, 58, 34, 0.1);
+  position: relative;
+  padding: 7px 18px;
+  border-radius: 6px;
+  border: 1px solid #cf8f9b;
+  background: var(--tag-bg);
+  color: var(--tag-fg);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  /* 立体底座：实心投影 + 环境软影 */
+  box-shadow: 0 4px 0 var(--tag-edge), 0 6px 10px var(--tag-glow);
+  transition: transform 0.14s ease, box-shadow 0.14s ease,
+    background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.ov-filter-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 0 var(--tag-edge), 0 9px 14px var(--tag-glow);
+}
+
+.ov-filter-tag:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 var(--tag-edge), 0 2px 4px var(--tag-glow);
+}
+
+.ov-filter-tag.active {
+  --tag-bg: var(--vermillion);
+  --tag-fg: #fff;
+  --tag-edge: #8f1730;
+  --tag-glow: rgba(143, 23, 48, 0.3);
+  border-color: #8f1730;
+}
+
+.ov-filter-reset {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--ink-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  text-decoration: underline;
+}
+
+.ov-filter-reset:hover {
+  color: var(--vermillion);
+}
+
+/* ============ 卡片网格 ============ */
+.ov-grid {
+  padding: 16px 40px 48px;
+  max-width: 1400px;
+  margin: 0 auto;
+  scroll-margin-top: 76px;
+}
+
+.ov-grid-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px 24px;
+}
+
+/* 滚动入场动画外壳 — 保持网格等高，交给卡片自适应填充 */
+.scroll-reveal__item {
+  display: flex;
+  min-width: 0;
+}
+
+.scroll-reveal__item > * {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ov-grid-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 88px 0;
+  color: var(--ink-muted);
+}
+
+.ov-grid-empty i {
+  font-size: 40px;
+  opacity: 0.35;
+  display: block;
+  margin-bottom: 16px;
+}
+
+/* ============ 3D 视差卡片 ============ */
+/* 外层透视容器 — 悬停时整张卡片(含文字框)放大 */
+.ov-card3d {
+  position: relative;
+  perspective: 1100px;
+  transition: transform 0.34s cubic-bezier(0.33, 0, 0.2, 1);
+}
+
+.ov-card3d:hover {
+  transform: translateY(-6px) scale(1.05);
+  z-index: 5;
+}
+
+/* 内部旋转层 */
+.building-card-3d {
+  transform-style: preserve-3d;
+  height: 100%;
+  transition: transform 0.18s ease-out;
+  will-change: transform;
+}
+
+/* preserve-3d 必须贯穿整条链, 中间层缺一会压平子层 */
+.ov-card3d-body,
+.building-card-body,
+.building-card-actions {
+  transform-style: preserve-3d;
+}
+
+.ov-card3d-item {
+  transform-style: preserve-3d;
+}
+
+/* ============ 建筑卡片 ============ */
+/* 注意: 不可设置 overflow:hidden, 否则强制压平 preserve-3d */
+.building-card {
+  background: #fff;
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: box-shadow var(--duration-normal) ease;
+}
+
+.building-card:hover {
+  box-shadow: 0 18px 40px rgba(44, 44, 44, 0.16);
+}
+
+/* 封面 — 收在卡片框内, 顶部跟随卡片圆角裁切 */
+.building-card-cover {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--paper-dark);
+  border-bottom: 1px solid var(--border-warm);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.building-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s var(--ease-in-out);
+}
+
+/* 悬停 — 图片在卡片框内进一步放大 */
+.building-card:hover .building-card-cover img {
+  transform: scale(1.08);
+}
+
+.building-card-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(150deg, #f1eadd 0%, #e6d9c2 100%);
+  color: var(--ink-muted);
+}
+
+.building-card-cover-placeholder i {
+  font-size: 38px;
+  color: rgba(var(--vermillion-rgb), 0.4);
+}
+
+.building-card-cover-placeholder span {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+
+.building-card-body {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.building-card-title {
+  margin: 0 0 10px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.building-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.building-card-meta span + span {
+  padding-left: 8px;
+  border-left: 1px solid var(--border-warm);
+}
+
+.building-card-meta .meta-category {
+  color: var(--vermillion);
+}
+
+.building-card-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-muted);
+  line-height: 1.75;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.building-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.building-card-btn {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 3px;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  /* 阶梯硬阴影 — 悬停时整叠收起, 呈现"按平"的反馈 */
+  transition: box-shadow 0.32s cubic-bezier(0.33, 0, 0.2, 1),
+    background-color 0.24s ease, border-color 0.24s ease, color 0.24s ease;
+}
+
+.building-card-btn--detail {
+  border: 1px solid var(--border-warm);
+  background: #fff;
+  color: var(--ink-light);
+  box-shadow: 2px 2px 0 #e4d9c6, 4px 4px 0 #d8c9b0, 6px 6px 0 #c9b899;
+}
+
+.building-card-btn--detail:hover {
+  border-color: var(--vermillion);
+  background: rgba(var(--vermillion-rgb), 0.06);
+  color: var(--vermillion);
+  box-shadow: none;
+}
+
+.building-card-btn--model {
+  border: 1px solid var(--vermillion);
+  background: var(--vermillion);
+  color: #fff;
+  box-shadow: 2px 2px 0 rgba(var(--vermillion-rgb), 0.42),
+    4px 4px 0 rgba(var(--vermillion-rgb), 0.26),
+    6px 6px 0 rgba(var(--vermillion-rgb), 0.15);
+}
+
+.building-card-btn--model:hover {
+  background: #a03022;
+  border-color: #a03022;
+  box-shadow: none;
+}
+
+.building-card-btn:active {
+  box-shadow: none;
+  filter: brightness(0.96);
+}
+
+/* ============ 分页 ============ */
+.ov-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 0 56px;
+}
+
+.ov-page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-warm);
+  background: #fff;
+  color: var(--ink-light);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+}
+
+.ov-page-btn:hover:not(:disabled) {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.ov-page-btn.active {
+  background: var(--vermillion);
+  border-color: var(--vermillion);
+  color: #fff;
+}
+
+.ov-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ============ 响应式 ============ */
+/* 侧栏内的中屏: 主区变窄, 略缩画廊与文案 */
+@media (min-width: 1181px) and (max-width: 1400px) {
+  .ov-hero {
+    --ring-cx: 68%;
+  }
+  .ov-hero-copy {
+    max-width: 420px;
+  }
+  .ov-ring-panel {
+    --ring-w: min(36vw, 520px);
+  }
+}
+
+@media (max-width: 1080px) {
+  .ov-hero-inner {
+    padding: 0 24px;
+  }
+  .ov-hero {
+    --ring-cx: 62%;
+  }
+  .ov-hero-copy {
+    max-width: 410px;
+  }
+  .ov-stats {
+    padding: 40px 24px 0;
+  }
+  .ov-stats-panel {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 30px 32px;
+  }
+  .ov-stats-chart {
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid var(--border-warm);
+    padding-top: 22px;
+  }
+}
+
+/* 桌面端折叠为图标细栏 */
+@media (min-width: 1181px) {
+  .ov-sidebar--collapsed {
+    width: 78px;
+    flex-basis: 78px;
+    padding: 22px 12px 16px;
+    gap: 16px;
+  }
+
+  .ov-sidebar--collapsed .ov-sidebar-head {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ov-sidebar--collapsed .ov-sidebar-brand {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .ov-sidebar--collapsed .ov-sidebar-title,
+  .ov-sidebar--collapsed .ov-sidebar-search,
+  .ov-sidebar--collapsed .ov-sidebar-group-label,
+  .ov-sidebar--collapsed .ov-sidebar-copy {
+    display: none;
+  }
+
+  .ov-sidebar--collapsed .ov-sidebar-nav {
+    align-items: center;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ov-sidebar--collapsed .ov-sidebar-group {
+    align-items: center;
+    gap: 4px;
+  }
+
+  .ov-sidebar--collapsed .ov-side-item {
+    width: 46px;
+    height: 42px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .ov-sidebar--collapsed .ov-side-item span {
+    display: none;
+  }
+
+  .ov-sidebar--collapsed .ov-side-item i {
+    width: auto;
+    font-size: 14px;
+  }
+
+  .ov-sidebar--collapsed .ov-sidebar-foot {
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ov-sidebar--collapsed .ov-side-user {
+    padding: 5px;
+  }
+
+  .ov-sidebar--collapsed .ov-side-user-meta,
+  .ov-sidebar--collapsed .ov-side-logout {
+    display: none;
+  }
+
+  .ov-sidebar--collapsed .ov-side-admin {
+    width: 46px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .ov-sidebar--collapsed .ov-side-admin span {
+    display: none;
+  }
+
+  .ov-sidebar--collapsed .ov-side-login {
+    width: 46px;
+    height: 40px;
+    padding: 0;
+  }
+
+  .ov-sidebar--collapsed .ov-side-login-text {
+    display: none;
+  }
+
+  .ov-sidebar--collapsed .ov-side-login-icon {
+    display: inline;
+  }
+}
+
+/* 侧栏收起为抽屉 */
+@media (max-width: 1180px) {
+  .ov-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100dvh;
+    transform: translateX(-100%);
+    transition: transform 0.32s cubic-bezier(0.33, 0, 0.2, 1);
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.22);
+    z-index: 1200;
+  }
+
+  .ov-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .ov-side-close {
+    display: flex;
+  }
+
+  /* 抽屉模式不需要折叠开关 */
+  .ov-sidebar-collapse {
+    display: none;
+  }
+
+  .ov-sidebar-toggle {
+    display: flex;
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 1300;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-warm);
+    border-radius: 10px;
+    background: rgba(251, 248, 241, 0.94);
+    color: var(--ink);
+    font-size: 15px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+    transition: background 0.2s ease;
+  }
+
+  .ov-sidebar-toggle:hover {
+    background: #fff;
+  }
+
+  .ov-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: rgba(12, 10, 9, 0.42);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .ov-sidebar-backdrop.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* 给左上角悬浮按钮留出空间 */
+  .ov-hero {
+    padding-top: 76px;
+  }
+}
+
+@media (max-width: 860px) {
+  .ov-grid-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  /* 窄屏留白更少, 液体降一点浓度避免抢戏 */
+  .ov-ambient {
+    opacity: 0.6;
+  }
+  /* 窄屏改为上下堆叠: 文字在上, 影像画廊在下, 不再互相遮挡 */
+  .ov-hero {
+    --ring-cx: 50%;
+    justify-content: flex-start;
+  }
+  .ov-hero-inner {
+    flex: 0 0 auto;
+  }
+  .ov-hero-copy {
+    max-width: 520px;
+  }
+  .ov-hero-title {
+    font-size: clamp(30px, 5vw, 40px);
+  }
+  .ov-hero-sub {
+    margin-top: 14px;
+    font-size: 13px;
+    line-height: 1.9;
+  }
+  .ov-hero-attach {
+    margin-top: 20px;
+  }
+  .ov-hero-cta {
+    margin-top: 24px;
+    gap: 12px;
+  }
+  .ov-hero-btn {
+    padding: 11px 22px;
+    font-size: 14px;
+  }
+  .ov-ring {
+    position: relative;
+    inset: auto;
+    height: 40vh;
+    margin-top: 30px;
+    --ring-spacing: clamp(140px, 34vw, 260px);
+  }
+  .ov-ring-panel {
+    top: 50%;
+    --ring-w: min(58vw, 380px);
+    --ring-h: min(30vh, 300px);
+  }
+  .ov-ring-caption {
+    position: static;
+    left: auto;
+    right: auto;
+    padding: 18px 0 26px;
+  }
+  .ov-stats-metrics {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 22px;
+  }
+  .ov-stat:nth-child(3) {
+    border-left: none;
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .ov-grid-list {
+    grid-template-columns: 1fr;
+  }
+  .ov-hero {
+    padding: 76px 20px 0;
+    --ring-cx: 50%;
+  }
+  .ov-hero-copy {
+    max-width: none;
+  }
+  .ov-ring {
+    height: 34vh;
+    margin-top: 24px;
+    --ring-spacing: clamp(110px, 40vw, 170px);
+  }
+  .ov-ring-panel {
+    --ring-w: 74vw;
+    --ring-h: 27vh;
+  }
+  .ov-ring-caption {
+    padding: 14px 0 22px;
+  }
+  .ov-ring-dots {
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 240px;
+    row-gap: 7px;
+  }
+  .ov-stats {
+    padding: 32px 20px 0;
+  }
+  .ov-stats-panel {
+    padding: 26px 22px;
+    gap: 22px;
+  }
+  .ov-stat-value {
+    font-size: 30px;
+  }
+  .ov-stats-row {
+    grid-template-columns: 54px minmax(0, 1fr) 24px;
+    gap: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ov-hero-bg {
+    transition: none;
+  }
+  .ov-hero-attach {
+    animation: none;
+  }
+  .ov-ring-panel {
+    transition: none;
+  }
+  .ov-card3d {
+    transition: none;
+  }
+  .building-card-3d {
+    transition: none;
+  }
+  .building-card-cover img {
+    transition: none;
+  }
+}

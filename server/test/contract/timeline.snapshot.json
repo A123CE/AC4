@@ -1,0 +1,18 @@
+{
+  "data": {
+    "events": [
+      {
+        "built_year": "string",
+        "category": "string",
+        "city": "string",
+        "dynasty": "string",
+        "event": "string",
+        "palace_id": "string",
+        "palace_name": "string",
+        "region": "string",
+        "year": "string"
+      }
+    ]
+  },
+  "success": "boolean"
+}

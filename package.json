@@ -7,7 +7,22 @@
     "client": "cd client && npm run dev",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "cd client && npm run build",
-    "db:init": "mysql -u root -p < server/db/init_full.sql"
+    "db:init": "mysql -u root -p < server/db/init_full.sql",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:test:init": "node scripts/db-test-init.mjs",
+    "test": "npm run test:client && npm run test:server",
+    "test:client": "cd client && npm run test",
+    "test:server": "cd server && npm run test",
+    "test:e2e": "playwright test --config=test/e2e/playwright.config.js",
+    "test:all": "npm run test && npm run test:contract && npm run test:e2e",
+    "test:contract": "node --test --test-force-exit server/test/contract.test.js",
+    "snapshot:api": "node scripts/snapshot-api.mjs",
+    "audit:assets": "node scripts/audit-assets.mjs",
+    "schema:diff": "node scripts/schema-diff.mjs",
+    "ci:gate": "npm run lint && npm run test && npm run test:contract && npm run schema:diff && npm run test:e2e",
+    "lint": "cd client && npm run lint",
+    "seo:check": "node scripts/seo-check.mjs",
+    "ugc:check": "node scripts/check-ugc-blocked.mjs"
   },
   "keywords": [
     "visualization",

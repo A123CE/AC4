@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "brand": "Ancient Chinese Architecture, Visualized",
+    "groups": {
+      "browse": "Browse",
+      "exhibition": "Exhibition",
+      "edit": "Curate"
+    },
+    "home": "Overview",
+    "category": "Architecture Types",
+    "map": "Geographic Map",
+    "timeline": "Historical Timeline",
+    "gallery": "3D Model Gallery",
+    "encyclopedia": "Architecture Encyclopedia",
+    "routes": "Curated Routes",
+    "quiz": "Architecture Quiz",
+    "upload": "Upload Model · New Record",
+    "curator": "Curator Desk",
+    "profile": "Profile",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "admin": "Administrator",
+    "explorer": "Architecture Explorer",
+    "searchPlaceholder": "Search ancient architecture…",
+    "language": "Language"
+  },
+  "overview": {
+    "title": "Ancient Chinese Architecture, Visualized",
+    "subtitle": "Preserving the beauty of Chinese construction through 3D models, cultural records, and spatial visualization.",
+    "enterGallery": "Enter 3D Gallery",
+    "explore": "Explore Architecture",
+    "upload": "Upload Model"
+  },
+  "detail": {
+    "title": "Archival Details",
+    "name": "Name",
+    "englishName": "English Name",
+    "translationMissing": "Detailed translation coming soon",
+    "related": "Related Architecture"
+  },
+  "search": {
+    "title": "Search Ancient Architecture",
+    "placeholder": "Search buildings, terms, quizzes, or historical events…",
+    "button": "Search"
+  },
+  "common": {
+    "greeting": "Hello, {name}"
+  }
+}

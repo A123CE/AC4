@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "brand": "古建筑多维信息可视化",
+    "groups": {
+      "browse": "浏览",
+      "exhibition": "展厅",
+      "edit": "编修"
+    },
+    "home": "首页总览",
+    "category": "古建筑分类",
+    "map": "地理分布",
+    "timeline": "历史时间轴",
+    "gallery": "3D 模型展厅",
+    "encyclopedia": "建筑知识科普",
+    "routes": "主题导览路线",
+    "quiz": "营造问答",
+    "upload": "上传模型 · 新建档案",
+    "curator": "档案编修台",
+    "profile": "个人中心",
+    "login": "登录",
+    "logout": "退出登录",
+    "admin": "管理员",
+    "explorer": "营造探索者",
+    "searchPlaceholder": "检索古建筑…",
+    "language": "语言"
+  },
+  "overview": {
+    "title": "古建筑多维信息可视化",
+    "subtitle": "以数字技术保存并呈现华夏营造之美：三维模型、文物信息与空间可视化。",
+    "enterGallery": "进入模型展厅",
+    "explore": "探索古建筑",
+    "upload": "上传模型"
+  },
+  "detail": {
+    "title": "卷宗详情",
+    "name": "名称",
+    "englishName": "英文名",
+    "translationMissing": "English coming soon",
+    "related": "相关建筑"
+  },
+  "search": {
+    "title": "搜索华夏古建",
+    "placeholder": "搜索建筑、术语、题目或历史事件…",
+    "button": "搜索"
+  },
+  "common": {
+    "greeting": "你好，{name}"
+  }
+}

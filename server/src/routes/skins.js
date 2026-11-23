@@ -85,6 +85,7 @@ router.get('/', async (req, res) => {
         skins,
         current_points: users[0].points,
         active_skin: users[0].active_skin || 'default',
+        fallback_reason: null,
       },
     });
   } catch (err) {

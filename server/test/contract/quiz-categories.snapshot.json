@@ -1,0 +1,14 @@
+{
+  "data": [
+    {
+      "accuracy": "null",
+      "answered": "null",
+      "category": "string",
+      "correct": "null",
+      "distinct_correct": "null",
+      "question_total": "number"
+    }
+  ],
+  "scope": "string",
+  "success": "boolean"
+}

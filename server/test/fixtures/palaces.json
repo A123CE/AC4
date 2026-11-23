@@ -1,0 +1,15 @@
+[
+  {
+    "id": "taihedian",
+    "name": "太和殿",
+    "name_en": "Hall of Supreme Harmony",
+    "category": "宫殿",
+    "dynasty": "明清",
+    "region": "北京",
+    "city": "北京",
+    "tagline": "东方三大殿之首",
+    "description": "紫禁城外朝三大殿之首。",
+    "poster_path": "posters/forbidden-city/taihedian.png",
+    "model_path": "forbidden-city/taihedian.glb"
+  }
+]

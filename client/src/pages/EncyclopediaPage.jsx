@@ -1,15 +1,20 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getEncyclopediaTerms, getEncyclopediaTerm } from '../api';
+import EncyclopediaGuide from '../components/EncyclopediaGuide';
+import EncyclopediaDiagramPanel from '../components/EncyclopediaDiagramPanel';
+import AnimatedList from '../components/AnimatedList';
+import ShareButton from '../components/ShareButton';
+import AudioGuidePlayer from '../components/AudioGuidePlayer';
+import { findHotspotForTerm } from '../data/buildingHotspots';
 
 /**
  * 营造法式百科页面 — 古建筑知识库 (API驱动版)
- * 涵盖屋顶等级、斗拱、彩画、柱础、台基、门窗、琉璃、脊兽、纹饰、建筑规制等
+ *
+ * 结构:
+ *   状态一（未选中词条）: 左侧分类 + 列表，右侧【营造导引看板】
+ *   状态二（词条详情）  : 标题信息 → 实拍图像 → 图解示意 → 三维联动 → 相关术语
  */
-
-// 图片路径前缀 — 数据库存的是相对路径 images/xxx，需加 / 前缀形成绝对路径
-// Vite 开发服务器会将 /images/* 代理到后端 express.static('images')
-const IMG_PREFIX = '/';
 
 // 扩展的分类定义
 const CATEGORIES = [
@@ -49,115 +54,56 @@ const PALACE_NAMES = {
   shenwumen: '神武门',
 };
 
-// SVG图解组件 - 斗拱结构
-function DougongDiagram() {
-  return (
-    <svg className="encyclopedia-diagram-svg" viewBox="0 0 400 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* 柱子 */}
-      <rect x="175" y="220" width="50" height="60" rx="3" fill="#8B4513" stroke="#6B3410" strokeWidth="2" />
-      <text x="200" y="258" textAnchor="middle" fill="#fff" fontSize="14">柱</text>
+// 关联建筑有多座且都能命中时，按中轴线顺序取"更有代表性"的那座
+const PALACE_PRIORITY = [
+  'wumen',
+  'taihemen',
+  'taihedian',
+  'zhonghedian',
+  'baohedian',
+  'qianqingmen',
+  'qianqinggong',
+  'jiaotaidian',
+  'kunninggong',
+  'shenwumen',
+];
 
-      {/* 柱础 */}
-      <rect x="165" y="260" width="70" height="15" rx="5" fill="#A0A0A0" stroke="#808080" strokeWidth="1.5" />
-      <text x="200" y="272" textAnchor="middle" fill="#333" fontSize="11">柱础</text>
+/**
+ * 词条 → 3D 热点术语的兜底映射
+ * 多数词条 id 与热点 termId 一致；不一致的（如「龙纹」对应彩画热点）走这里。
+ */
+const HOTSPOT_TERM_FALLBACK = {
+  彩画: ['caihua-hexi'],
+  纹饰: ['caihua-hexi', 'longwen', 'fengwen'],
+  斗拱: ['dougong', 'dougong-levels'],
+  屋顶: ['roof-ranking', 'wudian-roof', 'xieshan-roof'],
+  建筑规制: ['sanchaodian', 'gongmen'],
+  门窗: ['gongmen'],
+  脊兽: ['jishou-xianren', 'chiwen'],
+  台基: ['sumeru'],
+  柱础: ['zhuchu'],
+  琉璃: ['liuli'],
+  建筑装饰: ['caisson'],
+};
 
-      {/* 斗 (大斗) */}
-      <rect x="155" y="195" width="90" height="25" rx="4" fill="#C8960C" stroke="#A07800" strokeWidth="2" />
-      <text x="200" y="212" textAnchor="middle" fill="#fff" fontSize="13" fontWeight="bold">斗 (大斗)</text>
-
-      {/* 拱1 - 左右伸出 */}
-      <path d="M140 195 L100 170 L100 185 L140 195Z" fill="#D4A574" stroke="#A07800" strokeWidth="1.5" />
-      <path d="M260 195 L300 170 L300 185 L260 195Z" fill="#D4A574" stroke="#A07800" strokeWidth="1.5" />
-      <text x="115" y="180" textAnchor="middle" fill="#6B3410" fontSize="11">拱</text>
-      <text x="285" y="180" textAnchor="middle" fill="#6B3410" fontSize="11">拱</text>
-
-      {/* 升 (小斗) */}
-      <rect x="90" y="158" width="30" height="14" rx="3" fill="#C8960C" stroke="#A07800" strokeWidth="1.5" />
-      <rect x="280" y="158" width="30" height="14" rx="3" fill="#C8960C" stroke="#A07800" strokeWidth="1.5" />
-      <text x="105" y="168" textAnchor="middle" fill="#fff" fontSize="10">升</text>
-      <text x="295" y="168" textAnchor="middle" fill="#fff" fontSize="10">升</text>
-
-      {/* 昂 - 斜向构件 */}
-      <path d="M200 195 L240 130 L250 130 L210 195Z" fill="#D4A574" stroke="#A07800" strokeWidth="1.5" />
-      <text x="252" y="155" fill="#6B3410" fontSize="12">昂</text>
-
-      {/* 上层斗和拱 */}
-      <rect x="155" y="130" width="90" height="20" rx="4" fill="#C8960C" stroke="#A07800" strokeWidth="1.5" />
-      <text x="200" y="144" textAnchor="middle" fill="#fff" fontSize="12">斗</text>
-
-      <path d="M155 130 L100 100 L100 115 L155 130Z" fill="#D4A574" stroke="#A07800" strokeWidth="1.5" />
-      <path d="M245 130 L300 100 L300 115 L245 130Z" fill="#D4A574" stroke="#A07800" strokeWidth="1.5" />
-
-      {/* 屋顶示意 */}
-      <path d="M90 100 L200 40 L310 100" fill="none" stroke="#C41E3A" strokeWidth="3" />
-      <path d="M85 100 L200 35 L315 100" fill="none" stroke="#C41E3A" strokeWidth="1.5" opacity="0.5" />
-      <text x="200" y="30" textAnchor="middle" fill="#C41E3A" fontSize="14">屋顶</text>
-
-      {/* 标注线 */}
-      <line x1="70" y1="220" x2="140" y2="220" stroke="#666" strokeWidth="1" strokeDasharray="3,3" />
-      <text x="65" y="224" textAnchor="end" fill="#666" fontSize="12">承重传递</text>
-      <line x1="320" y1="170" x2="340" y2="170" stroke="#666" strokeWidth="1" strokeDasharray="3,3" />
-      <text x="348" y="174" fill="#666" fontSize="12">出挑方向→</text>
-    </svg>
-  );
+/** 安全解析 JSON 字段（可能是字符串或已解析的数组） */
+function safeJSON(val, defaultVal = []) {
+  if (!val) return defaultVal;
+  if (Array.isArray(val)) return val;
+  try {
+    return JSON.parse(val);
+  } catch {
+    return defaultVal;
+  }
 }
 
-// SVG图解组件 - 屋顶等级对比
-function RoofComparisonDiagram() {
+function SectionHead({ icon, title, hint }) {
   return (
-    <svg className="encyclopedia-diagram-svg" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <text x="200" y="18" textAnchor="middle" fill="#2C2C2C" fontSize="14" fontWeight="bold">屋顶等级对比图</text>
-
-      {/* 重檐庑殿顶 */}
-      <rect x="10" y="30" width="180" height="80" rx="6" fill="rgba(196,30,58,0.06)" stroke="#C41E3A" strokeWidth="1.5" />
-      <text x="100" y="48" textAnchor="middle" fill="#C41E3A" fontSize="12" fontWeight="bold">重檐庑殿顶 · 第一等</text>
-      <path d="M30 95 L100 50 L170 95" fill="none" stroke="#C41E3A" strokeWidth="2.5" />
-      <path d="M25 95 L100 45 L175 95" fill="none" stroke="#C41E3A" strokeWidth="1.5" />
-      <path d="M15 95 L100 40 L185 95" fill="none" stroke="#C41E3A" strokeWidth="0.8" opacity="0.5" />
-      <rect x="60" y="95" width="80" height="12" rx="2" fill="#D4A574" stroke="#A07800" strokeWidth="1" />
-
-      {/* 重檐歇山顶 */}
-      <rect x="210" y="30" width="180" height="80" rx="6" fill="rgba(184,134,11,0.06)" stroke="#B8860B" strokeWidth="1.5" />
-      <text x="300" y="48" textAnchor="middle" fill="#B8860B" fontSize="12" fontWeight="bold">重檐歇山顶 · 第二等</text>
-      <path d="M230 95 L300 50 L370 95" fill="none" stroke="#B8860B" strokeWidth="2.5" />
-      <path d="M225 95 L300 45 L375 95" fill="none" stroke="#B8860B" strokeWidth="1.5" />
-      <line x1="255" y1="80" x2="255" y2="95" stroke="#B8860B" strokeWidth="1.5" />
-      <line x1="345" y1="80" x2="345" y2="95" stroke="#B8860B" strokeWidth="1.5" />
-
-      {/* 单檐庑殿顶 */}
-      <rect x="10" y="125" width="180" height="70" rx="6" fill="rgba(139,69,19,0.04)" stroke="#8B4513" strokeWidth="1.5" />
-      <text x="100" y="142" textAnchor="middle" fill="#8B4513" fontSize="12" fontWeight="bold">单檐庑殿顶 · 第三等</text>
-      <path d="M30 180 L100 135 L170 180" fill="none" stroke="#8B4513" strokeWidth="2" />
-
-      {/* 单檐歇山顶 */}
-      <rect x="210" y="125" width="180" height="70" rx="6" fill="rgba(102,102,102,0.04)" stroke="#666" strokeWidth="1.5" />
-      <text x="300" y="142" textAnchor="middle" fill="#666" fontSize="12" fontWeight="bold">单檐歇山顶 · 第四等</text>
-      <path d="M230 180 L300 135 L370 180" fill="none" stroke="#666" strokeWidth="2" />
-      <line x1="255" y1="165" x2="255" y2="180" stroke="#666" strokeWidth="1" />
-      <line x1="345" y1="165" x2="345" y2="180" stroke="#666" strokeWidth="1" />
-
-      {/* 悬山顶/硬山顶 */}
-      <rect x="60" y="210" width="280" height="60" rx="6" fill="rgba(136,136,136,0.04)" stroke="#999" strokeWidth="1" />
-      <text x="200" y="228" textAnchor="middle" fill="#999" fontSize="12" fontWeight="bold">悬山顶 / 硬山顶 · 第五·六等</text>
-      <path d="M100 255 L200 215 L300 255" fill="none" stroke="#999" strokeWidth="1.5" />
-      <text x="200" y="272" textAnchor="middle" fill="#999" fontSize="11">用于一般官署和民居建筑</text>
-    </svg>
-  );
-}
-
-// 根据术语ID渲染对应的图解
-function TermDiagram({ termId, categoryIcon }) {
-  if (termId === 'dougong' || termId === 'dougong-levels') {
-    return <DougongDiagram />;
-  }
-  if (termId === 'roof-ranking' || termId === 'wudian-roof' || termId === 'xieshan-roof') {
-    return <RoofComparisonDiagram />;
-  }
-  // 默认占位
-  return (
-    <div className="encyclopedia-diagram-placeholder">
-      <i className={`fas ${categoryIcon || 'fa-image'}`} />
-      <span>点击展开查看完整图解</span>
+    <div className="enc-section-head">
+      <h3>
+        <i className={`fas ${icon}`} /> {title}
+      </h3>
+      {hint && <span className="enc-section-hint">{hint}</span>}
     </div>
   );
 }
@@ -169,38 +115,32 @@ export default function EncyclopediaPage() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedTermId, setSelectedTermId] = useState(null);
   const [selectedTerm, setSelectedTerm] = useState(null);
+  const [termLoading, setTermLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showDiagram, setShowDiagram] = useState(false);
+
   // 轮播状态
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const autoplayRef = useRef(null);
-  const CAROUSEL_INTERVAL = 4000; // 每 4 秒自动切换
+  const CAROUSEL_INTERVAL = 4000;
 
   // 图片灯箱状态
   const [lightboxImages, setLightboxImages] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(-1);
 
-  /**
-   * 安全解析 JSON 字段（可能是字符串或已解析的数组）
-   */
-  const safeJSON = (val, defaultVal = []) => {
-    if (!val) return defaultVal;
-    if (Array.isArray(val)) return val;
-    try { return JSON.parse(val); } catch { return defaultVal; }
-  };
-
   // 轮播自动播放
   useEffect(() => {
     if (autoplayRef.current) clearInterval(autoplayRef.current);
     const images = selectedTerm?.image_paths ? safeJSON(selectedTerm.image_paths, []) : [];
-    if (showDiagram && !isPaused && images.length > 1) {
+    if (!isPaused && images.length > 1) {
       autoplayRef.current = setInterval(() => {
-        setCarouselIndex(prev => (prev + 1) % images.length);
+        setCarouselIndex((prev) => (prev + 1) % images.length);
       }, CAROUSEL_INTERVAL);
     }
-    return () => { if (autoplayRef.current) clearInterval(autoplayRef.current); };
-  }, [showDiagram, isPaused, selectedTerm?.image_paths]);
+    return () => {
+      if (autoplayRef.current) clearInterval(autoplayRef.current);
+    };
+  }, [isPaused, selectedTerm?.image_paths]);
 
   // 选择新术语时重置轮播
   useEffect(() => {
@@ -217,6 +157,13 @@ export default function EncyclopediaPage() {
     try {
       const res = await getEncyclopediaTerms();
       setTerms(res.data.data || []);
+
+      // 分享深链：/encyclopedia?term=xxx
+      const termFromQuery =
+        typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.search).get('term')
+          : null;
+      if (termFromQuery) setSelectedTermId(termFromQuery);
     } catch (err) {
       console.error('加载百科术语失败:', err);
     } finally {
@@ -234,23 +181,24 @@ export default function EncyclopediaPage() {
   }, [selectedTermId]);
 
   const loadTermDetail = async (id) => {
+    setTermLoading(true);
     try {
       const res = await getEncyclopediaTerm(id);
       setSelectedTerm(res.data.data);
     } catch (err) {
       // 降级：从列表中查找
-      const found = terms.find(t => t.id === id);
+      const found = terms.find((t) => t.id === id);
       if (found) setSelectedTerm(found);
+    } finally {
+      setTermLoading(false);
     }
   };
 
-  // 打开灯箱
+  // 打开/关闭灯箱
   const openLightbox = (images, index) => {
     setLightboxImages(images);
     setLightboxIndex(index);
   };
-
-  // 关闭灯箱
   const closeLightbox = () => {
     setLightboxImages([]);
     setLightboxIndex(-1);
@@ -261,8 +209,9 @@ export default function EncyclopediaPage() {
     if (lightboxIndex < 0) return;
     const handler = (e) => {
       if (e.key === 'Escape') closeLightbox();
-      else if (e.key === 'ArrowLeft' && lightboxIndex > 0) setLightboxIndex(i => i - 1);
-      else if (e.key === 'ArrowRight' && lightboxIndex < lightboxImages.length - 1) setLightboxIndex(i => i + 1);
+      else if (e.key === 'ArrowLeft' && lightboxIndex > 0) setLightboxIndex((i) => i - 1);
+      else if (e.key === 'ArrowRight' && lightboxIndex < lightboxImages.length - 1)
+        setLightboxIndex((i) => i + 1);
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -272,33 +221,99 @@ export default function EncyclopediaPage() {
   const filteredTerms = useMemo(() => {
     let result = terms;
     if (activeCategory !== 'all') {
-      result = result.filter(t => t.category === activeCategory);
+      result = result.filter((t) => t.category === activeCategory);
     }
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
-      result = result.filter(t =>
-        t.term.toLowerCase().includes(q) ||
-        (t.synopsis && t.synopsis.toLowerCase().includes(q))
+      result = result.filter(
+        (t) =>
+          t.term.toLowerCase().includes(q) ||
+          (t.synopsis && t.synopsis.toLowerCase().includes(q))
       );
     }
     return result;
   }, [terms, activeCategory, searchQuery]);
 
-  // 获取分类列表 (从数据中动态提取)
+  // 分类列表 (从数据中动态提取)
   const availableCategories = useMemo(() => {
     const cats = new Set();
-    terms.forEach(t => cats.add(t.category));
-    return CATEGORIES.filter(c => c.key === 'all' || cats.has(c.key));
+    terms.forEach((t) => cats.add(t.category));
+    return CATEGORIES.filter((c) => c.key === 'all' || cats.has(c.key));
   }, [terms]);
 
-  // 渲染内容块
+  // 导引卡点击 — 筛选分类并展开该分类首条词条
+  const handleGuidePick = (categoryKey) => {
+    setActiveCategory(categoryKey);
+    setSearchQuery('');
+    const first = terms.find((t) => t.category === categoryKey);
+    setSelectedTermId(first ? first.id : null);
+  };
+
+  // 三维联动目标 — 优先选择带匹配热点的关联建筑
+  const modelTarget = useMemo(() => {
+    if (!selectedTerm) return null;
+    const related = selectedTerm._relatedPalaces?.length
+      ? selectedTerm._relatedPalaces
+      : safeJSON(selectedTerm.related_palaces, []).map((id) => ({
+          id,
+          name: PALACE_NAMES[id] || id,
+          dynasty: '',
+        }));
+
+    const candidates = [
+      ...new Set(
+        [selectedTerm.id, ...(HOTSPOT_TERM_FALLBACK[selectedTerm.category] || [])].filter(Boolean)
+      ),
+    ];
+
+    // 同一候选术语命中多座建筑时，按中轴线顺序取代表建筑
+    const ranked = [...related].sort((a, b) => {
+      const ai = PALACE_PRIORITY.indexOf(a.id);
+      const bi = PALACE_PRIORITY.indexOf(b.id);
+      return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
+    });
+
+    // 按候选术语优先级逐个匹配（而非按建筑顺序），保证「龙纹」优先命中彩画热点
+    let matched = null;
+    for (const termId of candidates) {
+      for (const p of ranked) {
+        const h = findHotspotForTerm(p.id, [termId]);
+        if (h) {
+          matched = { palace: p, hotspot: h };
+          break;
+        }
+      }
+      if (matched) break;
+    }
+
+    const palace = matched?.palace || ranked[0] || { id: 'taihedian', name: '太和殿' };
+    const hotspot = matched?.hotspot || findHotspotForTerm(palace.id, candidates);
+    return {
+      palace,
+      hotspot,
+      related,
+      others: related.filter((r) => r.id !== palace.id),
+    };
+  }, [selectedTerm]);
+
+  // 相关术语 — API 未提供时用同分类词条兜底
+  const relatedTerms = useMemo(() => {
+    if (!selectedTerm) return [];
+    const picked = (selectedTerm._relatedTerms || []).slice(0, 6);
+    const seen = new Set([selectedTerm.id, ...picked.map((t) => t.id)]);
+    const extra = terms
+      .filter((t) => t.category === selectedTerm.category && !seen.has(t.id))
+      .slice(0, Math.max(0, 6 - picked.length));
+    return [...picked, ...extra];
+  }, [selectedTerm, terms]);
+
+  // 正文渲染
   const renderContent = (content) => {
     if (!content) return null;
     return content.split('\n\n').map((block, i) => {
       const trimmed = block.trim();
       if (!trimmed) return null;
 
-      // 图标开头的行 -> 带图标的bullet point
       if (/^[▲■◉◆●○☐☑⬥]/.test(trimmed)) {
         return (
           <div key={i} className="encyclopedia-bullet-point">
@@ -306,8 +321,11 @@ export default function EncyclopediaPage() {
           </div>
         );
       }
-      // 分类标题行
-      if (/^(等级排序|等级细分|故宫常见|故宫台基等级|故宫中的|功能|特点|结构组成|名称由来|琉璃构件|故宫宫门|故宫龙纹|故宫凤纹|故宫中的|空间过渡|礼制意义|故宫藻井|故宫影壁|榫卯的|故宫中的石雕|石雕工艺|汉白玉的|故宫中的琉璃|纹样的演变|故宫中的脊兽|琉璃瓦的等级|故宫中的黄瓦)/.test(trimmed)) {
+      if (
+        /^(等级排序|等级细分|故宫常见|故宫台基等级|故宫中的|功能|特点|结构组成|名称由来|琉璃构件|故宫宫门|故宫龙纹|故宫凤纹|空间过渡|礼制意义|故宫藻井|故宫影壁|榫卯的|故宫中的石雕|石雕工艺|汉白玉的|故宫中的琉璃|纹样的演变|故宫中的脊兽|琉璃瓦的等级)/.test(
+          trimmed
+        )
+      ) {
         return (
           <div key={i} className="encyclopedia-section-label">
             {trimmed.split('\n')[0]}
@@ -325,7 +343,9 @@ export default function EncyclopediaPage() {
           <button className="profile-back-btn" onClick={() => navigate('/')}>
             <i className="fas fa-arrow-left" /> 返回宫城
           </button>
-          <h1 className="profile-title"><i className="fas fa-book" /> 营造法式</h1>
+          <h1 className="profile-title">
+            <i className="fas fa-book" /> 营造法式
+          </h1>
         </div>
         <div className="profile-loading">
           <div className="loading-spinner" />
@@ -334,6 +354,11 @@ export default function EncyclopediaPage() {
       </div>
     );
   }
+
+  const galleryImages = selectedTerm?.image_paths
+    ? safeJSON(selectedTerm.image_paths, [])
+    : [];
+  const level = selectedTerm?.level_value ? LEVEL_LABELS[selectedTerm.level_value] : null;
 
   return (
     <div className="encyclopedia-page">
@@ -351,14 +376,16 @@ export default function EncyclopediaPage() {
       <div className="encyclopedia-layout">
         {/* 左侧：分类 + 搜索 + 词条列表 */}
         <aside className="encyclopedia-sidebar">
-          {/* 搜索框 */}
           <div className="encyclopedia-search">
             <i className="fas fa-search" />
             <input
               type="text"
               placeholder="搜索术语..."
               value={searchQuery}
-              onChange={(e) => { setSearchQuery(e.target.value); setSelectedTermId(null); }}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSelectedTermId(null);
+              }}
             />
             {searchQuery && (
               <button className="encyclopedia-search-clear" onClick={() => setSearchQuery('')}>
@@ -367,13 +394,15 @@ export default function EncyclopediaPage() {
             )}
           </div>
 
-          {/* 分类筛选 */}
           <div className="encyclopedia-categories">
-            {availableCategories.map(cat => (
+            {availableCategories.map((cat) => (
               <button
                 key={cat.key}
                 className={`encyclopedia-cat-chip ${activeCategory === cat.key ? 'active' : ''}`}
-                onClick={() => { setActiveCategory(cat.key); setSelectedTermId(null); }}
+                onClick={() => {
+                  setActiveCategory(cat.key);
+                  setSelectedTermId(null);
+                }}
               >
                 <i className={`fas ${cat.icon}`} />
                 {cat.label}
@@ -381,20 +410,31 @@ export default function EncyclopediaPage() {
             ))}
           </div>
 
-          {/* 词条列表 */}
-          <div className="encyclopedia-term-list">
-            {filteredTerms.length === 0 ? (
-              <div className="encyclopedia-empty">
-                <i className="fas fa-search" />
-                <p>未找到匹配的术语</p>
-              </div>
-            ) : (
-              filteredTerms.map(term => (
-                <div
-                  key={term.id}
-                  className={`encyclopedia-term-item ${selectedTermId === term.id ? 'active' : ''}`}
-                  onClick={() => setSelectedTermId(term.id)}
-                >
+          {filteredTerms.length === 0 ? (
+            <div className="encyclopedia-empty">
+              <i className="fas fa-search" />
+              <p>未找到匹配的术语</p>
+            </div>
+          ) : (
+            <AnimatedList
+              className="encyclopedia-term-animated"
+              scrollClassName="encyclopedia-term-list"
+              items={filteredTerms}
+              getKey={(term) => term.id}
+              selectedKey={selectedTermId}
+              staggerKey={activeCategory}
+              animation="slide"
+              stagger={0.03}
+              gap={0}
+              showGradients
+              fadeSize={44}
+              enableArrowNavigation
+              onItemSelect={(term) => setSelectedTermId(term.id)}
+              itemAs="div"
+              itemClassName="encyclopedia-term-item"
+              activeClassName="active"
+              renderItem={(term) => (
+                <>
                   <div className="encyclopedia-term-item-header">
                     <span className="encyclopedia-term-item-name">{term.term}</span>
                     {term.level_value && (
@@ -407,244 +447,220 @@ export default function EncyclopediaPage() {
                     )}
                   </div>
                   <div className="encyclopedia-term-item-synopsis">{term.synopsis}</div>
-                </div>
-              ))
-            )}
-          </div>
+                </>
+              )}
+            />
+          )}
         </aside>
 
-        {/* 右侧：详情区域 */}
+        {/* 右侧：导引看板 / 词条详情 */}
         <main className="encyclopedia-detail">
-          {!selectedTerm ? (
-            <div className="encyclopedia-placeholder">
-              <div className="encyclopedia-placeholder-icon">
-                <i className="fas fa-scroll" />
-              </div>
-              <h3>营造法式百科</h3>
-              <p>左侧选择一个条目，查看详细的古建筑知识</p>
-              <div className="encyclopedia-placeholder-hints">
-                <div className="placeholder-hint">
-                  <i className="fas fa-house" /> 了解屋顶等级制度
-                </div>
-                <div className="placeholder-hint">
-                  <i className="fas fa-cubes" /> 拆解斗拱结构原理
-                </div>
-                <div className="placeholder-hint">
-                  <i className="fas fa-palette" /> 赏析彩画艺术魅力
-                </div>
-              </div>
+          {!selectedTermId ? (
+            <EncyclopediaGuide
+              onPick={handleGuidePick}
+              availableKeys={availableCategories.filter((c) => c.key !== 'all').map((c) => c.key)}
+            />
+          ) : !selectedTerm ? (
+            <div className="enc-article-loading">
+              <div className="loading-spinner" />
+              <p>{termLoading ? '正在展开词条…' : '该词条暂无内容'}</p>
             </div>
           ) : (
-            <div className="encyclopedia-article">
-              {/* 词条头 */}
-              <div className="encyclopedia-article-header">
-                <h2>{selectedTerm.term}</h2>
-                <div className="encyclopedia-article-meta">
-                  <span className="encyclopedia-article-category">
+            <article className="enc-article">
+              {/* ① 标题信息区 */}
+              <header className="enc-head">
+                <div className="enc-head-tags">
+                  <span className="enc-tag enc-tag--cat">
                     <i className={`fas ${selectedTerm.category_icon || 'fa-book'}`} />
                     {selectedTerm.category}
                   </span>
-                  {selectedTerm.level_value && (
+                  {level && (
                     <span
-                      className="encyclopedia-article-level"
-                      style={{ background: LEVEL_LABELS[selectedTerm.level_value]?.color || '#666' }}
+                      className="enc-tag enc-tag--level"
+                      style={{ background: level.color }}
                     >
-                      {LEVEL_LABELS[selectedTerm.level_value]?.text}
+                      {level.text}
                     </span>
                   )}
                 </div>
-                <p className="encyclopedia-article-synopsis">{selectedTerm.synopsis}</p>
-              </div>
+                <h2 className="enc-head-title">{selectedTerm.term}</h2>
+                <div className="enc-head-share">
+                  <ShareButton
+                    type="term"
+                    id={selectedTerm.id}
+                    title={selectedTerm.term}
+                    showLabel
+                  />
+                </div>
+                <p className="enc-head-synopsis">{selectedTerm.synopsis}</p>
+                <AudioGuidePlayer
+                  text={selectedTerm.content}
+                  title="朗读词条"
+                />
+              </header>
 
-              {/* 图解区 — 轮播展示 */}
-              <div className="encyclopedia-article-diagram">
-                {(() => {
-                  const images = selectedTerm?.image_paths ? safeJSON(selectedTerm.image_paths, []) : [];
-                  return images.length > 0 ? (
-                    <>
-                      {/* 轮播容器 */}
-                      <div
-                        className="encyclopedia-carousel"
-                        onMouseEnter={() => setIsPaused(true)}
-                        onMouseLeave={() => setIsPaused(false)}
-                      >
-                        {/* 图片显示区 */}
-                        <div className="encyclopedia-carousel-track">
-                          <img
-                            src={images[carouselIndex]}
-                            alt={`${selectedTerm.term} 图 ${carouselIndex + 1}`}
-                            className="encyclopedia-carousel-img"
-                            onClick={() => openLightbox(images, carouselIndex)}
-                          />
-                        </div>
-
-                        {/* 左右箭头 */}
-                        <button
-                          className="encyclopedia-carousel-btn encyclopedia-carousel-btn--prev"
-                          onClick={() => setCarouselIndex(i => (i - 1 + images.length) % images.length)}
-                          title="上一张"
-                        >
-                          <i className="fas fa-chevron-left"></i>
-                        </button>
-                        <button
-                          className="encyclopedia-carousel-btn encyclopedia-carousel-btn--next"
-                          onClick={() => setCarouselIndex(i => (i + 1) % images.length)}
-                          title="下一张"
-                        >
-                          <i className="fas fa-chevron-right"></i>
-                        </button>
-
-                        {/* 指示点 */}
-                        <div className="encyclopedia-carousel-dots">
-                          {images.map((_, i) => (
-                            <button
-                              key={i}
-                              className={`encyclopedia-carousel-dot${i === carouselIndex ? ' active' : ''}`}
-                              onClick={() => setCarouselIndex(i)}
-                              aria-label={`第 ${i + 1} 张`}
-                            />
-                          ))}
-                        </div>
-
-                        {/* 计数 */}
-                        <div className="encyclopedia-carousel-counter">
-                          {carouselIndex + 1} / {images.length}
-                        </div>
-
-                        {/* 暂停/播放按钮 */}
-                        <button
-                          className="encyclopedia-carousel-pause"
-                          onClick={() => setIsPaused(p => !p)}
-                          title={isPaused ? '继续播放' : '暂停'}
-                        >
-                          <i className={`fas fa-${isPaused ? 'play' : 'pause'}`}></i>
-                        </button>
-                      </div>
-                    </>
-                  ) : showDiagram ? (
-                    <TermDiagram
-                      termId={selectedTerm.id}
-                      categoryIcon={selectedTerm.category_icon}
-                    />
-                  ) : null;
-                })()}
-                {/* 无图片时保留展开/收起按钮 */}
-                {selectedTerm?.image_paths && safeJSON(selectedTerm.image_paths, []).length === 0 && (
-                  <button
-                    className="encyclopedia-diagram-toggle"
-                    onClick={() => setShowDiagram(!showDiagram)}
+              {/* ② 实拍图像轮播 */}
+              {galleryImages.length > 0 && (
+                <section className="enc-section">
+                  <SectionHead icon="fa-images" title="实拍图像" hint="点击图片可放大预览" />
+                  <div
+                    className="encyclopedia-carousel"
+                    onMouseEnter={() => setIsPaused(true)}
+                    onMouseLeave={() => setIsPaused(false)}
                   >
-                    <i className={`fas fa-${showDiagram ? 'chevron-up' : 'diagram-project'}`} />
-                    {showDiagram ? '收起图解' : '展开图解'}
-                  </button>
-                )}
-                {/* 有图片时保留展开/收起按钮 */}
-                {selectedTerm?.image_paths && safeJSON(selectedTerm.image_paths, []).length > 0 && (
-                  <button
-                    className="encyclopedia-diagram-toggle"
-                    onClick={() => { setShowDiagram(d => !d); setCarouselIndex(0); }}
-                  >
-                    <i className={`fas fa-${showDiagram ? 'chevron-up' : 'diagram-project'}`} />
-                    {showDiagram ? '收起图解' : '展开图解'}
-                  </button>
-                )}
-              </div>
+                    <div className="encyclopedia-carousel-track">
+                      <img
+                        src={galleryImages[carouselIndex]}
+                        alt={`${selectedTerm.term} 图 ${carouselIndex + 1}`}
+                        className="encyclopedia-carousel-img"
+                        onClick={() => openLightbox(galleryImages, carouselIndex)}
+                      />
+                    </div>
 
-              {/* 正文 */}
-              <div className="encyclopedia-article-content">
-                {renderContent(selectedTerm.content)}
-              </div>
+                    <button
+                      className="encyclopedia-carousel-btn encyclopedia-carousel-btn--prev"
+                      onClick={() =>
+                        setCarouselIndex((i) => (i - 1 + galleryImages.length) % galleryImages.length)
+                      }
+                      title="上一张"
+                    >
+                      <i className="fas fa-chevron-left"></i>
+                    </button>
+                    <button
+                      className="encyclopedia-carousel-btn encyclopedia-carousel-btn--next"
+                      onClick={() => setCarouselIndex((i) => (i + 1) % galleryImages.length)}
+                      title="下一张"
+                    >
+                      <i className="fas fa-chevron-right"></i>
+                    </button>
 
-              {/* 图片画廊 — 当有图片时展示 */}
-              {selectedTerm?.image_paths && safeJSON(selectedTerm.image_paths, []).length > 0 && (() => {
-                const images = safeJSON(selectedTerm.image_paths, []);
-                return (
-                  <div className="encyclopedia-gallery">
-                    <h4><i className="fas fa-images" /> 讲解图解</h4>
-                    <div className="encyclopedia-gallery-grid">
-                      {images.map((img, i) => (
-                        <div
+                    <div className="encyclopedia-carousel-dots">
+                      {galleryImages.map((_, i) => (
+                        <button
                           key={i}
-                          className="encyclopedia-gallery-item"
-                          onClick={() => openLightbox(images, i)}
-                        >
-                          <img
-                            src={img}
-                            alt={`${selectedTerm.term} 图${i + 1}`}
-                            loading="lazy"
-                          />
-                        </div>
+                          className={`encyclopedia-carousel-dot${
+                            i === carouselIndex ? ' active' : ''
+                          }`}
+                          onClick={() => setCarouselIndex(i)}
+                          aria-label={`第 ${i + 1} 张`}
+                        />
                       ))}
                     </div>
-                  </div>
-                );
-              })()}
 
-              {/* 相关术语 */}
-              {selectedTerm._relatedTerms && selectedTerm._relatedTerms.length > 0 && (
-                <div className="encyclopedia-related">
-                  <h4><i className="fas fa-link" /> 相关术语</h4>
-                  <div className="encyclopedia-related-terms">
-                    {selectedTerm._relatedTerms.map(rt => (
+                    <div className="encyclopedia-carousel-counter">
+                      {carouselIndex + 1} / {galleryImages.length}
+                    </div>
+
+                    <button
+                      className="encyclopedia-carousel-pause"
+                      onClick={() => setIsPaused((p) => !p)}
+                      title={isPaused ? '继续播放' : '暂停'}
+                    >
+                      <i className={`fas fa-${isPaused ? 'play' : 'pause'}`}></i>
+                    </button>
+                  </div>
+                </section>
+              )}
+
+              {/* ③ 图解示意区 */}
+              <section className="enc-section">
+                <SectionHead
+                  icon="fa-diagram-project"
+                  title={selectedTerm.category === '斗拱' ? '三维拆解' : '图解示意'}
+                  hint={
+                    selectedTerm.category === '斗拱'
+                      ? '拖拽旋转 · 点击构件查看构造'
+                      : '悬停热点查看构件名称'
+                  }
+                />
+                <EncyclopediaDiagramPanel term={selectedTerm} />
+              </section>
+
+              {/* 正文 */}
+              <section className="enc-section enc-section--text">
+                <SectionHead icon="fa-scroll" title="知识详解" />
+                <div className="encyclopedia-article-content">
+                  {renderContent(selectedTerm.content)}
+                </div>
+              </section>
+
+              {/* ④ 三维联动区 */}
+              {modelTarget && (
+                <section className="enc-section">
+                  <div className="enc-3d-card">
+                    <div className="enc-3d-text">
+                      <span className="enc-3d-eyebrow">
+                        <i className="fas fa-cube" /> 三维联动
+                      </span>
+                      <h3>在三维场景中查看「{selectedTerm.term}」</h3>
+                      <p>
+                        将自动定位至「{modelTarget.palace.name}」
+                        {modelTarget.hotspot
+                          ? `，并在模型上高亮「${modelTarget.hotspot.label}」构件。`
+                          : '，在 3D 展厅中继续观察该建筑。'}
+                      </p>
+                      {modelTarget.others.length > 0 && (
+                        <div className="enc-3d-chips">
+                          <span>其他关联建筑</span>
+                          {modelTarget.others.map((p) => (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() =>
+                                navigate('/gallery', {
+                                  state: {
+                                    selectPalaceId: p.id,
+                                    highlightTermId: modelTarget.hotspot?.termId || null,
+                                  },
+                                })
+                              }
+                            >
+                              {p.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className="enc-3d-btn"
+                      onClick={() =>
+                        navigate('/gallery', {
+                          state: {
+                            selectPalaceId: modelTarget.palace.id,
+                            highlightTermId: modelTarget.hotspot?.termId || null,
+                          },
+                        })
+                      }
+                    >
+                      <i className="fas fa-location-crosshairs" />
+                      前往 3D 模型查看该构件
+                    </button>
+                  </div>
+                </section>
+              )}
+
+              {/* ⑤ 相关术语 */}
+              {relatedTerms.length > 0 && (
+                <section className="enc-section">
+                  <SectionHead icon="fa-link" title="相关术语" hint="点击直接切换词条" />
+                  <div className="enc-related-tags">
+                    {relatedTerms.map((rt) => (
                       <button
                         key={rt.id}
-                        className="encyclopedia-related-term-btn"
+                        type="button"
+                        className="enc-related-tag"
                         onClick={() => setSelectedTermId(rt.id)}
                       >
-                        <span className="encyclopedia-related-term-cat">{rt.category}</span>
-                        <span className="encyclopedia-related-term-name">{rt.term}</span>
+                        <span className="enc-related-cat">{rt.category}</span>
+                        <span className="enc-related-name">{rt.term}</span>
                         <i className="fas fa-arrow-right" />
                       </button>
                     ))}
                   </div>
-                </div>
+                </section>
               )}
-
-              {/* 关联建筑 */}
-              {(selectedTerm._relatedPalaces && selectedTerm._relatedPalaces.length > 0) && (
-                <div className="encyclopedia-related">
-                  <h4><i className="fas fa-landmark" /> 关联建筑</h4>
-                  <div className="encyclopedia-related-palaces">
-                    {selectedTerm._relatedPalaces.map(palace => (
-                      <button
-                        key={palace.id}
-                        className="encyclopedia-palace-card"
-                        onClick={() => navigate('/', { state: { selectPalaceId: palace.id } })}
-                      >
-                        <div className="encyclopedia-palace-card-icon">
-                          <i className="fas fa-building-columns" />
-                        </div>
-                        <div className="encyclopedia-palace-card-info">
-                          <span className="encyclopedia-palace-card-name">{palace.name}</span>
-                          <span className="encyclopedia-palace-card-dynasty">{palace.dynasty}</span>
-                        </div>
-                        <i className="fas fa-external-link-alt" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 降级：使用硬编码关联宫殿（当API未返回_relatedPalaces时） */}
-              {(!selectedTerm._relatedPalaces || selectedTerm._relatedPalaces.length === 0) &&
-                selectedTerm.related_palaces && selectedTerm.related_palaces.length > 0 && (
-                <div className="encyclopedia-related">
-                  <h4><i className="fas fa-landmark" /> 关联建筑</h4>
-                  <div className="encyclopedia-related-btns">
-                    {selectedTerm.related_palaces.map(pid => (
-                      <button
-                        key={pid}
-                        className="encyclopedia-related-btn"
-                        onClick={() => navigate('/', { state: { selectPalaceId: pid } })}
-                      >
-                        查看 {PALACE_NAMES[pid] || pid}
-                        <i className="fas fa-external-link-alt" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            </article>
           )}
         </main>
       </div>

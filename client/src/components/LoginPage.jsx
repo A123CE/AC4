@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import guestSession from '../lib/guestSession';
+import ModalShell from './ModalShell';
 import PixelBlast from './PixelBlast';
+import { useMuseumMeta } from '../lib/museumMeta';
 import '../styles/global.css';
 
 const INTEREST_TAGS = [
@@ -10,12 +14,16 @@ const INTEREST_TAGS = [
 ];
 
 /**
- * 登录/注册全屏页面 —— "入宫通行证"
- * 左侧: 故宫摄影背景 + 山峦装饰 + 诗词
+ * 登录/注册全屏页面 —— "入馆通行证"
+ * 左侧: 古建影像背景 + 山峦装饰 + 诗文
  * 右侧: 令牌样式的表单卡片
  */
 function LoginPage() {
-  const { login, register, loading } = useAuth();
+  const { login, register, loading, mergeGuest, setPendingGuestMerge } = useAuth();
+  const meta = useMuseumMeta();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || '/';
 
   const [mode, setMode] = useState('login');
   const [entered, setEntered] = useState(false);
@@ -30,6 +38,7 @@ function LoginPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [mergePrompt, setMergePrompt] = useState(null);
 
   const usernameRef = useRef(null);
 
@@ -61,13 +70,23 @@ function LoginPage() {
     e.preventDefault();
     setError('');
     if (!username.trim() || !password) {
-      setError('请输入完整的入宫凭证');
+      setError('请输入完整的入馆凭证');
       return;
     }
     setSubmitting(true);
     const result = await login(username.trim(), password);
     setSubmitting(false);
-    if (!result.success) setError(result.message);
+    if (!result.success) {
+      setError(result.message);
+      return;
+    }
+
+    const snapshot = guestSession.snapshotForMerge();
+    if (snapshot.collections.length > 0 || snapshot.notes.length > 0) {
+      setMergePrompt(snapshot);
+      return;
+    }
+    navigate(from, { replace: true });
   };
 
   // 提交注册
@@ -89,12 +108,58 @@ function LoginPage() {
     setSubmitting(true);
     const result = await register(username.trim(), password, email.trim() || undefined, interestTag || undefined);
     setSubmitting(false);
-    if (!result.success) setError(result.message);
+    if (!result.success) {
+      setError(result.message);
+      return;
+    }
+
+    const snapshot = guestSession.snapshotForMerge();
+    if (snapshot.collections.length > 0 || snapshot.notes.length > 0) {
+      setMergePrompt(snapshot);
+      return;
+    }
+    navigate(from, { replace: true });
   };
+
+  const finishMerge = async (shouldMerge) => {
+    const snapshot = mergePrompt;
+    setMergePrompt(null);
+    if (!snapshot) {
+      navigate(from, { replace: true });
+      return;
+    }
+
+    if (shouldMerge) {
+      const result = await mergeGuest({
+        collections: snapshot.collections.map((item) => ({
+          palace_id: item.palace_id,
+          category: item.category,
+          note: item.note,
+        })),
+        notes: snapshot.notes.map((item) => ({
+          palace_id: item.palace_id,
+          note: item.note,
+        })),
+        source: 'guest_local',
+      });
+      if (!result.success) setPendingGuestMerge(true);
+    } else {
+      setPendingGuestMerge(true);
+    }
+
+    navigate(from, { replace: true });
+  };
+
+  const mergeCount = mergePrompt
+    ? new Set([
+        ...mergePrompt.collections.map((item) => item.palace_id),
+        ...mergePrompt.notes.map((item) => item.palace_id),
+      ]).size
+    : 0;
 
   return (
     <div className={`auth-page${entered ? ' entered' : ''}`}>
-      {/* ======== 左侧: 故宫摄影区 ======== */}
+      {/* ======== 左侧: 古建影像区 ======== */}
       <div className="auth-hero">
         {/* 遮罩纹理 */}
         <div className="auth-hero-overlay" />
@@ -128,22 +193,22 @@ function LoginPage() {
           <div className="auth-hero-cloud auth-hero-cloud--2" />
         </div>
 
-        {/* 底部诗词 */}
+        {/* 底部诗文 */}
         <div className="auth-hero-verse">
-          <p className="auth-verse-main">红墙黄瓦</p>
-          <p className="auth-verse-sub">岁月悠长</p>
+          <p className="auth-verse-main">砖瓦为骨</p>
+          <p className="auth-verse-sub">匠心千年</p>
           <div className="auth-verse-line" />
           <p className="auth-verse-footnote">
-            紫禁城 · 六百年
+            {meta.total} 座名筑 · 遍及 {meta.regionCount} 省市
           </p>
         </div>
 
         {/* 底部品牌信息 */}
         <div className="auth-hero-brand">
           <div className="auth-hero-seal">
-            <span>故</span><span>宫</span>
+            <span>古</span><span>建</span>
           </div>
-          <span className="auth-hero-brand-text">故宫可视化 · 中国古代建筑数字博物馆</span>
+          <span className="auth-hero-brand-text">华夏古建可视化 · 中国历代建筑数字博物馆</span>
         </div>
       </div>
 
@@ -162,7 +227,7 @@ function LoginPage() {
             <div className="auth-card-seal">
               <div className="auth-card-seal-box">
                 {mode === 'login' ? (
-                  <><span>入</span><span>宫</span></>
+                  <><span>入</span><span>馆</span></>
                 ) : (
                   <><span>腰</span><span>牌</span></>
                 )}
@@ -176,8 +241,8 @@ function LoginPage() {
               </h2>
               <p className="auth-card-subtitle">
                 {mode === 'login'
-                  ? '出示凭证，踏入紫禁城数字之旅'
-                  : '加入故宫数字社区，开启您的营造之旅'
+                  ? '出示凭证，踏入华夏古建数字之旅'
+                  : '加入古建数字社区，开启您的营造之旅'
                 }
               </p>
             </div>
@@ -349,7 +414,7 @@ function LoginPage() {
               <div className="auth-card-oauth">
                 <div className="auth-oauth-divider">
                   <span />
-                  <span className="auth-oauth-text">或 以其他方式入宫</span>
+                  <span className="auth-oauth-text">或 以其他方式入馆</span>
                   <span />
                 </div>
                 <div className="auth-oauth-btns">
@@ -366,6 +431,37 @@ function LoginPage() {
           </div>
         </div>
       </div>
+
+      {mergePrompt && (
+        <ModalShell
+          open={mergePrompt !== null}
+          onClose={() => finishMerge(false)}
+          labelledBy="merge-guest-title"
+        >
+          <h2 id="merge-guest-title" className="login-prompt-title">
+            发现 {mergeCount} 条本机收藏
+          </h2>
+          <p className="login-prompt-desc">
+            登录后可合并到账号；与账号已有内容冲突时以账号为准。暂不合并则保留 30 天。
+          </p>
+          <div className="login-prompt-actions">
+            <button
+              type="button"
+              className="login-prompt-btn login-prompt-btn--ghost"
+              onClick={() => finishMerge(false)}
+            >
+              暂不合并
+            </button>
+            <button
+              type="button"
+              className="login-prompt-btn login-prompt-btn--primary"
+              onClick={() => finishMerge(true)}
+            >
+              合并到账号
+            </button>
+          </div>
+        </ModalShell>
+      )}
     </div>
   );
 }

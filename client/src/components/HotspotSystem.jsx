@@ -9,16 +9,20 @@ import { getHotspots } from '../data/buildingHotspots';
  * ============================================ */
 
 /** 缩放脉冲环 */
-function PulseRing({ color = '#C8960C', size = 0.18, active = false }) {
+function PulseRing({ color = '#C8960C', size = 0.18, active = false, reduceMotion = false }) {
   const ringRef = useRef();
   const startRef = useRef(Date.now());
 
   useFrame(() => {
     if (!ringRef.current) return;
     const elapsed = (Date.now() - startRef.current) / 1000;
-    const s = 1 + Math.sin(elapsed * 2.5) * 0.25;
+    const s = reduceMotion ? 1 : 1 + Math.sin(elapsed * 2.5) * 0.25;
     ringRef.current.scale.setScalar(active ? s * 1.2 : s);
-    ringRef.current.material.opacity = active ? 0.9 : 0.5 + Math.sin(elapsed * 2.5) * 0.2;
+    ringRef.current.material.opacity = active
+      ? 0.9
+      : reduceMotion
+        ? 0.6
+        : 0.5 + Math.sin(elapsed * 2.5) * 0.2;
   });
 
   return (
@@ -36,13 +40,13 @@ function PulseRing({ color = '#C8960C', size = 0.18, active = false }) {
 }
 
 /** 中心发光点 */
-function GlowDot({ color = '#C8960C', size = 0.04, active = false }) {
+function GlowDot({ color = '#C8960C', size = 0.04, active = false, reduceMotion = false }) {
   const dotRef = useRef();
 
   useFrame(() => {
     if (!dotRef.current) return;
     const elapsed = (Date.now() - 1500) / 1000;
-    const brightness = 0.7 + Math.sin(elapsed * 3) * 0.3;
+    const brightness = reduceMotion ? 0.8 : 0.7 + Math.sin(elapsed * 3) * 0.3;
     dotRef.current.material.opacity = active ? 1 : brightness;
   });
 
@@ -83,6 +87,7 @@ function HotspotMarker({
   onActivate,
   onDeactivate,
   onClick,
+  reduceMotion = false,
 }) {
   const [hovered, setHovered] = useState(false);
   const active = isActive || hovered;
@@ -96,8 +101,18 @@ function HotspotMarker({
       onPointerEnter={(e) => { e.stopPropagation(); setHovered(true); }}
       onPointerLeave={(e) => { e.stopPropagation(); setHovered(false); }}
     >
-      <PulseRing color={color} size={size} active={active} />
-      <GlowDot color={color} size={0.04} active={active} />
+      <PulseRing
+        color={color}
+        size={size}
+        active={active}
+        reduceMotion={reduceMotion}
+      />
+      <GlowDot
+        color={color}
+        size={0.04}
+        active={active}
+        reduceMotion={reduceMotion}
+      />
       <VerticalLine color={color} height={0.2} active={active} />
 
       {/* 悬停时显示标签 */}
@@ -138,6 +153,9 @@ export default function HotspotSystem({
   modelGroupRef,
   activeHotspotId,
   onHotspotClick,
+  /* 仅显示被指定的热点（百科「三维联动」场景），避免默认满屏悬浮标记 */
+  onlyActive = false,
+  reduceMotion = false,
 }) {
   const { camera, size } = useThree();
   const [hotspots, setHotspots] = useState([]);
@@ -171,7 +189,8 @@ export default function HotspotSystem({
       return raw.map(h => {
         worldPos.set(
           (h.position[0] - 0.5) * (box.max.x - box.min.x) + (box.max.x + box.min.x) / 2,
-          (h.position[1] - 0.5) * (box.max.y - box.min.y) + box.max.y + 0.2,
+          // y: 0 = 台基底面, 1 = 屋顶最高点
+          box.min.y + h.position[1] * (box.max.y - box.min.y),
           (h.position[2] - 0.5) * (box.max.z - box.min.z) + (box.max.z + box.min.z) / 2,
         );
         return { ...h, worldPosition: worldPos.toArray() };
@@ -190,13 +209,16 @@ export default function HotspotSystem({
 
   if (!hotspots.length) return null;
 
+  const visible = onlyActive ? hotspots.filter(h => h.id === (activeId || activeHotspotId)) : hotspots;
+
   return (
     <group>
-      {hotspots.map(hotspot => (
+      {visible.map(hotspot => (
         <HotspotMarker
           key={hotspot.id}
           hotspot={hotspot}
           isActive={activeId === hotspot.id}
+          reduceMotion={reduceMotion}
           onClick={(h) => {
             setActiveId(h.id);
             onHotspotClick?.(h);

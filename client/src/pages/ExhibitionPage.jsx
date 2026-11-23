@@ -1,8 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import ExhibitionViewer from '../components/ExhibitionViewer';
+import PosterFallback from '../components/PosterFallback';
+import AudioGuidePlayer from '../components/AudioGuidePlayer';
+import { track } from '../lib/analytics';
+import { probeVideo } from '../lib/videoProbe';
+import { getAssetManifest } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useSkin } from '../context/SkinContext';
+import guestSession from '../lib/guestSession';
+import ShareButton from '../components/ShareButton';
+import { formatBuiltYear, formatLocation } from '../lib/museumMeta';
 
 const API_BASE = '/api/palaces';
 
@@ -10,9 +19,72 @@ const API_BASE = '/api/palaces';
  * 沉浸式展览页 v2
  * 明亮优雅的博物馆展览风格 — 宣纸底色 + 金色装饰 + 柔和光影
  */
+function VideoSection({ palace }) {
+  const declared = palace?.video?.declared === true;
+  const url = palace?.video?.url;
+  const [state, setState] = useState('idle');
+
+  useEffect(() => {
+    if (!declared || !url) {
+      setState('idle');
+      return undefined;
+    }
+
+    let cancelled = false;
+    setState('probing');
+
+    probeVideo(url, { timeoutMs: 2500 }).then((result) => {
+      if (!cancelled) setState(result.ok ? 'ok' : 'failed');
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [palace?.id, url, declared]);
+
+  if (!declared || !url || state !== 'ok') return null;
+
+  const poster = palace.video?.poster || '/images/posters/gugong.webp';
+
+  return (
+    <section className="video-section" data-testid="video-section">
+      <h3>{palace.name} · 视频讲解</h3>
+      <p>{palace.tagline || '观看建筑空间与工艺'}</p>
+      <video
+        controls
+        preload="none"
+        playsInline
+        poster={poster}
+        aria-label={`${palace.name} · 视频讲解`}
+        style={{ width: '100%', aspectRatio: '16 / 9', display: 'block' }}
+        onError={() => {
+          setState('failed');
+          track('video_unavailable', {
+            reason: 'play_error',
+            entity_type: 'palace',
+            entity_id: palace.id,
+          });
+          console.warn('视频播放失败:', url);
+        }}
+      >
+        <source src={url} />
+      </video>
+      {(palace.audio_guide || palace.description) && (
+        <details className="video-transcript">
+          <summary>查看文字稿</summary>
+          <p>{palace.audio_guide || palace.description}</p>
+        </details>
+      )}
+    </section>
+  );
+}
+
 export default function ExhibitionPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isLoggedIn } = useAuth();
+  const { skin } = useSkin();
 
   const [palace, setPalace] = useState(null);
   const [allPalaces, setAllPalaces] = useState([]);
@@ -20,36 +92,90 @@ export default function ExhibitionPage() {
   const [error, setError] = useState(null);
   const [autoRotate, setAutoRotate] = useState(true);
   const [infoExpanded, setInfoExpanded] = useState(false);
+  const [quotaBlocked, setQuotaBlocked] = useState(false);
+  const [promptDismissed, setPromptDismissed] = useState(false);
+  const [assetManifest, setAssetManifest] = useState(null);
+
+  useEffect(() => {
+    getAssetManifest()
+      .then((res) => {
+        if (res.data?.success) setAssetManifest(res.data.data);
+      })
+      .catch(() => {});
+  }, []);
 
   // 注入模型路径到全局（供ExhibitionViewer读取）
+  // 程序化建筑没有 GLB 资源, 走 proceduralKey 分支
+  const proceduralKey =
+    palace?.model_path?.startsWith('procedural:')
+      ? palace.model_path.slice('procedural:'.length)
+      : null;
+
   useEffect(() => {
-    if (palace?.model_path) {
+    if (palace?.model_path && !proceduralKey) {
       window.__EXHIBITION_MODEL_PATH = `/models/${palace.model_path}`;
+    } else {
+      window.__EXHIBITION_MODEL_PATH = '';
     }
     return () => { window.__EXHIBITION_MODEL_PATH = ''; };
-  }, [palace?.model_path]);
+  }, [palace?.model_path, proceduralKey]);
 
   useEffect(() => {
     loadPalace();
   }, [id]);
+
+  // 游客 3D 试看额度判定；分享深链同样记录到本机足迹
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('from') === 'share') {
+      track('share_open', {
+        entity_type: 'palace',
+        entity_id: id,
+        channel: params.get('ch') || 'unknown',
+      });
+    }
+  }, [id, location.search]);
+
+  useEffect(() => {
+    if (!id || isLoggedIn) {
+      setQuotaBlocked(false);
+      return;
+    }
+
+    const gate = guestSession.tryEnter3D(id);
+    setQuotaBlocked(!gate.allowed);
+
+    const fromParam = new URLSearchParams(location.search).get('from');
+    if (fromParam === 'share' && !gate.allowed) {
+      const state = guestSession.read();
+      const rest = state.lastVisited.filter((item) => item.palace_id !== id);
+      guestSession.update({
+        lastVisited: [
+          { palace_id: id, visitedAt: new Date().toISOString() },
+          ...rest,
+        ].slice(0, 10),
+      });
+    }
+  }, [id, isLoggedIn, location.search]);
 
   const loadPalace = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const [detailRes, listRes] = await Promise.all([
+      const [detailResult, listResult] = await Promise.allSettled([
         axios.get(`${API_BASE}/${id}`),
         axios.get(API_BASE),
       ]);
 
-      if (detailRes.data.success) {
-        setPalace(detailRes.data.data);
+      if (detailResult.status === 'fulfilled' && detailResult.value.data.success) {
+        setPalace(detailResult.value.data.data);
       } else {
-        setError('建筑不存在');
+        setError('内容已调整');
       }
-      if (listRes.data.success) {
-        setAllPalaces(listRes.data.data);
+
+      if (listResult.status === 'fulfilled' && listResult.value.data.success) {
+        setAllPalaces(listResult.value.data.data);
       }
     } catch (err) {
       console.error('加载展览数据失败:', err);
@@ -97,11 +223,33 @@ export default function ExhibitionPage() {
   }
 
   if (error || !palace) {
+    const recommendations = allPalaces.slice(0, 3);
     return (
       <div className="exhibition-page" style={styles.page}>
         <div style={styles.centered}>
-          <i className="fas fa-exclamation-triangle" style={{ fontSize: '1.8rem', color: 'var(--ink-muted)', marginBottom: 12 }} />
-          <p style={styles.loadingText}>{error || '建筑不存在'}</p>
+          <i
+            className="fas fa-compass"
+            style={{ fontSize: '1.8rem', color: 'var(--ink-muted)', marginBottom: 12 }}
+          />
+          <h2 style={{ margin: '0 0 8px', fontFamily: "'Noto Serif SC', serif", color: 'var(--ink)' }}>
+            内容已调整
+          </h2>
+          <p style={styles.loadingText}>该建筑可能已下线或地址有误，继续看看其他建筑。</p>
+
+          {recommendations.length > 0 && (
+            <div className="exhibition-recommend">
+              {recommendations.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavigate(item.id)}
+                  style={styles.textButton}
+                >
+                  {item.name}
+                </button>
+              ))}
+            </div>
+          )}
+
           <button onClick={() => navigate('/')} style={styles.textButton}>
             返回首页
           </button>
@@ -114,7 +262,38 @@ export default function ExhibitionPage() {
     <div className="exhibition-page" style={styles.page}>
       {/* 3D 展览查看器 */}
       <div style={styles.viewerArea}>
-        <ExhibitionViewer autoRotate={autoRotate} />
+        {quotaBlocked ? (
+          <div className="exhibition-quota-stage">
+            {promptDismissed ? (
+              <div className="hall-quota-muted">
+                <i className="fas fa-image" />
+                <p>今日 3D 试看额度已用完，图文信息仍可查看</p>
+              </div>
+            ) : (
+              <PosterFallback
+                palace={palace}
+                reason="quota"
+                onDismiss={() => {
+                  setPromptDismissed(true);
+                  guestSession.markDismissed('registerPrompt');
+                }}
+                onOpenDetail={() => setInfoExpanded(true)}
+                onLogin={() =>
+                  navigate('/login', { state: { from: `/exhibition/${id}` } })
+                }
+              />
+            )}
+          </div>
+        ) : (
+          <ExhibitionViewer
+            autoRotate={autoRotate}
+            proceduralKey={proceduralKey}
+            activeSkin={skin}
+            palace={palace}
+            assetManifest={assetManifest}
+            onRetry={() => setQuotaBlocked(false)}
+          />
+        )}
       </div>
 
       {/* 顶部导航 */}
@@ -130,6 +309,8 @@ export default function ExhibitionPage() {
         </div>
 
         <div style={{ display: 'flex', gap: 8 }}>
+          <ShareButton type="palace" id={palace.id} title={palace.name} channel="copy" />
+
           <button onClick={() => setAutoRotate(v => !v)} style={{
             ...styles.iconBtn,
             borderColor: autoRotate ? 'rgba(184,58,42,0.3)' : 'var(--border-warm)',
@@ -143,7 +324,7 @@ export default function ExhibitionPage() {
           </button>
 
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/gallery')}
             style={{
               ...styles.iconBtn,
               color: 'var(--vermillion)',
@@ -175,14 +356,16 @@ export default function ExhibitionPage() {
         <div style={styles.bottomContent}>
           <div>
             <div style={styles.tagRow}>
-              <span style={styles.tag}>{palace.built_year}年</span>
+              <span style={styles.tag}>{formatBuiltYear(palace.built_year)}</span>
               {palace.height && <span style={styles.tag}>{palace.height}</span>}
               {palace.area && <span style={styles.tag}>{palace.area}</span>}
               <span style={{ ...styles.tag, color: 'var(--imperial-yellow)', borderColor: 'rgba(200,150,12,0.3)' }}>{palace.style}</span>
             </div>
 
             <h3 style={styles.buildingName}>{palace.name}</h3>
-            <p style={styles.buildingEng}>{palace.name_en} · {palace.dynasty} · 北京故宫</p>
+            <p style={styles.buildingEng}>
+              {palace.name_en} · {palace.dynasty} · {formatLocation(palace)}
+            </p>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -201,6 +384,18 @@ export default function ExhibitionPage() {
                 <i className="fas fa-feather-alt" style={{ marginRight: 8 }} />
                 {palace.significance}
               </p>
+            )}
+
+            <VideoSection palace={palace} />
+
+            {palace.audio_guide && (
+              <AudioGuidePlayer
+                text={palace.audio_guide}
+                title="语音讲解"
+                audioUrl={palace.audio?.url || ''}
+                audioDuration={palace.audio?.duration}
+                isCurrent={palace.audio?.is_current !== false}
+              />
             )}
           </div>
         )}

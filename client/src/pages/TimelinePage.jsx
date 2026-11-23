@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getTimeline } from '../api';
 
 /**
  * 历史沿革时间轴页面 — 横向年表，串联所有建筑的历史事件
@@ -28,57 +29,34 @@ function TimelinePage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [palacesRes] = await Promise.all([
+      // 建筑列表用于筛选下拉与「始建」事件；沿革事件由聚合接口一次返回
+      const [palacesRes, timelineRes] = await Promise.all([
         axios.get('/api/palaces'),
+        getTimeline(),
       ]);
 
-      if (palacesRes.data.success) {
-        const palaces = palacesRes.data.data;
-        setAllPalaces(palaces);
+      const palaces = palacesRes.data?.success ? palacesRes.data.data : [];
+      setAllPalaces(palaces);
 
-        // 展开所有建筑的时间线为一个扁平的事件列表
-        const allEvents = [];
-        palaces.forEach(palace => {
-          if (palace.timeline) return; // 列表接口不含timeline
-          allEvents.push({
-            palace_id: palace.id,
-            palace_name: palace.name,
-            dynasty: palace.dynasty,
-            category: palace.category,
-            built_year: palace.built_year,
-            year: palace.built_year,
-            event: `${palace.name}始建 — ${palace.dynasty}`,
-            type: 'built',
-          });
-        });
-
-        setTimelineData(allEvents);
-      }
-
-      // 加载每个建筑的详细时间线
-      const detailPromises = palacesRes.data.data.map(palace =>
-        axios.get(`/api/palaces/${palace.id}`).then(r => r.data.success ? r.data.data : null)
-      );
-
-      const details = await Promise.all(detailPromises);
       const mergedEvents = [];
+      const timelineEvents = timelineRes.data?.success
+        ? timelineRes.data.data?.events || []
+        : [];
 
-      details.forEach(palace => {
-        if (!palace) return;
-        if (palace.timeline && palace.timeline.length > 0) {
-          palace.timeline.forEach(t => {
-            mergedEvents.push({
-              palace_id: palace.id,
-              palace_name: palace.name,
-              dynasty: palace.dynasty,
-              category: palace.category,
-              year: t.year,
-              event: t.event,
-              type: 'event',
-            });
-          });
-        }
-        // 也加入始建事件
+      timelineEvents.forEach(event => {
+        mergedEvents.push({
+          palace_id: event.palace_id,
+          palace_name: event.palace_name,
+          dynasty: event.dynasty,
+          category: event.category,
+          year: event.year,
+          event: event.event,
+          type: 'event',
+        });
+      });
+
+      // 加入「始建」事件
+      palaces.forEach(palace => {
         if (palace.built_year) {
           mergedEvents.push({
             palace_id: palace.id,
@@ -94,8 +72,8 @@ function TimelinePage() {
 
       // 按年份排序
       mergedEvents.sort((a, b) => {
-        const yearA = parseInt(a.year.replace(/[^0-9]/g, '')) || 0;
-        const yearB = parseInt(b.year.replace(/[^0-9]/g, '')) || 0;
+        const yearA = parseInt(String(a.year).replace(/[^0-9]/g, ''), 10) || 0;
+        const yearB = parseInt(String(b.year).replace(/[^0-9]/g, ''), 10) || 0;
         return yearA - yearB;
       });
 
@@ -111,7 +89,7 @@ function TimelinePage() {
   const filteredEvents = timelineData.filter(e => {
     if (activePalace !== 'all' && e.palace_id !== activePalace) return false;
     if (activeDynasty !== 'all') {
-      const year = parseInt(e.year.replace(/[^0-9]/g, '')) || 0;
+      const year = parseInt(String(e.year).replace(/[^0-9]/g, ''), 10) || 0;
       if (activeDynasty === '明' && (year < 1368 || year > 1644)) return false;
       if (activeDynasty === '清' && (year < 1644 || year > 1912)) return false;
       if (activeDynasty === '现代' && year < 1912) return false;
@@ -123,7 +101,7 @@ function TimelinePage() {
   const groupByCentury = (events) => {
     const groups = {};
     events.forEach(e => {
-      const year = parseInt(e.year.replace(/[^0-9]/g, '')) || 0;
+      const year = parseInt(String(e.year).replace(/[^0-9]/g, ''), 10) || 0;
       const century = Math.floor(year / 100) * 100;
       const label = century === 0 ? '不详' : `${century}年代`;
       if (!groups[century]) groups[century] = { century, label, events: [] };
@@ -136,7 +114,7 @@ function TimelinePage() {
 
   // 获取朝代标签
   const getDynastyTag = (yearStr) => {
-    const year = parseInt(yearStr.replace(/[^0-9]/g, '')) || 0;
+    const year = parseInt(String(yearStr).replace(/[^0-9]/g, ''), 10) || 0;
     if (year >= 1368 && year <= 1644) return '明';
     if (year >= 1644 && year <= 1912) return '清';
     if (year >= 1912) return '现代';
@@ -162,7 +140,7 @@ function TimelinePage() {
         <h1 className="profile-title">
           <i className="fas fa-hourglass-half" /> 历史沿革
         </h1>
-        <p className="profile-title-sub">六百年紫禁城 · 岁月留痕</p>
+        <p className="profile-title-sub">历代营造 · 岁月留痕</p>
       </div>
 
       {/* 筛选器 */}
@@ -222,7 +200,7 @@ function TimelinePage() {
                       <div
                         key={ei}
                         className={`timeline-event-card ${event.type}`}
-                        onClick={() => navigate('/', { state: { selectPalaceId: event.palace_id } })}
+                        onClick={() => navigate('/gallery', { state: { selectPalaceId: event.palace_id } })}
                       >
                         {/* 年份标记 */}
                         <div className="timeline-event-year" style={{ borderColor: color.bg }}>

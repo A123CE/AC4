@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "question": "太和殿属于哪一类建筑？",
+    "options": ["A: 宫殿", "B: 民居", "C: 佛塔", "D: 关隘"],
+    "correct_answer": "A",
+    "explanation": "太和殿是紫禁城外朝三大殿之首。",
+    "difficulty": 1,
+    "category": "古建筑"
+  }
+]

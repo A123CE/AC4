@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SpotlightCard from './SpotlightCard';
+import CollectionButton from './CollectionButton';
+import { useAuth } from '../context/AuthContext';
+import guestSession from '../lib/guestSession';
+import { getHotspotReads, markHotspotRead } from '../api';
 
 /**
  * 热点详情卡片 — 点击3D模型热点后弹出的信息卡
@@ -7,12 +12,61 @@ import SpotlightCard from './SpotlightCard';
  */
 export default function HotspotInfoCard({
   hotspot,
+  palaceId,
   onClose,
   onNavigateToTerm,
   position = 'right',
 }) {
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
   const [visible, setVisible] = useState(false);
   const [animating, setAnimating] = useState(false);
+  const [read, setRead] = useState(false);
+
+  useEffect(() => {
+    if (!hotspot || !palaceId) {
+      setRead(false);
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    if (isLoggedIn) {
+      getHotspotReads(palaceId)
+        .then((res) => {
+          if (!cancelled && res.data?.success) {
+            setRead(
+              (res.data.data.items || []).some(
+                (item) => item.hotspot_id === hotspot.id
+              )
+            );
+          }
+        })
+        .catch(() => {});
+    } else {
+      setRead(guestSession.isHotspotRead(palaceId, hotspot.id));
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hotspot?.id, palaceId, isLoggedIn]);
+
+  const handleMarkRead = async () => {
+    if (!hotspot || !palaceId) return;
+
+    if (isLoggedIn) {
+      try {
+        await markHotspotRead(palaceId, hotspot.id);
+      } catch {
+        /* 失败不阻断阅读 */
+      }
+    } else {
+      guestSession.markHotspotRead(palaceId, hotspot.id);
+    }
+
+    setRead(true);
+  };
 
   useEffect(() => {
     if (hotspot) {
@@ -57,6 +111,7 @@ export default function HotspotInfoCard({
           {/* 关闭按钮 */}
           <button
             onClick={onClose}
+            aria-label="关闭热点介绍"
             style={{
               position: 'absolute',
               top: 6,
@@ -108,6 +163,34 @@ export default function HotspotInfoCard({
           }}>
             {hotspot?.description || '暂无描述'}
           </p>
+
+          {palaceId && (
+            <div className="hotspot-collection-row">
+              <CollectionButton palaceId={palaceId} variant="text" showLabel />
+            </div>
+          )}
+
+          <div className="hotspot-actions">
+            <button
+              type="button"
+              className="hotspot-action-btn"
+              onClick={() => {
+                onClose?.();
+                navigate(`/quiz?palace_id=${encodeURIComponent(palaceId || '')}`);
+              }}
+            >
+              <i className="fas fa-graduation-cap" /> 相关题目
+            </button>
+            <button
+              type="button"
+              className="hotspot-action-btn"
+              onClick={handleMarkRead}
+              disabled={read}
+            >
+              <i className={`fas ${read ? 'fa-check' : 'fa-bookmark'}`} />
+              {read ? '已读' : '标记已读'}
+            </button>
+          </div>
 
           {/* 了解更多按钮 */}
           {hotspot?.termId && (

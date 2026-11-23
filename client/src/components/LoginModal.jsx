@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useMuseumMeta } from '../lib/museumMeta';
 
 const INTEREST_TAGS = [
   { key: 'tourist', label: '游历者', desc: '走马观花，遍览宫阙', icon: 'fa-compass' },
@@ -8,11 +10,15 @@ const INTEREST_TAGS = [
 ];
 
 /**
- * 登录/注册模态框 — "入宫通行证" 宫廷美学设计
+ * 登录/注册模态框 — "入馆通行证" 宫廷美学设计
  * 设计灵感: 奏折/令牌样式, 回纹边框, 朱红配金
  */
 function LoginModal({ open, onClose }) {
   const { login, register, loading } = useAuth();
+  const meta = useMuseumMeta();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || '/';
 
   const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [phase, setPhase] = useState('hidden'); // hidden -> entering -> visible
@@ -87,7 +93,7 @@ function LoginModal({ open, onClose }) {
     setError('');
 
     if (!username.trim() || !password) {
-      setError('请输入完整的入宫凭证');
+      setError('请输入完整的入馆凭证');
       return;
     }
 
@@ -97,6 +103,7 @@ function LoginModal({ open, onClose }) {
 
     if (result.success) {
       handleClose();
+      navigate(from, { replace: true });
     } else {
       setError(result.message);
     }
@@ -126,6 +133,7 @@ function LoginModal({ open, onClose }) {
 
     if (result.success) {
       handleClose();
+      navigate(from, { replace: true });
     } else {
       setError(result.message);
     }
@@ -159,10 +167,13 @@ function LoginModal({ open, onClose }) {
           <div className="auth-bg-mountain auth-bg-mountain--2" />
           <div className="auth-bg-mountain auth-bg-mountain--3" />
         </div>
-        {/* 诗词 */}
+        {/* 诗文 */}
         <div className="auth-bg-verse">
-          <p className="verse-line">红墙黄瓦</p>
-          <p className="verse-line verse-line--sub">岁月悠长</p>
+          <p className="verse-line">砖瓦为骨</p>
+          <p className="verse-line verse-line--sub">匠心千年</p>
+          <p className="verse-line verse-line--foot">
+            {meta.total} 座名筑 · 遍及 {meta.regionCount} 省市
+          </p>
         </div>
       </div>
 
@@ -181,7 +192,7 @@ function LoginModal({ open, onClose }) {
         <div className="auth-modal-seal">
           <div className="auth-modal-seal-inner">
             {mode === 'login' ? (
-              <><span>入</span><span>宫</span></>
+              <><span>入</span><span>馆</span></>
             ) : (
               <><span>腰</span><span>牌</span></>
             )}
@@ -195,8 +206,8 @@ function LoginModal({ open, onClose }) {
           </h2>
           <p className="auth-modal-subtitle">
             {mode === 'login'
-              ? '出示凭证，踏入紫禁城数字之旅'
-              : '加入故宫数字社区，开启您的营造之旅'
+              ? '出示凭证，踏入华夏古建数字之旅'
+              : '加入古建数字社区，开启您的营造之旅'
             }
           </p>
         </div>
@@ -368,7 +379,7 @@ function LoginModal({ open, onClose }) {
           <div className="auth-modal-social">
             <div className="auth-divider">
               <span className="auth-divider-line" />
-              <span className="auth-divider-text">或 以其他方式入宫</span>
+              <span className="auth-divider-text">或 以其他方式入馆</span>
               <span className="auth-divider-line" />
             </div>
             <div className="auth-social-btns">

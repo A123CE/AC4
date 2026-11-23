@@ -1,0 +1,16 @@
+{
+  "data": {
+    "generated_at": "string",
+    "palaces": {
+      "*": {
+        "bytes": "number",
+        "high": "string",
+        "poster": "string",
+        "smooth": "null",
+        "standard": "string"
+      }
+    },
+    "ttl_seconds": "number"
+  },
+  "success": "boolean"
+}

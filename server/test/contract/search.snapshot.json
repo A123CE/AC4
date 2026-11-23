@@ -1,0 +1,32 @@
+{
+  "data": {
+    "groups": [
+      {
+        "items": [
+          {
+            "href": "string",
+            "id": "string",
+            "matched": [
+              [
+                "number"
+              ]
+            ],
+            "meta": {
+              "category": "string",
+              "dynasty": "string"
+            },
+            "snippet": "string",
+            "title": "string"
+          }
+        ],
+        "label": "string",
+        "total": "number",
+        "type": "string"
+      }
+    ],
+    "q": "string",
+    "took_ms": "number",
+    "total": "number"
+  },
+  "success": "boolean"
+}

@@ -1,0 +1,18 @@
+{
+  "data": {
+    "category": "string",
+    "difficulty": "number",
+    "id": "number",
+    "options": [
+      "string"
+    ],
+    "palace_id": "string",
+    "question": "string",
+    "related_term_id": "string",
+    "tags": [
+      "string"
+    ]
+  },
+  "scope": "string",
+  "success": "boolean"
+}

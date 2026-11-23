@@ -1,0 +1,20 @@
+{
+  "data": {
+    "achievements": {
+      "badges": [],
+      "progress": [],
+      "stamps": []
+    },
+    "category": "string",
+    "correct_answer": "string",
+    "explanation": "string",
+    "is_correct": "boolean",
+    "leaderboard_hint": "boolean",
+    "new_badge": "null",
+    "palace_id": "string",
+    "points_earned": "number",
+    "related_term_id": "string",
+    "scope": "string"
+  },
+  "success": "boolean"
+}

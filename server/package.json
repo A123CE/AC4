@@ -2,10 +2,12 @@
   "name": "ac4-palace-server",
   "version": "1.0.0",
   "description": "故宫可视化后端服务",
-  "main": "src/app.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "node --watch src/app.js"
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:migrate": "node ../scripts/migrate.mjs",
+    "test": "node --test --test-force-exit --test-concurrency=1 test/smoke.test.js test/public-fields.test.js test/palaces-routes.test.js test/timeline.test.js test/quiz-guest.test.js test/points-service.test.js test/collections.test.js test/achievement-engine.test.js test/achievement-hooks.test.js test/achievements-api.test.js test/rate-limit.test.js test/share-page.test.js test/share-visit.test.js test/assets-manifest.test.js test/search-service.test.js test/search-api.test.js test/migration-idempotent.test.js test/merge-guest.test.js test/taxonomy.test.js test/routes.test.js test/recommend.test.js test/content-coverage.test.js test/hotspots-read.test.js test/audio-guide.test.js test/content-status.test.js test/metrics.test.js test/palaces-video.test.js test/sitemap-service.test.js test/minor-guard.test.js test/quiz-answer-idempotent.test.js test/leaderboard.test.js test/seo-routes.test.js test/quiz-facts-migration.test.js test/quiz-answer-api.test.js test/share-jsonld.test.js test/preferences-classroom.test.js test/quiz-practice.test.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -13,5 +15,9 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.6.5"
+  },
+  "devDependencies": {
+    "supertest": "^7.3.2",
+    "vitest": "^5.1.1"
   }
 }

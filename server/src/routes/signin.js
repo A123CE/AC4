@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const { authMiddleware } = require('../middleware/auth');
+const achievementEngine = require('../services/achievementEngine');
 
 router.use(authMiddleware);
 
@@ -66,8 +67,11 @@ router.post('/', async (req, res) => {
       [pointsEarned, req.user.id]
     );
 
-    // 检查签到徽章
-    const newBadge = await checkSigninBadges(req.user.id, consecutiveDays);
+    // 统一成就引擎判定，替代本地徽章发放
+    const achievements = await achievementEngine.evaluate(req.user.id, {
+      trigger: 'signin',
+    });
+    const newBadge = achievements.badges[0] || null;
 
     res.json({
       success: true,
@@ -77,6 +81,7 @@ router.post('/', async (req, res) => {
         consecutive_days: consecutiveDays,
         bonus: bonusPoints > 0 ? bonusPoints : 0,
         new_badge: newBadge,
+        achievements,
       },
     });
   } catch (err) {
@@ -134,40 +139,6 @@ router.get('/status', async (req, res) => {
   }
 });
 
-/**
- * 检查签到徽章
- */
-async function checkSigninBadges(userId, consecutiveDays) {
-  try {
-    let conditionValue = null;
-    if (consecutiveDays >= 30) conditionValue = 30;
-    else if (consecutiveDays >= 7) conditionValue = 7;
-
-    if (!conditionValue) return null;
-
-    const [eligible] = await pool.execute(
-      `SELECT b.* FROM badges b
-       WHERE b.condition_type = 'consecutive_signin' AND b.condition_value = ?
-       AND b.id NOT IN (SELECT badge_id FROM user_badges WHERE user_id = ?)
-       LIMIT 1`,
-      [conditionValue, userId]
-    );
-
-    if (eligible.length > 0) {
-      const badge = eligible[0];
-      await pool.execute(
-        'INSERT INTO user_badges (user_id, badge_id) VALUES (?, ?)',
-        [userId, badge.id]
-      );
-      return { id: badge.id, name: badge.name, description: badge.description, icon: badge.icon };
-    }
-
-    return null;
-  } catch (err) {
-    console.error('检查签到徽章失败:', err);
-    return null;
-  }
-}
 
 function getYesterdayStr() {
   const y = new Date();

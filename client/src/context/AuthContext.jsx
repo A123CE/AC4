@@ -1,10 +1,21 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { emitAchievements } from '../lib/achievementBus';
+import guestSession from '../lib/guestSession';
 
 const AuthContext = createContext(null);
 
 const AUTH_API = '/api/auth';
 const STORAGE_KEY = 'palace_auth';
+const GUEST_MERGE_KEY = 'ac4_pending_guest_merge';
+
+function hasPendingGuestMerge() {
+  try {
+    return localStorage.getItem(GUEST_MERGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
 
 function getStoredAuth() {
   try {
@@ -27,6 +38,7 @@ function setStoredAuth(auth) {
 export function AuthProvider({ children }) {
   const [auth, setAuth] = useState(() => getStoredAuth());
   const [loading, setLoading] = useState(false);
+  const [pendingGuestMerge, setPendingGuestMergeState] = useState(hasPendingGuestMerge);
 
   // 持久化 auth 变更
   useEffect(() => {
@@ -49,6 +61,7 @@ export function AuthProvider({ children }) {
       const res = await axios.post(`${AUTH_API}/login`, { username, password });
       if (res.data.success) {
         setAuth(res.data.data);
+        emitAchievements(res.data.data?.achievements);
         return { success: true, message: res.data.message };
       }
       return { success: false, message: res.data.error };
@@ -72,6 +85,7 @@ export function AuthProvider({ children }) {
       });
       if (res.data.success) {
         setAuth(res.data.data);
+        emitAchievements(res.data.data?.achievements);
         return { success: true, message: res.data.message };
       }
       return { success: false, message: res.data.error };
@@ -87,6 +101,16 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     setAuth(null);
     setStoredAuth(null);
+  }, []);
+
+  // 游客数据合并标记 — 由 T-S2-01 在登录后消费
+  const setPendingGuestMerge = useCallback((value) => {
+    const next = !!value;
+    setPendingGuestMergeState(next);
+    try {
+      if (next) localStorage.setItem(GUEST_MERGE_KEY, '1');
+      else localStorage.removeItem(GUEST_MERGE_KEY);
+    } catch { /* 忽略写入失败 */ }
   }, []);
 
   // 获取完整用户信息
@@ -107,17 +131,42 @@ export function AuthProvider({ children }) {
     }
   }, [fetchProfile]);
 
+  // 合并本机游客收藏与笔记
+  const mergeGuest = useCallback(async (payload) => {
+    if (!auth?.token) return { success: false, message: '未登录' };
+
+    try {
+      const res = await axios.post(`${AUTH_API}/merge-guest`, payload);
+      if (res.data.success) {
+        guestSession.applyMergeResult(res.data.data.items || []);
+        setPendingGuestMerge(false);
+        emitAchievements(res.data.data.achievements);
+        await refreshAuth();
+        return { success: true, data: res.data.data };
+      }
+      return { success: false, message: res.data.error || '合并失败' };
+    } catch (err) {
+      return {
+        success: false,
+        message: err.response?.data?.error || '合并失败',
+      };
+    }
+  }, [auth?.token, refreshAuth, setPendingGuestMerge]);
+
   const value = {
     auth,
     user: auth?.user || null,
     token: auth?.token || null,
     isLoggedIn: !!auth?.token,
+    pendingGuestMerge,
     loading,
     login,
     register,
     logout,
     fetchProfile,
-    refreshAuth
+    refreshAuth,
+    mergeGuest,
+    setPendingGuestMerge
   };
 
   return (

@@ -1,0 +1,21 @@
+{
+  "data": {
+    "categories": [
+      "string"
+    ],
+    "corrections": [
+      "string"
+    ],
+    "hot": [
+      "string"
+    ],
+    "recommended": [
+      {
+        "id": "string",
+        "name": "string",
+        "poster_path": "string"
+      }
+    ]
+  },
+  "success": "boolean"
+}

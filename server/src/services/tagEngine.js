@@ -40,6 +40,38 @@ function getPalaceTags(palaceId) {
   return PALACE_TAGS[palaceId] || [];
 }
 
+function parseTagsValue(raw) {
+  if (Array.isArray(raw)) return raw.filter(Boolean);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.filter(Boolean);
+  } catch {
+    /* 逗号分隔 */
+  }
+  return String(raw)
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
+
+/**
+ * 标签来源：palaces.tags 优先，静态 PALACE_TAGS 兜底
+ */
+async function getPalaceTagsFromDb(palaceId) {
+  try {
+    const [rows] = await pool.execute(
+      'SELECT tags FROM palaces WHERE id = ?',
+      [palaceId]
+    );
+    const tags = parseTagsValue(rows[0]?.tags);
+    if (tags.length > 0) return tags;
+  } catch {
+    /* 查询失败时回退静态标签 */
+  }
+  return PALACE_TAGS[palaceId] || [];
+}
+
 /**
  * 从标签名数组批量更新用户标签权重
  * @param {number} userId - 用户ID
@@ -73,7 +105,7 @@ async function updateTags(userId, tags, increment) {
 async function onPalaceViewed(userId, palaceId, durationSeconds = 0) {
   if (!userId || !palaceId) return;
 
-  const tags = getPalaceTags(palaceId);
+  const tags = await getPalaceTagsFromDb(palaceId);
   if (tags.length === 0) return;
 
   // 浏览超过10秒才加权
@@ -90,7 +122,7 @@ async function onPalaceViewed(userId, palaceId, durationSeconds = 0) {
 async function onPalaceCollected(userId, palaceId) {
   if (!userId || !palaceId) return;
 
-  const tags = getPalaceTags(palaceId);
+  const tags = await getPalaceTagsFromDb(palaceId);
   await updateTags(userId, tags, 2.0);
 }
 
@@ -144,6 +176,7 @@ async function getActiveTags(userId, threshold = 5.0) {
 
 module.exports = {
   getPalaceTags,
+  getPalaceTagsFromDb,
   updateTags,
   onPalaceViewed,
   onPalaceCollected,

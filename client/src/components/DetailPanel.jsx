@@ -1,21 +1,62 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { formatBuiltYear } from '../lib/museumMeta';
+import { getRecommendations, getPalaceContent } from '../api';
+import { useI18n } from '../context/I18nContext';
+import CollectionButton from './CollectionButton';
+import ShareButton from './ShareButton';
+import AudioGuidePlayer from './AudioGuidePlayer';
+
+/**
+ * 清洗档案字段 — 空值与占位符统一显示为「暂未考订」
+ */
+function cleanValue(value, fallback = '暂未考订') {
+  if (value === null || value === undefined) return fallback;
+  const text = String(value).trim();
+  if (!text || ['—', '-', '－', 'N/A', 'null', 'undefined'].includes(text)) return fallback;
+  return text;
+}
 
 /**
  * 从 palace 数据中提取仪表盘指标
+ * 华夏名筑数据自带 stats 字段时优先使用, 否则回退到字段推导
  */
 function extractDashboardData(palace) {
+  // 数据自带关键数据: [["72 万㎡", "占地"], ...]
+  if (Array.isArray(palace.stats) && palace.stats.length > 0) {
+    return palace.stats.slice(0, 4).map(([value, label]) => ({
+      value,
+      label,
+      icon: 'fa-gem',
+    }));
+  }
+
   const stats = [];
 
   if (palace.built_year) {
-    stats.push({ value: palace.built_year, label: '建成年份', icon: 'fa-calendar' });
+    stats.push({ value: formatBuiltYear(palace.built_year), label: '建成年代', icon: 'fa-calendar' });
   }
   if (palace.height) {
     const h = palace.height.replace(/[^0-9.]/g, '');
-    if (h) stats.push({ value: h + 'm', label: '建筑高度', icon: 'fa-ruler-vertical' });
+    if (h) {
+      const isAltitude = palace.height.includes('海拔');
+      stats.push({
+        value: `${h} 米`,
+        label: isAltitude ? '海拔高度' : '建筑高度',
+        icon: 'fa-ruler-vertical',
+      });
+    }
   }
   if (palace.area) {
-    const a = palace.area.replace(/[^0-9]/g, '');
-    if (a) stats.push({ value: a + '㎡', label: '占地面积', icon: 'fa-up-right-and-down-left-from-center' });
+    const a = palace.area.replace(/[^0-9.]/g, '');
+    if (a) {
+      const isLength = palace.area.includes('公里');
+      const isPainting = palace.area.includes('壁画');
+      stats.push({
+        value: isLength ? `${a} 公里` : isPainting ? `${a} 万平方米` : `${a} 平方米`,
+        label: isLength ? '绵延长度' : isPainting ? '壁画面积' : '占地规模',
+        icon: 'fa-up-right-and-down-left-from-center',
+      });
+    }
   }
   if (palace.style) {
     stats.push({ value: palace.style.length > 6 ? palace.style.slice(0, 6) + '…' : palace.style, label: '建筑风格', icon: 'fa-brush' });
@@ -25,17 +66,18 @@ function extractDashboardData(palace) {
 }
 
 /**
- * 解析年代用于摘要
+ * 解析摘要 — 优先使用 tagline
  */
 function getSummary(palace) {
+  if (palace.tagline) return palace.tagline;
   if (palace.category === '关隘') {
-    return `紫禁城重要门户，${palace.dynasty || '明清'}时期建造`;
+    return `${palace.dynasty || '历代'}修筑的要冲门户`;
   }
-  return `${palace.dynasty || '明清皇家'}${palace.category || '建筑'}，庄严宏伟的主体殿宇`;
+  return `${palace.dynasty || '明清'}${palace.category || '建筑'}，庄严宏伟的主体殿宇`;
 }
 
 /**
- * 获取相关建筑推荐
+ * 获取相关建筑推荐 — 相邻 → 同类型 → 同地区
  */
 function getRelatedPalaces(palace, allPalaces) {
   if (!allPalaces || allPalaces.length <= 1) return [];
@@ -53,6 +95,17 @@ function getRelatedPalaces(palace, allPalaces) {
   );
   related.push(...sameCategory.slice(0, 2));
 
+  // 同地区建筑 — 让全国名筑与中轴线建筑彼此可达
+  if (related.length < 4) {
+    const sameRegion = allPalaces.filter(
+      p =>
+        p.id !== palace.id &&
+        (p.region || p.city) === (palace.region || palace.city) &&
+        !related.find(r => r.id === p.id)
+    );
+    related.push(...sameRegion.slice(0, 4 - related.length));
+  }
+
   return related.slice(0, 4);
 }
 
@@ -64,9 +117,68 @@ function getRelatedPalaces(palace, allPalaces) {
 function DetailPanel({ palace, palaces = [], onNavigate, loading = false }) {
   // 默认全部展开
   const [collapsed, setCollapsed] = useState({});
+  
+
+  const { lang, t } = useI18n();
+  const [localized, setLocalized] = useState(null);
+  const [relatedFromApi, setRelatedFromApi] = useState([]);
 
   const dashboardData = useMemo(() => extractDashboardData(palace), [palace]);
-  const relatedPalaces = useMemo(() => getRelatedPalaces(palace, palaces), [palace, palaces]);
+
+  useEffect(() => {
+    if (lang !== 'en' || !palace?.id) {
+      setLocalized(null);
+      return undefined;
+    }
+
+    let cancelled = false;
+    getPalaceContent(palace.id, 'en')
+      .then((res) => {
+        if (!cancelled && res.data?.success) setLocalized(res.data.data);
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lang, palace?.id]);
+
+  useEffect(() => {
+    if (!palace?.id) {
+      setRelatedFromApi([]);
+      return undefined;
+    }
+
+    let cancelled = false;
+    getRecommendations({ scene: 'detail', palace_id: palace.id, limit: 6 })
+      .then((res) => {
+        if (!cancelled && res.data?.success) {
+          setRelatedFromApi(res.data.data.items || []);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [palace?.id]);
+
+  const displayName =
+    lang === 'en'
+      ? localized?.name || palace.name_en || palace.name
+      : palace.name;
+
+  const relatedPalaces = useMemo(() => {
+    if (relatedFromApi.length > 0) {
+      return relatedFromApi.map((item) => ({
+        id: item.palace_id,
+        name: item.name,
+        poster_path: item.poster_path,
+        reason_text: item.reason_text,
+      }));
+    }
+    return getRelatedPalaces(palace, palaces);
+  }, [relatedFromApi, palace, palaces]);
 
   const toggleSection = (key) => {
     setCollapsed(prev => ({ ...prev, [key]: !prev[key] }));
@@ -98,13 +210,38 @@ function DetailPanel({ palace, palaces = [], onNavigate, loading = false }) {
     <div className="museum-detail">
       {/* 面板头部 */}
       <div className="detail-header">
-        <h3>
-          <i className="fas fa-scroll"></i>
-          卷宗详情
-        </h3>
+        <div className="detail-header-top">
+          <h3>
+            <i className="fas fa-scroll"></i>
+            {t('detail.title', '卷宗详情')}
+          </h3>
+          <div className="detail-header-actions">
+            <CollectionButton palaceId={palace.id} variant="icon" />
+            <ShareButton
+              type="palace"
+              id={palace.id}
+              title={palace.name}
+              className="detail-action"
+            />
+            <button
+              type="button"
+              className="detail-action"
+              title="朗读（即将上线）"
+              aria-label="朗读（即将上线）"
+              disabled
+            >
+              <i className="fas fa-volume-high" />
+            </button>
+          </div>
+        </div>
         <p className="detail-summary">
-          {getSummary(palace)}
+          {localized?.description || getSummary(palace)}
         </p>
+        {lang === 'en' && (!localized || localized.description_status !== 'full') && (
+          <span className="i18n-missing">
+            {t('detail.translationMissing', 'English coming soon')}
+          </span>
+        )}
       </div>
 
       {/* ====== 折叠式内容区块 ====== */}
@@ -141,15 +278,37 @@ function DetailPanel({ palace, palaces = [], onNavigate, loading = false }) {
               {palace.description || '暂无简介'}
             </div>
 
-            {/* 音频导览入口 */}
-            {palace.audio_guide && (
-              <div className="detail-audio-entry">
-                <i className="fas fa-headphones"></i>
-                <div>
-                  <div className="detail-audio-title">语音讲解</div>
-                  <div className="detail-audio-hint">点击播放</div>
-                </div>
+            {/* 经典诗句引用 */}
+            {palace.quote && (
+              <div className="detail-quote">
+                <div className="detail-quote-text">「{palace.quote}」</div>
+                {palace.quote_by && (
+                  <div className="detail-quote-by">—— {palace.quote_by}</div>
+                )}
               </div>
+            )}
+
+            {/* 标签 */}
+            {Array.isArray(palace.tags) && palace.tags.length > 0 && (
+              <div className="detail-tags">
+                {palace.tags.map((tag, i) => (
+                  <span key={i} className="detail-tag">
+                    <i className="fas fa-hashtag"></i>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* 语音讲解播放器 */}
+            {palace.audio_guide && (
+              <AudioGuidePlayer
+                text={palace.audio_guide}
+                title="语音讲解"
+                audioUrl={palace.audio?.url || ''}
+                audioDuration={palace.audio?.duration}
+                isCurrent={palace.audio?.is_current !== false}
+              />
             )}
           </div>
         </div>
@@ -169,43 +328,45 @@ function DetailPanel({ palace, palaces = [], onNavigate, loading = false }) {
           <div className="detail-accordion-body">
             <div className="detail-info-grid">
               <div className="detail-info-row">
-                <span className="detail-info-label">名称</span>
-                <span className="detail-info-value">{palace.name}</span>
+                <span className="detail-info-label">{t('detail.name', '名称')}</span>
+                <span className="detail-info-value">{displayName}</span>
               </div>
               <div className="detail-info-row">
-                <span className="detail-info-label">英文名</span>
+                <span className="detail-info-label">{t('detail.englishName', '英文名')}</span>
                 <span className="detail-info-value" style={{ fontStyle: 'italic' }}>
                   {palace.name_en || '-'}
                 </span>
               </div>
               <div className="detail-info-row">
                 <span className="detail-info-label">年代</span>
-                <span className="detail-info-value">{palace.dynasty} · {palace.built_year}年</span>
+                <span className="detail-info-value">
+                  {palace.dynasty || '年代待考'} · {formatBuiltYear(palace.built_year)}
+                </span>
               </div>
               <div className="detail-info-row">
                 <span className="detail-info-label">类别</span>
-                <span className="detail-info-value">{palace.category}</span>
+                <span className="detail-info-value">{cleanValue(palace.category)}</span>
               </div>
               <div className="detail-info-row">
                 <span className="detail-info-label">地点</span>
-                <span className="detail-info-value">北京 · 故宫</span>
+                <span className="detail-info-value">{cleanValue(palace.city || palace.region)}</span>
               </div>
               <div className="detail-info-row">
-                <span className="detail-info-label">占地</span>
-                <span className="detail-info-value">{palace.area || '-'}</span>
+                <span className="detail-info-label">占地 / 规模</span>
+                <span className="detail-info-value">{cleanValue(palace.area)}</span>
               </div>
               <div className="detail-info-row">
                 <span className="detail-info-label">高度</span>
-                <span className="detail-info-value">{palace.height || '-'}</span>
+                <span className="detail-info-value">{cleanValue(palace.height)}</span>
               </div>
               <div className="detail-info-row">
                 <span className="detail-info-label">风格</span>
-                <span className="detail-info-value">{palace.style || '-'}</span>
+                <span className="detail-info-value">{cleanValue(palace.style)}</span>
               </div>
               <div className="detail-info-row">
                 <span className="detail-info-label">历史意义</span>
                 <span className="detail-info-value" style={{ maxWidth: '55%', lineHeight: 1.5 }}>
-                  {palace.significance || '-'}
+                  {cleanValue(palace.significance)}
                 </span>
               </div>
             </div>
@@ -274,6 +435,35 @@ function DetailPanel({ palace, palaces = [], onNavigate, loading = false }) {
             )}
           </div>
         </div>
+        {/* ---- 图影 (四视图画廊) ---- */}
+        {Array.isArray(palace.views) && palace.views.length > 0 && (
+          <div className={`detail-accordion-section${collapsed['views'] ? ' collapsed' : ''}`}>
+            <div
+              className="detail-accordion-header"
+              onClick={() => toggleSection('views')}
+            >
+              <div className="detail-accordion-header-left">
+                <i className="fas fa-images"></i>
+                <span>图影</span>
+              </div>
+              <i className="fas fa-chevron-down detail-accordion-chevron"></i>
+            </div>
+            <div className="detail-accordion-body">
+              <div className="detail-views-gallery">
+                {palace.views.map((view, i) => (
+                  <figure key={i} className="detail-view-item">
+                    <img
+                      src={`/images/${view.src}`}
+                      alt={`${palace.name}${view.zh || ''}视图`}
+                      loading="lazy"
+                    />
+                    <figcaption>{view.zh || view.en}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 相关建筑推荐 */}
@@ -287,7 +477,10 @@ function DetailPanel({ palace, palaces = [], onNavigate, loading = false }) {
                 className="related-item"
                 onClick={() => onNavigate(p)}
               >
-                {p.name}
+                <span>{p.name}</span>
+                {p.reason_text && (
+                  <span className="related-reason">{p.reason_text}</span>
+                )}
               </button>
             ))}
           </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { dailySignin, getSigninStatus } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { emitAchievements } from '../lib/achievementBus';
 
 /**
  * 签到按钮组件
@@ -39,6 +40,11 @@ export default function SigninButton() {
           consecutive_days: res.data.data.consecutive_days,
         }));
         refreshAuth?.();
+        emitAchievements(
+          res.data.data.achievements || {
+            badges: res.data.data.new_badge ? [res.data.data.new_badge] : [],
+          }
+        );
         setTimeout(() => setAnimating(false), 1500);
       }
     } catch {

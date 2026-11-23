@@ -1,0 +1,11 @@
+{
+  "data": [
+    {
+      "*": "string"
+    }
+  ],
+  "meta": {
+    "source": "string"
+  },
+  "success": "boolean"
+}

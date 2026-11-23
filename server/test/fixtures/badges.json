@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "name": "初入翰院",
+    "description": "首次答对题目",
+    "icon": "fa-award",
+    "condition_type": "quiz_correct",
+    "condition_value": 1
+  }
+]

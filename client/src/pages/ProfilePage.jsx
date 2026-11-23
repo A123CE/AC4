@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getProfile, getHistory, getCollections, getQuizStats, getQuizRecords, getSkins, unlockSkin, activateSkin } from '../api';
+import { getProfile, getHistory, getCollections, getQuizStats, getQuizRecords, getSkins, unlockSkin, activateSkin, updateCollectionNote, getAchievements, getPreferences, updatePreferences, getLearningRecords } from '../api';
+import { getHotspots } from '../data/buildingHotspots';
+import { useCollections } from '../context/CollectionsContext';
+import { useSkin } from '../context/SkinContext';
+import { useUiPrefs } from '../context/UiPrefsContext';
+import { useClassroomView } from '../context/ClassroomViewContext';
 import SigninButton from '../components/SigninButton';
 import AchievementBadge from '../components/AchievementBadge';
 
@@ -9,9 +14,16 @@ import AchievementBadge from '../components/AchievementBadge';
  * 个人中心页面 — "养心殿"
  * 包含：御览足迹、珍宝阁、徽章成就、虚拟集章
  */
+const COLLECTION_FILTERS = ['全部', '默认', '想去', '已研究', '教学素材'];
+
 function ProfilePage() {
   const navigate = useNavigate();
   const { user, logout, refreshAuth } = useAuth();
+  const { refresh: refreshCollections } = useCollections();
+  const { refresh: refreshSkin } = useSkin();
+  const { setAnalyticsEnabled, uiPrefs, updatePrefs } = useUiPrefs();
+  const { readOnly: classroomReadOnly } = useClassroomView();
+  const [prefError, setPrefError] = useState(null);
   const [activeTab, setActiveTab] = useState('stamps'); // stamps | history | collections | badges | quiz | skins
   const [profile, setProfile] = useState(null);
   const [history, setHistory] = useState([]);
@@ -19,7 +31,18 @@ function ProfilePage() {
   const [quizStats, setQuizStats] = useState(null);
   const [quizRecords, setQuizRecords] = useState([]);
   const [skins, setSkins] = useState([]);
+  const [achievements, setAchievements] = useState(null);
+  const [stampTotalNotice, setStampTotalNotice] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [collectionFilter, setCollectionFilter] = useState('全部');
+  const [editingCollection, setEditingCollection] = useState(null);
+  const [noteDraft, setNoteDraft] = useState('');
+  const [noteSaving, setNoteSaving] = useState(false);
+  const [personalizationEnabled, setPersonalizationEnabled] = useState(true);
+  const [savingPref, setSavingPref] = useState(false);
+  const [learning, setLearning] = useState([]);
+  const [analyticsEnabled, setAnalyticsEnabledState] = useState(true);
+  const [savingAnalytics, setSavingAnalytics] = useState(false);
 
   useEffect(() => {
     loadAllData();
@@ -28,13 +51,16 @@ function ProfilePage() {
   const loadAllData = async () => {
     try {
       setLoading(true);
-      const [profileRes, historyRes, collectionsRes, quizStatsRes, quizRecordsRes, skinsRes] = await Promise.all([
+      const [profileRes, historyRes, collectionsRes, quizStatsRes, quizRecordsRes, skinsRes, achievementsRes, preferencesRes, learningRes] = await Promise.all([
         getProfile(),
         getHistory(),
         getCollections(),
         getQuizStats().catch(() => ({ data: { data: null } })),
         getQuizRecords(1, 10).catch(() => ({ data: { data: [] } })),
         getSkins().catch(() => ({ data: { data: { skins: [], current_points: 0 } } })),
+        getAchievements().catch(() => ({ data: { success: false } })),
+        getPreferences().catch(() => ({ data: { success: false } })),
+        getLearningRecords().catch(() => ({ data: { success: false } })),
       ]);
       if (profileRes.data.success) setProfile(profileRes.data.data);
       if (historyRes.data.success) setHistory(historyRes.data.data);
@@ -42,6 +68,18 @@ function ProfilePage() {
       if (quizStatsRes.data.success) setQuizStats(quizStatsRes.data.data);
       if (quizRecordsRes.data.success) setQuizRecords(quizRecordsRes.data.data || []);
       if (skinsRes.data.success) setSkins(skinsRes.data.data.skins || []);
+      if (achievementsRes.data.success) setAchievements(achievementsRes.data.data);
+      if (preferencesRes.data.success) {
+        setPersonalizationEnabled(
+          preferencesRes.data.data.personalization_enabled !== false
+        );
+        setAnalyticsEnabledState(
+          preferencesRes.data.data.analytics_enabled !== false
+        );
+      }
+      if (learningRes.data.success) {
+        setLearning(learningRes.data.data.items || []);
+      }
     } catch (err) {
       console.error('加载个人数据失败:', err);
       await refreshAuth();
@@ -79,33 +117,142 @@ function ProfilePage() {
         const skinsRes = await getSkins();
         if (skinsRes.data.success) setSkins(skinsRes.data.data.skins || []);
         refreshAuth?.();
+        refreshSkin?.();
       }
     } catch {
       // 静默
     }
   };
 
-  // 计算集章进度
-  const stampsEarned = history.filter(h => h.palace_id).length;
-  const stampsTotal = 10; // 当前共10座宫殿
-  const stampProgress = Math.round((stampsEarned / stampsTotal) * 100);
+  const togglePersonalization = async () => {
+    const next = !personalizationEnabled;
+    setPersonalizationEnabled(next);
+    setSavingPref(true);
 
-  // 印章设计 — 每座建筑对应不同的印章纹样
-  const STAMP_DESIGNS = {
-    wumen: { name: '午门', emoji: '🏯', color: '#c41e3a', sub: '正门' },
-    taihemen: { name: '太和门', emoji: '🚪', color: '#b8860b', sub: '朝门' },
-    taihedian: { name: '太和殿', emoji: '👑', color: '#c41e3a', sub: '金銮' },
-    zhonghedian: { name: '中和殿', emoji: '⚖️', color: '#8b4513', sub: '方殿' },
-    baohedian: { name: '保和殿', emoji: '🏛️', color: '#a0522d', sub: '殿试' },
-    qianqingmen: { name: '乾清门', emoji: '🏮', color: '#b8860b', sub: '内门' },
-    qianqinggong: { name: '乾清宫', emoji: '🐉', color: '#c41e3a', sub: '正寝' },
-    jiaotaidian: { name: '交泰殿', emoji: '💎', color: '#9b1b30', sub: '交泰' },
-    kunninggong: { name: '坤宁宫', emoji: '🦚', color: '#800020', sub: '中宫' },
-    shenwumen: { name: '神武门', emoji: '⛩️', color: '#4a3728', sub: '北门' },
+    try {
+      const res = await updatePreferences({
+        personalization_enabled: next,
+      });
+      if (!res.data?.success) setPersonalizationEnabled(!next);
+    } catch {
+      setPersonalizationEnabled(!next);
+    } finally {
+      setSavingPref(false);
+    }
   };
 
-  // 已浏览的宫殿ID集合
-  const visitedPalaceIds = new Set(history.map(h => h.palace_id).filter(Boolean));
+  const toggleAnalytics = async () => {
+    const next = !analyticsEnabled;
+    setAnalyticsEnabledState(next);
+    setAnalyticsEnabled(next);
+    setSavingAnalytics(true);
+
+    try {
+      const res = await updatePreferences({ analytics_enabled: next });
+      if (!res.data?.success) {
+        setAnalyticsEnabledState(!next);
+        setAnalyticsEnabled(!next);
+      }
+    } catch {
+      setAnalyticsEnabledState(!next);
+      setAnalyticsEnabled(!next);
+    } finally {
+      setSavingAnalytics(false);
+    }
+  };
+
+  const changePref = async (patch) => {
+    setPrefError(null);
+    setSavingPref(true);
+    try {
+      await updatePrefs(patch);
+    } catch {
+      setPrefError('设置未保存，请重试');
+    } finally {
+      setSavingPref(false);
+    }
+  };
+
+  const startEditNote = (item) => {
+    setEditingCollection(item.palace_id);
+    setNoteDraft(item.note || '');
+  };
+
+  const cancelEditNote = () => {
+    setEditingCollection(null);
+    setNoteDraft('');
+  };
+
+  const saveNote = async (palaceId, noteOverride) => {
+    const note = noteOverride !== undefined ? noteOverride : noteDraft;
+    setNoteSaving(true);
+    try {
+      const res = await updateCollectionNote(palaceId, note);
+      if (res.data?.success) {
+        setCollections((prev) =>
+          prev.map((item) =>
+            item.palace_id === palaceId
+              ? { ...item, note: res.data.data.note, updated_at: res.data.data.updated_at }
+              : item
+          )
+        );
+        setEditingCollection(null);
+        setNoteDraft('');
+        refreshCollections?.();
+      }
+    } catch (err) {
+      console.error('保存收藏笔记失败:', err);
+    } finally {
+      setNoteSaving(false);
+    }
+  };
+
+  const filteredCollections = collections.filter(
+    (item) =>
+      collectionFilter === '全部' ||
+      (item.collection_category || '默认') === collectionFilter
+  );
+
+  // 集章与徽章 — 以 /api/achievements 为准
+  const stampSummary = achievements?.stamps;
+  const stampsEarned = stampSummary?.earned ?? history.filter(h => h.palace_id).length;
+  const stampsTotal = stampSummary?.total ?? 20;
+  const stampProgress = stampsTotal > 0 ? Math.round((stampsEarned / stampsTotal) * 100) : 0;
+  const stampItems = stampSummary?.items || [];
+  const badgeList = achievements?.badges || [];
+  const nextTargets = achievements?.next_targets || [];
+  const displayBadges = badgeList.length > 0
+    ? badgeList
+    : (profile?.badges || []).map((badge) => ({
+        ...badge,
+        is_earned: true,
+        condition_value: 10,
+      }));
+
+  const STAMP_CATEGORY_DESIGN = {
+    宫殿: { emoji: '🏯', color: '#c41e3a' },
+    关隘: { emoji: '🚪', color: '#b8860b' },
+    楼阁: { emoji: '🏛️', color: '#3E6B89' },
+    佛塔: { emoji: '🗼', color: '#8b4513' },
+    寺庙: { emoji: '⛩️', color: '#8a2418' },
+    石窟: { emoji: '🗿', color: '#6b5b4a' },
+    军事工程: { emoji: '🧱', color: '#4a3728' },
+    坛庙: { emoji: '🛕', color: '#b8860b' },
+    民居: { emoji: '🏠', color: '#8B5E3C' },
+  };
+  const getStampDesign = (item) =>
+    STAMP_CATEGORY_DESIGN[item?.category] || { emoji: '📍', color: '#8A7A68' };
+
+  useEffect(() => {
+    if (!achievements?.stamps) return;
+    try {
+      const previous = Number(localStorage.getItem('ac4_stamps_total') || 0);
+      if (previous && previous !== achievements.stamps.total) {
+        setStampTotalNotice(achievements.stamps.total);
+      }
+      localStorage.setItem('ac4_stamps_total', String(achievements.stamps.total));
+    } catch { /* 忽略存储异常 */ }
+  }, [achievements?.stamps?.total]);
 
   if (loading) {
     return (
@@ -165,7 +312,9 @@ function ProfilePage() {
           <div className="profile-stat-card-label">珍宝收藏</div>
         </div>
         <div className="profile-stat-card">
-          <div className="profile-stat-card-value">{profile?.badges?.length || 0}</div>
+          <div className="profile-stat-card-value">
+            {displayBadges.filter((badge) => badge.is_earned).length || profile?.badges?.length || 0}
+          </div>
           <div className="profile-stat-card-label">获得徽章</div>
         </div>
         <div className="profile-stat-card">
@@ -173,6 +322,146 @@ function ProfilePage() {
           <div className="profile-stat-card-label">探索进度</div>
         </div>
       </div>
+
+      {classroomReadOnly && (
+        <div className="profile-pref-row" role="status">
+          <div className="profile-pref-copy">
+            <strong>课堂视图</strong>
+            <span>课堂视图不支持修改设置</span>
+          </div>
+        </div>
+      )}
+
+      {prefError && (
+        <div className="profile-pref-row" role="alert" style={{ color: '#8A2418' }}>
+          <div className="profile-pref-copy">
+            <strong>{prefError}</strong>
+          </div>
+        </div>
+      )}
+
+      <div className="profile-pref-row">
+        <div className="profile-pref-copy">
+          <strong>课堂模式</strong>
+          <span>放大字号并隐藏推荐、分享与社交入口</span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={uiPrefs.classroomMode}
+          className={`profile-pref-toggle${uiPrefs.classroomMode ? ' on' : ''}`}
+          onClick={() => changePref({ classroomMode: !uiPrefs.classroomMode })}
+          disabled={savingPref || classroomReadOnly}
+        >
+          {uiPrefs.classroomMode ? '已开启' : '已关闭'}
+        </button>
+      </div>
+
+      <div className="profile-pref-row">
+        <div className="profile-pref-copy">
+          <strong>课堂字号</strong>
+          <span>标准 / 大 / 特大，仅课堂模式生效</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {[
+            { value: 'standard', label: '标准' },
+            { value: 'large', label: '大' },
+            { value: 'xlarge', label: '特大' },
+          ].map((item) => (
+            <button
+              key={item.value}
+              type="button"
+              className={`profile-pref-toggle${uiPrefs.classroomFontScale === item.value ? ' on' : ''}`}
+              aria-pressed={uiPrefs.classroomFontScale === item.value}
+              onClick={() => changePref({ classroomFontScale: item.value })}
+              disabled={savingPref || classroomReadOnly}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="profile-pref-row">
+        <div className="profile-pref-copy">
+          <strong>未成年人模式</strong>
+          <span>开启后隐藏精确名次，并自动退出公开榜</span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={uiPrefs.minorMode === 'minor'}
+          className={`profile-pref-toggle${uiPrefs.minorMode === 'minor' ? ' on' : ''}`}
+          onClick={() => changePref({ minorMode: uiPrefs.minorMode === 'minor' ? 'unset' : 'minor' })}
+          disabled={savingPref || classroomReadOnly}
+        >
+          {uiPrefs.minorMode === 'minor' ? '已开启' : '已关闭'}
+        </button>
+      </div>
+
+      <div className="profile-pref-row">
+        <div className="profile-pref-copy">
+          <strong>退出公开榜</strong>
+          <span>不展示精确名次，仍可继续答题</span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={uiPrefs.leaderboardOptOut}
+          className={`profile-pref-toggle${uiPrefs.leaderboardOptOut ? ' on' : ''}`}
+          onClick={() => changePref({ leaderboardOptOut: !uiPrefs.leaderboardOptOut })}
+          disabled={savingPref || classroomReadOnly}
+        >
+          {uiPrefs.leaderboardOptOut ? '已退出' : '参与中'}
+        </button>
+      </div>
+
+      <div className="profile-pref-row">
+        <div className="profile-pref-copy">
+          <strong>个性化推荐</strong>
+          <span>关闭后首页使用通用热门推荐</span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={personalizationEnabled}
+          className={`profile-pref-toggle${personalizationEnabled ? ' on' : ''}`}
+          onClick={togglePersonalization}
+          disabled={savingPref}
+        >
+          {personalizationEnabled ? '已开启' : '已关闭'}
+        </button>
+      </div>
+
+      <div className="profile-pref-row">
+        <div className="profile-pref-copy">
+          <strong>允许匿名统计</strong>
+          <span>仅采集匿名事件，不记录账号、IP 或搜索原文</span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={analyticsEnabled}
+          className={`profile-pref-toggle${analyticsEnabled ? ' on' : ''}`}
+          onClick={toggleAnalytics}
+          disabled={savingAnalytics}
+        >
+          {analyticsEnabled ? '已开启' : '已关闭'}
+        </button>
+      </div>
+
+      {nextTargets.length > 0 && (
+        <div className="profile-next-targets">
+          <span className="profile-next-label">下一步</span>
+          {nextTargets.map((target) => (
+            <span className="profile-next-target" key={target.id}>
+              <i className={`fas ${target.icon || 'fa-award'}`} />
+              {target.name}
+              <em>{target.progress.current}/{target.progress.target}</em>
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Tab 导航 */}
       <div className="profile-tabs">
@@ -201,6 +490,12 @@ function ProfilePage() {
           <i className="fas fa-trophy" /> 成就徽章
         </button>
         <button
+          className={`profile-tab ${activeTab === 'learning' ? 'active' : ''}`}
+          onClick={() => setActiveTab('learning')}
+        >
+          <i className="fas fa-lightbulb" /> 学习记录
+        </button>
+        <button
           className={`profile-tab ${activeTab === 'quiz' ? 'active' : ''}`}
           onClick={() => setActiveTab('quiz')}
         >
@@ -219,34 +514,53 @@ function ProfilePage() {
         {/* ===== 虚拟集章 ===== */}
         {activeTab === 'stamps' && (
           <div className="stamps-tab">
+            {stampTotalNotice && (
+              <div className="stamps-total-notice">
+                集章总数已更新为 {stampTotalNotice}，已获得的章保留
+              </div>
+            )}
+
             <div className="stamps-progress-bar">
               <div className="stamps-progress-fill" style={{ width: `${stampProgress}%` }} />
             </div>
             <p className="stamps-progress-text">
               已收集 {stampsEarned}/{stampsTotal} 枚印章 ({stampProgress}%)
             </p>
-            <div className="stamps-grid">
-              {Object.entries(STAMP_DESIGNS).map(([id, design]) => {
-                const earned = visitedPalaceIds.has(id);
-                return (
-                  <div
-                    key={id}
-                    className={`stamp-card ${earned ? 'earned' : 'locked'}`}
-                    title={earned ? design.name : '尚未造访'}
-                  >
-                    <div className="stamp-card-seal" style={{ borderColor: design.color }}>
-                      <div className={`stamp-card-emoji ${earned ? '' : 'grayscale'}`}>
-                        {earned ? design.emoji : '❓'}
+
+            {stampsTotal === 0 ? (
+              <div className="profile-empty">
+                <i className="fas fa-stamp" />
+                <p>暂无集章，去展厅盖章</p>
+              </div>
+            ) : (
+              <div className="stamps-grid">
+                {stampItems.map((item) => {
+                  const earned = !!item.earned_at;
+                  const design = getStampDesign(item);
+                  return (
+                    <div
+                      key={item.palace_id}
+                      className={`stamp-card ${earned ? 'earned' : 'locked'}`}
+                      title={earned ? item.name : '尚未造访'}
+                    >
+                      <div className="stamp-card-seal" style={{ borderColor: design.color }}>
+                        <div className={`stamp-card-emoji ${earned ? '' : 'grayscale'}`}>
+                          {earned ? design.emoji : '❓'}
+                        </div>
+                        {earned && <div className="stamp-card-ribbon">御览</div>}
                       </div>
-                      {earned && <div className="stamp-card-ribbon">御览</div>}
+                      <div className="stamp-card-name">
+                        {item.chinese_seal_text || item.name}
+                      </div>
+                      <div className="stamp-card-sub">
+                        {earned ? (item.category || '已集章') : '???'}
+                      </div>
+                      {earned && <div className="stamp-card-check">✓</div>}
                     </div>
-                    <div className="stamp-card-name">{design.name}</div>
-                    <div className="stamp-card-sub">{earned ? design.sub : '???'}</div>
-                    {earned && <div className="stamp-card-check">✓</div>}
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
@@ -257,7 +571,7 @@ function ProfilePage() {
               <div className="profile-empty">
                 <i className="fas fa-scroll" />
                 <p>暂无游览记录</p>
-                <span>去首页探索故宫建筑，足迹将自动记录于此</span>
+                <span>去首页探索古建筑，足迹将自动记录于此</span>
               </div>
             ) : (
               <div className="history-list">
@@ -285,23 +599,89 @@ function ProfilePage() {
         {/* ===== 珍宝阁（收藏） ===== */}
         {activeTab === 'collections' && (
           <div className="collections-tab">
-            {collections.length === 0 ? (
+            <div className="collection-filter-tabs">
+              {COLLECTION_FILTERS.map((filter) => (
+                <button
+                  key={filter}
+                  type="button"
+                  className={`collection-filter${collectionFilter === filter ? ' active' : ''}`}
+                  onClick={() => setCollectionFilter(filter)}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+
+            {filteredCollections.length === 0 ? (
               <div className="profile-empty">
                 <i className="fas fa-bookmark" />
-                <p>暂无收藏</p>
+                <p>{collections.length === 0 ? '还没有收藏，去展厅看看' : `「${collectionFilter}」下暂无收藏`}</p>
                 <span>浏览建筑时点击收藏按钮，建造你的私人珍宝阁</span>
               </div>
             ) : (
               <div className="collections-grid">
-                {collections.map((item, i) => (
+                {filteredCollections.map((item, i) => (
                   <div key={item.id || i} className="collection-card">
+                    {item.poster_path ? (
+                      <img
+                        className="collection-card-poster"
+                        src={`/images/${item.poster_path}`}
+                        alt={item.palace_name}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="collection-card-poster collection-card-poster--placeholder">
+                        <i className="fas fa-landmark" />
+                      </div>
+                    )}
+
                     <div className="collection-card-header">
-                      <i className="fas fa-landmark" />
-                      <span>{item.category || '默认'}</span>
+                      <i className="fas fa-bookmark" />
+                      <span>{item.collection_category || '默认'}</span>
                     </div>
                     <div className="collection-card-name">{item.palace_name}</div>
                     <div className="collection-card-meta">{item.dynasty}</div>
-                    {item.note && <p className="collection-card-note">{item.note}</p>}
+
+                    {editingCollection === item.palace_id ? (
+                      <div className="collection-note-editor">
+                        <textarea
+                          className="collection-note"
+                          value={noteDraft}
+                          maxLength={500}
+                          onChange={(event) => setNoteDraft(event.target.value)}
+                          placeholder="写下令你印象最深的一处细节…"
+                        />
+                        <div className="collection-note-count">{noteDraft.length}/500</div>
+                        <div className="collection-note-editor-actions">
+                          <button type="button" onClick={cancelEditNote}>取消</button>
+                          <button
+                            type="button"
+                            onClick={() => saveNote(item.palace_id)}
+                            disabled={noteSaving}
+                          >
+                            {noteSaving ? '保存中…' : '保存'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => saveNote(item.palace_id, '')}
+                            disabled={noteSaving}
+                          >
+                            清空
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {item.note && <p className="collection-card-note">{item.note}</p>}
+                        <button
+                          type="button"
+                          className="collection-card-edit"
+                          onClick={() => startEditNote(item)}
+                        >
+                          <i className="fas fa-pen" /> {item.note ? '编辑笔记' : '写笔记'}
+                        </button>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
@@ -312,22 +692,60 @@ function ProfilePage() {
         {/* ===== 成就徽章 ===== */}
         {activeTab === 'badges' && (
           <div className="badges-tab">
-            {(!profile?.badges || profile.badges.length === 0) ? (
+            {displayBadges.length === 0 ? (
               <div className="profile-empty">
                 <i className="fas fa-trophy" />
                 <p>暂无徽章</p>
-                <span>持续探索故宫，解锁更多成就</span>
+                <span>持续探索古建，解锁更多成就</span>
               </div>
             ) : (
               <div className="badges-grid">
-                {profile.badges.map((badge, i) => (
+                {displayBadges.map((badge, i) => (
                   <AchievementBadge
                     key={badge.id || i}
-                    badge={{ ...badge, is_earned: true, condition_value: 10 }}
+                    badge={badge}
                     size="medium"
-                    showProgress={false}
+                    showProgress
                   />
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ===== 学习记录 ===== */}
+        {activeTab === 'learning' && (
+          <div className="learning-tab">
+            {learning.length === 0 ? (
+              <div className="profile-empty">
+                <i className="fas fa-lightbulb" />
+                <p>暂无学习记录</p>
+                <span>在 3D 展厅点击热点并标记已读</span>
+              </div>
+            ) : (
+              <div className="learning-list">
+                {learning.map((item, index) => {
+                  const label =
+                    getHotspots(item.palace_id).find(
+                      (hotspot) => hotspot.id === item.hotspot_id
+                    )?.label || item.hotspot_id;
+                  return (
+                    <div
+                      className="learning-item"
+                      key={`${item.palace_id}-${item.hotspot_id}-${index}`}
+                    >
+                      <div className="learning-item-main">
+                        <strong>{label}</strong>
+                        <span>{item.palace_name}</span>
+                      </div>
+                      <em>
+                        {item.read_at
+                          ? new Date(item.read_at).toLocaleDateString('zh-CN')
+                          : ''}
+                      </em>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

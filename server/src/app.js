@@ -2,14 +2,27 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const palaceRoutes = require('./routes/palaces');
+const timelineRoutes = require('./routes/timeline');
 const authRoutes = require('./routes/auth');
+const achievementRoutes = require('./routes/achievements');
 const encyclopediaRoutes = require('./routes/encyclopedia');
 const quizRoutes = require('./routes/quiz');
 const signinRoutes = require('./routes/signin');
 const skinRoutes = require('./routes/skins');
+const shareRoutes = require('./routes/share');
+const sharePageRoutes = require('./routes/sharePage');
+const assetsRoutes = require('./routes/assets');
+const searchRoutes = require('./routes/search');
+const taxonomyRoutes = require('./routes/taxonomy');
+const routeRoutes = require('./routes/routes');
+const recommendRoutes = require('./routes/recommend');
+const contentRoutes = require('./routes/content');
+const hotspotRoutes = require('./routes/hotspots');
+const metricsRoutes = require('./routes/metrics');
+const seoRoutes = require('./routes/seo');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+
 
 // 中间件
 app.use(cors());
@@ -27,21 +40,52 @@ app.use(express.static(clientDist));
 
 // API 路由
 app.use('/api/palaces', palaceRoutes);
+app.use('/api/timeline', timelineRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/achievements', achievementRoutes);
 app.use('/api/encyclopedia', encyclopediaRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/signin', signinRoutes);
 app.use('/api/skins', skinRoutes);
+app.use('/api/share', shareRoutes);
+app.use('/api/assets', assetsRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/taxonomy', taxonomyRoutes);
+app.use('/api/routes', routeRoutes);
+app.use('/api/recommend', recommendRoutes);
+app.use('/api/content', contentRoutes);
+app.use('/api/hotspots', hotspotRoutes);
+app.use('/api/metrics', metricsRoutes);
 
 // 健康检查
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// 启动服务器
-app.listen(PORT, () => {
-  console.log(`故宫可视化后端服务已启动: http://localhost:${PORT}`);
-  console.log(`API 文档: http://localhost:${PORT}/api/palaces`);
+// SEO 路由 — 必须早于 SPA fallback
+app.use(seoRoutes);
+
+// 分享卡片页 — 置于静态与 API 之后、SPA fallback 之前
+app.use('/share', sharePageRoutes);
+
+// SPA fallback：公开深链刷新不 404
+app.get('*', (req, res, next) => {
+  if (
+    req.path.startsWith('/api') ||
+    req.path.startsWith('/share') ||
+    req.path === '/robots.txt' ||
+    req.path.startsWith('/sitemap')
+  ) {
+    return next();
+  }
+
+  if (['/search', '/profile', '/curator'].includes(req.path)) {
+    res.set('X-Robots-Tag', 'noindex, follow');
+  }
+
+  res.sendFile(path.join(clientDist, 'index.html'), (err) => {
+    if (err) next();
+  });
 });
 
 module.exports = app;

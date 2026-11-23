@@ -1,7 +1,9 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { trackPageView, installAnalyticsFlush } from './lib/analytics';
+import { AppProviders } from './context/AppProviders';
 import LoginPage from './components/LoginPage';
-import LoadingScreen from './components/LoadingScreen';
+import OverviewPage from './pages/OverviewPage';
 import HomePage from './pages/HomePage';
 import MapPage from './pages/MapPage';
 import TimelinePage from './pages/TimelinePage';
@@ -10,115 +12,150 @@ import ProfilePage from './pages/ProfilePage';
 import ExhibitionPage from './pages/ExhibitionPage';
 import EighteenDouPage from './pages/EighteenDouPage';
 import QuizPage from './pages/QuizPage';
-import QuizModal from './components/QuizModal';
+import CuratorPage from './pages/CuratorPage';
+import SearchPage from './pages/SearchPage';
+import RoutePage from './pages/RoutePage';
+import RouteGuard from './components/guards/RouteGuard';
+import GlobalSearchDialog from './components/GlobalSearchDialog';
+import SkipLink from './components/SkipLink';
+import AchievementToast from './components/AchievementToast';
 import './styles/global.css';
 
 /**
- * 受保护路由包装器
+ * 路由表 — 表驱动守卫
+ * guard: 'public' 公开可读 / 'auth' 需登录 / 'admin' 需管理员
+ *
+ * 公开读页面不拆数据边界：页面可进入，写操作仍由各页面能力级引导。
  */
-function ProtectedRoute({ children }) {
-  const { isLoggedIn } = useAuth();
-  if (!isLoggedIn) return <Navigate to="/login" replace />;
-  return children;
+const ROUTES = [
+  {
+    path: '/login',
+    element: <LoginPage />,
+    guard: 'public',
+    meta: { loginPage: true, publicReadonly: true },
+  },
+  {
+    path: '/',
+    element: <OverviewPage />,
+    guard: 'public',
+    meta: { publicReadonly: true },
+  },
+  {
+    path: '/gallery',
+    element: <HomePage />,
+    guard: 'public',
+    meta: { publicReadonly: true },
+  },
+  {
+    path: '/map',
+    element: <MapPage />,
+    guard: 'public',
+    meta: { publicReadonly: true },
+  },
+  {
+    path: '/timeline',
+    element: <TimelinePage />,
+    guard: 'public',
+    meta: { publicReadonly: true },
+  },
+  {
+    path: '/encyclopedia',
+    element: <EncyclopediaPage />,
+    guard: 'public',
+    meta: { publicReadonly: true },
+  },
+  {
+    path: '/quiz',
+    element: <QuizPage />,
+    guard: 'public',
+    meta: { publicReadonly: true },
+  },
+  {
+    path: '/search',
+    element: <SearchPage />,
+    guard: 'public',
+    meta: { publicReadonly: true },
+  },
+  {
+    path: '/routes',
+    element: <RoutePage />,
+    guard: 'public',
+    meta: { publicReadonly: true },
+  },
+  {
+    path: '/routes/:id',
+    element: <RoutePage />,
+    guard: 'public',
+    meta: { publicReadonly: true },
+  },
+  {
+    path: '/exhibition/:id',
+    element: <ExhibitionPage />,
+    guard: 'public',
+    meta: { publicReadonly: true },
+  },
+  {
+    path: '/douba-eighteen',
+    element: <EighteenDouPage />,
+    guard: 'public',
+    meta: { publicReadonly: true },
+  },
+  {
+    path: '/profile',
+    element: <ProfilePage />,
+    guard: 'auth',
+  },
+  {
+    path: '/curator',
+    element: <CuratorPage />,
+    guard: 'admin',
+  },
+  ];
+
+
+function AnalyticsTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    installAnalyticsFlush();
+  }, []);
+
+  return null;
 }
 
 function App() {
-  const { isLoggedIn } = useAuth();
-
   return (
-    <BrowserRouter>
+    <AppProviders>
+      <BrowserRouter>
+      <AnalyticsTracker />
+      <SkipLink />
+      <AchievementToast />
+      <GlobalSearchDialog />
       <Routes>
-        {/* 登录页（已登录跳转到首页） */}
-        <Route
-          path="/login"
-          element={isLoggedIn ? <Navigate to="/" replace /> : <LoginPage />}
-        />
-
-        {/* 首页 — 三栏博物馆布局 */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 时空地图 */}
-        <Route
-          path="/map"
-          element={
-            <ProtectedRoute>
-              <MapPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 历史沿革时间轴 */}
-        <Route
-          path="/timeline"
-          element={
-            <ProtectedRoute>
-              <TimelinePage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 营造法式百科 */}
-        <Route
-          path="/encyclopedia"
-          element={
-            <ProtectedRoute>
-              <EncyclopediaPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 翰林院答题 */}
-        <Route
-          path="/quiz"
-          element={
-            <ProtectedRoute>
-              <QuizPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 沉浸式3D展览页 */}
-        <Route
-          path="/exhibition/:id"
-          element={
-            <ProtectedRoute>
-              <ExhibitionPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 清式十八斗独立单体展示 */}
-        <Route
-          path="/douba-eighteen"
-          element={
-            <ProtectedRoute>
-              <EighteenDouPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 个人中心 */}
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
+        {ROUTES.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <RouteGuard guard={route.guard} meta={route.meta}>
+                {route.element}
+              </RouteGuard>
+            }
+          />
+        ))}
 
         {/* 404 回首页 */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    </AppProviders>
   );
 }
 
+export { ROUTES };
+export { AppProviders };
 export default App;

@@ -1,0 +1,732 @@
+/* ============================================================
+   3D 展厅 · 三层架构
+   极简顶栏 / 可折叠档案栏 / 大画幅舞台 / 半透明工具栏 / 建筑轴
+   色系: 故宫红 + 宣纸米
+   ============================================================ */
+
+.hall-app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--paper-white);
+  color: var(--ink);
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+/* ============ 极简顶栏 ============ */
+.hall-topbar {
+  flex-shrink: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 56px;
+  padding: 0 20px;
+  background: rgba(250, 246, 238, 0.9);
+  border-bottom: 1px solid var(--border-warm);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.hall-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.hall-seal {
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  background: var(--vermillion);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.hall-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.hall-brand-text strong {
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
+.hall-brand-text span {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--ink-muted);
+}
+
+.hall-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 10px;
+}
+
+.hall-nav-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 13px;
+  color: var(--ink-light);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.18s ease, background 0.18s ease;
+}
+
+.hall-nav-btn:hover {
+  color: var(--vermillion);
+  background: rgba(178, 58, 44, 0.06);
+}
+
+.hall-nav-btn.active {
+  color: var(--vermillion);
+  font-weight: 600;
+  background: rgba(178, 58, 44, 0.07);
+}
+
+.hall-topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* 顶栏内的搜索框收紧 */
+.hall-search {
+  width: 250px;
+}
+
+.hall-search .search-container {
+  width: 100%;
+  margin: 0;
+}
+
+.hall-search .search-input-wrap {
+  height: 34px;
+}
+
+.hall-search .search-input {
+  font-size: 12.5px;
+}
+
+.hall-user {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border-warm);
+  background: var(--stone-blue);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.hall-user:hover {
+  box-shadow: 0 0 0 3px rgba(178, 58, 44, 0.12);
+}
+
+/* ============ 主区 ============ */
+.hall-main {
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* ---------- 左侧档案 ---------- */
+.hall-archive {
+  position: relative;
+  z-index: 8;
+  width: 340px;
+  flex: 0 0 340px;
+  background: #fbf8f1;
+  border-right: 1px solid var(--border-warm);
+  overflow: hidden;
+  transition: flex-basis 0.34s cubic-bezier(0.33, 0, 0.2, 1), width 0.34s cubic-bezier(0.33, 0, 0.2, 1);
+}
+
+.hall-archive.is-collapsed {
+  width: 0;
+  flex-basis: 0;
+  border-right: none;
+}
+
+.hall-archive-inner {
+  width: 340px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 14px 14px 30px;
+}
+
+.hall-archive-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px 10px;
+}
+
+.hall-archive-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: var(--ink-light);
+}
+
+.hall-archive-label::before {
+  content: '';
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--vermillion);
+}
+
+.hall-archive-close {
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.hall-archive-close:hover {
+  background: rgba(44, 44, 44, 0.06);
+  color: var(--ink);
+}
+
+/* 收起后浮在舞台左上角的档案唤出 */
+.hall-archive-open {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  z-index: 14;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-warm);
+  border-radius: 8px;
+  background: rgba(251, 248, 241, 0.92);
+  color: var(--ink-light);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.hall-archive-open:hover {
+  color: var(--vermillion);
+  border-color: rgba(178, 58, 44, 0.4);
+}
+
+/* 百科「三维联动」定位提示条 */
+.hall-highlight-banner {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 16;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px 8px 14px;
+  border-radius: 10px;
+  background: rgba(43, 28, 16, 0.9);
+  color: #f6efe2;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  box-shadow: 0 12px 26px rgba(30, 18, 8, 0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.hall-highlight-banner i {
+  color: #e8b96a;
+}
+
+.hall-highlight-banner button {
+  padding: 0 2px;
+  border: none;
+  background: transparent;
+  color: rgba(246, 239, 226, 0.55);
+  font-size: 11px;
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+
+.hall-highlight-banner button:hover {
+  color: #fff;
+}
+
+/* ---------- 中央舞台 ---------- */
+.hall-stage {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 78%, #f6ecd9 0%, #efe3cd 42%, #e6d7bd 100%);
+}
+
+/* 顶光 + 底部院落暗角, 让模型有"置于庭院"的体积感 */
+.hall-stage::before,
+.hall-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.hall-stage::before {
+  background: radial-gradient(70% 55% at 50% 12%, rgba(255, 249, 236, 0.55) 0%, rgba(255, 249, 236, 0) 70%);
+}
+
+.hall-stage::after {
+  background:
+    radial-gradient(95% 70% at 50% 88%, rgba(120, 82, 48, 0) 46%, rgba(104, 68, 38, 0.16) 100%),
+    linear-gradient(180deg, rgba(120, 82, 48, 0.05) 0%, rgba(120, 82, 48, 0) 30%);
+}
+
+.hall-stage .viewer-title-overlay {
+  z-index: 12;
+}
+
+/* 档案收起时左上角浮出「建筑档案」按钮, 标题下移避让, 避免被裁切 */
+.hall-stage.has-archive-open .viewer-title-overlay {
+  top: 58px;
+  left: 18px;
+}
+
+.hall-stage canvas {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- 模型加载反馈 ---------- */
+.viewer-model-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  pointer-events: none;
+  color: var(--ink-light);
+  font-size: 12.5px;
+  letter-spacing: 0.14em;
+}
+
+.viewer-model-loading-ring {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid rgba(178, 58, 44, 0.2);
+  border-top-color: var(--vermillion);
+  animation: hall-spin 0.9s linear infinite;
+}
+
+@keyframes hall-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hall-empty {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: var(--ink-muted);
+}
+
+.hall-empty i {
+  font-size: 38px;
+  opacity: 0.4;
+}
+
+.hall-empty p {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.hall-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(250, 246, 238, 0.7);
+  color: var(--ink-light);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  backdrop-filter: blur(2px);
+}
+
+/* ---------- 右侧工具栏 ---------- */
+.hall-toolbar {
+  position: relative;
+  z-index: 10;
+  width: 64px;
+  flex: 0 0 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 0 16px;
+  background: rgba(251, 247, 238, 0.72);
+  border-left: 1px solid var(--border-warm);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+
+.hall-tool {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink-light);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.hall-tool:hover:not(:disabled) {
+  background: rgba(178, 58, 44, 0.08);
+  color: var(--vermillion);
+}
+
+.hall-tool.is-active {
+  background: var(--vermillion);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(178, 58, 44, 0.32);
+}
+
+.hall-tool:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.hall-tool-sep {
+  width: 22px;
+  height: 1px;
+  margin: 5px 0;
+  background: var(--border-warm);
+}
+
+.hall-toolbar-foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---------- 底部建筑轴 ---------- */
+.hall-axis {
+  flex-shrink: 0;
+  z-index: 20;
+  padding: 10px 24px 12px;
+  background: linear-gradient(180deg, #fbf7ee 0%, #f5eddf 100%);
+  border-top: 1px solid var(--border-warm);
+}
+
+.hall-axis-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+.hall-axis-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 12.5px;
+  letter-spacing: 0.18em;
+  color: var(--ink-light);
+}
+
+.hall-axis-count {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.hall-axis-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.hall-chip {
+  padding: 4px 12px;
+  border: 1px solid var(--border-warm);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink-light);
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.hall-chip:hover {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.hall-chip.is-active {
+  border-color: var(--vermillion);
+  background: var(--vermillion);
+  color: #fff;
+}
+
+.hall-axis-track {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0 6px;
+  scrollbar-width: thin;
+}
+
+.hall-axis-track::-webkit-scrollbar {
+  height: 4px;
+}
+
+.hall-axis-track::-webkit-scrollbar-thumb {
+  background: rgba(178, 58, 44, 0.25);
+  border-radius: 2px;
+}
+
+.hall-node {
+  position: relative;
+  flex: 0 0 auto;
+  width: 104px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 0 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+/* 连线 */
+.hall-node::before {
+  content: '';
+  position: absolute;
+  top: 27px;
+  left: calc(50% + 6px);
+  width: calc(100% - 12px);
+  height: 1px;
+  background: var(--border-warm);
+}
+
+.hall-node:last-child::before {
+  display: none;
+}
+
+.hall-node-year {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  line-height: 1.2;
+}
+
+.hall-node-dot {
+  position: relative;
+  z-index: 1;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fdfaf3;
+  border: 1px solid #c9b89c;
+  transition: all 0.2s ease;
+}
+
+.hall-node-name {
+  max-width: 96px;
+  font-size: 12px;
+  color: var(--ink-light);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.18s ease;
+}
+
+.hall-node:hover .hall-node-dot {
+  border-color: var(--vermillion);
+}
+
+.hall-node:hover .hall-node-name {
+  color: var(--vermillion);
+}
+
+.hall-node.is-active .hall-node-dot {
+  background: var(--vermillion);
+  border-color: var(--vermillion);
+  box-shadow: 0 0 0 4px rgba(178, 58, 44, 0.15);
+}
+
+.hall-node.is-active .hall-node-name {
+  color: var(--vermillion);
+  font-weight: 600;
+}
+
+.hall-node.is-active .hall-node-year {
+  color: var(--vermillion);
+}
+
+/* ============ 响应式 ============ */
+@media (max-width: 1100px) {
+  .hall-nav {
+    display: none;
+  }
+
+  .hall-archive {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 320px;
+    flex-basis: 320px;
+    z-index: 22;
+    box-shadow: 18px 0 50px rgba(44, 34, 24, 0.18);
+  }
+
+  .hall-archive.is-collapsed {
+    width: 320px;
+    flex-basis: 320px;
+    transform: translateX(-101%);
+  }
+
+  .hall-archive-inner {
+    width: 320px;
+  }
+
+  .hall-toolbar {
+    width: 54px;
+    flex-basis: 54px;
+  }
+
+  .hall-tool {
+    width: 38px;
+    height: 38px;
+  }
+
+  .hall-node {
+    width: 92px;
+  }
+
+  .hall-search {
+    width: 200px;
+  }
+}
+
+@media (max-width: 720px) {
+  .hall-topbar {
+    gap: 10px;
+    padding: 0 12px;
+  }
+
+  .hall-brand-text span {
+    display: none;
+  }
+
+  .hall-search {
+    width: 150px;
+  }
+
+  .hall-axis {
+    padding: 8px 12px 10px;
+  }
+
+  .hall-axis-title {
+    display: none;
+  }
+
+  .hall-axis-filters {
+    margin-left: 0;
+  }
+
+  .hall-node {
+    width: 84px;
+  }
+
+  .hall-toolbar {
+    width: 48px;
+    flex-basis: 48px;
+    padding: 10px 0;
+    gap: 4px;
+  }
+
+  .hall-tool {
+    width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+
+  .hall-archive-open {
+    left: 12px;
+    top: 12px;
+    padding: 7px 11px;
+  }
+
+  .hall-stage .viewer-title-overlay h2 {
+    font-size: 1.45rem;
+    letter-spacing: 3px;
+  }
+
+  .hall-stage .viewer-title-overlay p {
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+  }
+
+  .hall-stage.has-archive-open .viewer-title-overlay {
+    top: 56px;
+    left: 14px;
+  }
+}

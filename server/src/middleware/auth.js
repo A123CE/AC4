@@ -60,6 +60,43 @@ function optionalAuth(req, res, next) {
 }
 
 /**
+ * 管理员权限中间件 — 需配合 authMiddleware 使用
+ * 仅 role === 'admin' 可访问档案编修接口
+ */
+function requireAdmin(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      error: '请先登录',
+      code: 'NO_TOKEN'
+    });
+  }
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      error: '需要编修权限，请联系管理员开通',
+      code: 'FORBIDDEN'
+    });
+  }
+  next();
+}
+
+/**
+ * 登录校验中间件 — 用于「可选鉴权」之后的写分支
+ * 与 authMiddleware 语义一致，但表达「此处必须登录」的意图
+ */
+function requireLogin(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      error: '请先登录',
+      code: 'NO_TOKEN',
+    });
+  }
+  next();
+}
+
+/**
  * 生成 JWT Token
  */
 function generateToken(user) {
@@ -75,4 +112,12 @@ function generateToken(user) {
   );
 }
 
-module.exports = { authMiddleware, optionalAuth, generateToken, JWT_SECRET, JWT_EXPIRES_IN };
+module.exports = {
+  authMiddleware,
+  optionalAuth,
+  requireLogin,
+  requireAdmin,
+  generateToken,
+  JWT_SECRET,
+  JWT_EXPIRES_IN,
+};

@@ -104,6 +104,19 @@ export function getHotspots(palaceId) {
   return BUILDING_HOTSPOTS[palaceId] || [];
 }
 
+/**
+ * 在指定建筑上查找与百科词条匹配的热点
+ * @param palaceId 建筑ID
+ * @param termIds  候选术语ID（按优先级排列，可传数组或单个字符串）
+ * @returns 命中的热点对象，未命中返回 null
+ */
+export function findHotspotForTerm(palaceId, termIds) {
+  const candidates = (Array.isArray(termIds) ? termIds : [termIds]).filter(Boolean);
+  if (!candidates.length) return null;
+  const list = getHotspots(palaceId);
+  return list.find(h => candidates.includes(h.termId)) || null;
+}
+
 /** 获取热点对应的百科术语信息 */
 export function getHotspotTermInfo(hotspot) {
   if (!hotspot || !hotspot.termId) return null;

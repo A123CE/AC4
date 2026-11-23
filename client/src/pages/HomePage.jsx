@@ -1,19 +1,39 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import PalaceList from '../components/PalaceList';
 import ModelViewer from '../components/ModelViewer';
+import { findHotspotForTerm } from '../data/buildingHotspots';
 import DetailPanel from '../components/DetailPanel';
 import SearchBar from '../components/SearchBar';
 import { useAuth } from '../context/AuthContext';
-import { recordHistory } from '../api';
+import { useSkin } from '../context/SkinContext';
+import { useClassroomView } from '../context/ClassroomViewContext';
+import { recordHistory, getAssetManifest } from '../api';
+import guestSession from '../lib/guestSession';
+import { emitAchievements } from '../lib/achievementBus';
+import { track } from '../lib/analytics';
 import QuizModal from '../components/QuizModal';
+import CollectionButton from '../components/CollectionButton';
+import PosterFallback from '../components/PosterFallback';
+import HotspotInfoCard from '../components/HotspotInfoCard';
+import '../styles/hall.css';
 
 const API_BASE = '/api/palaces';
+
+/* 顶栏导航 — 极简文字导航 */
+const NAV_ITEMS = [
+  { key: '/gallery', label: '3D 展厅' },
+  { key: '/', label: '首页总览' },
+  { key: '/map', label: '时空地图' },
+  { key: '/encyclopedia', label: '营造法式' },
+  { key: '/timeline', label: '历史沿革' },
+  { key: '/quiz', label: '翰林院' },
+];
 
 function HomePage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { hidden } = useClassroomView();
   const [palaces, setPalaces] = useState([]);
   const [selectedPalace, setSelectedPalace] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,30 +44,66 @@ function HomePage() {
   const [filterCategory, setFilterCategory] = useState(null);
   const [filterDynasty, setFilterDynasty] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [quotaBlocked, setQuotaBlocked] = useState(false);
+  const [promptDismissed, setPromptDismissed] = useState(false);
+  const [assetManifest, setAssetManifest] = useState(null);
+  const [activeInfoHotspot, setActiveInfoHotspot] = useState(null);
 
   // 翰林院答题
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizPalaceId, setQuizPalaceId] = useState(null);
 
-  // 背景切换
+  // 舞台状态
   const [bgMode, setBgMode] = useState('warm');
   const [showHud, setShowHud] = useState(false);
+  const [autoRotate, setAutoRotate] = useState(true);
+  const [resetToken, setResetToken] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(
+    () => typeof window === 'undefined' || window.innerWidth > 1100
+  );
+
+  // 百科三维联动带来的构件高亮（术语ID → 当前建筑上的热点）
+  const [highlightTermId, setHighlightTermId] = useState(null);
+
   const idleTimerRef = useRef(null);
+  const stageRef = useRef(null);
+  const axisRef = useRef(null);
 
-  const { user } = useAuth();
+  const { user, isLoggedIn } = useAuth();
+  const { skin } = useSkin();
 
-  // 从其他页面跳转过来时，自动选中指定建筑
+  useEffect(() => {
+    getAssetManifest()
+      .then((res) => {
+        if (res.data?.success) setAssetManifest(res.data.data);
+      })
+      .catch(() => {});
+  }, []);
+
+  // 分类 / 朝代导航：URL 参数驱动筛选
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setFilterCategory(params.get('category') || null);
+    setFilterDynasty(params.get('dynasty') || null);
+  }, [location.search]);
+
+  // 从其他页面跳转过来时，自动选中指定建筑（可附带需要高亮的构件术语）
   useEffect(() => {
     const targetId = location.state?.selectPalaceId;
-    if (targetId && palaces.length > 0) {
-      const target = palaces.find(p => p.id === targetId);
-      if (target) {
-        handleSelectPalace(target);
-        // 清除 state 防止循环
-        navigate('.', { replace: true, state: {} });
-      }
+    const highlight = location.state?.highlightTermId;
+    if (!targetId || palaces.length === 0) return;
+
+    // 百科「三维联动」带来的构件高亮
+    if (highlight) setHighlightTermId(highlight);
+
+    const target = palaces.find((p) => p.id === targetId);
+    if (target) {
+      handleSelectPalace(target);
+      // 清除 state 防止循环
+      navigate('.', { replace: true, state: {} });
     }
-  }, [location.state?.selectPalaceId, palaces]);
+  }, [location.state?.selectPalaceId, location.state?.highlightTermId, palaces]);
 
   // 加载宫殿列表
   useEffect(() => {
@@ -103,6 +159,20 @@ function HomePage() {
     setIsSearching(false);
     setSearchResults([]);
     setSearchQuery('');
+    setActiveInfoHotspot(null);
+
+    // 游客 3D 试看额度：图文详情不受限，仅舞台按额度决定是否渲染模型
+    if (!isLoggedIn) {
+      const gate = guestSession.tryEnter3D(palace.id);
+      track(gate.allowed ? 'guest_3d_enter' : 'guest_quota_blocked', {
+        entity_type: 'palace',
+        entity_id: palace.id,
+      });
+      setQuotaBlocked(!gate.allowed);
+      if (gate.allowed) setPromptDismissed(false);
+    } else {
+      setQuotaBlocked(false);
+    }
 
     try {
       setDetailLoading(true);
@@ -120,16 +190,19 @@ function HomePage() {
     }
   };
 
-  // 切换筛选
+  // 类别筛选循环
+  const CATEGORIES = ['宫殿', '关隘', '楼阁', '佛塔', '寺庙', '石窟', '军事工程', '坛庙', '民居'];
+
   const toggleFilter = (type) => {
     if (type === 'category') {
-      setFilterCategory(prev => {
-        if (prev === null) return '宫殿';
-        if (prev === '宫殿') return '关隘';
-        return null;
+      setFilterCategory((prev) => {
+        if (prev === null) return CATEGORIES[0];
+        const idx = CATEGORIES.indexOf(prev);
+        if (idx === -1 || idx === CATEGORIES.length - 1) return null;
+        return CATEGORIES[idx + 1];
       });
     } else {
-      setFilterDynasty(prev => {
+      setFilterDynasty((prev) => {
         if (prev === null) return '明';
         if (prev === '明') return '清';
         return null;
@@ -149,170 +222,362 @@ function HomePage() {
 
   // 选中宫殿时自动记录游览历史
   useEffect(() => {
-    if (selectedPalace?.id) {
-      recordHistory(selectedPalace.id, 0).catch(() => {});
+    let timer = null;
+
+    if (isLoggedIn && selectedPalace?.id) {
+      const palaceId = selectedPalace.id;
+
+      recordHistory(palaceId, 0, { interacted: true })
+        .then((res) => emitAchievements(res.data?.data?.achievements))
+        .catch(() => {});
+
+      // 停留 10 秒后再次上报，触发兴趣标签加权（个性化推荐）
+      timer = window.setTimeout(() => {
+        recordHistory(palaceId, 10)
+          .then((res) => emitAchievements(res.data?.data?.achievements))
+          .catch(() => {});
+      }, 10000);
     }
+
+    return () => {
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [isLoggedIn, selectedPalace?.id]);
+
+  // 当前索引与前后导航
+  const currentIndex = selectedPalace
+    ? palaces.findIndex((p) => p.id === selectedPalace.id)
+    : -1;
+  const hasPrev = currentIndex > 0;
+  const hasNext = currentIndex >= 0 && currentIndex < palaces.length - 1;
+
+  // 术语ID → 当前建筑上的热点（用于 3D 高亮）
+  const activeHotspot = useMemo(() => {
+    if (!selectedPalace || !highlightTermId) return null;
+    return findHotspotForTerm(selectedPalace.id, [highlightTermId]);
+  }, [selectedPalace?.id, highlightTermId]);
+
+  const goPrev = () => hasPrev && handleSelectPalace(palaces[currentIndex - 1]);
+  const goNext = () => hasNext && handleSelectPalace(palaces[currentIndex + 1]);
+
+  // 建筑轴: 当前节点自动居中
+  useEffect(() => {
+    const el = axisRef.current?.querySelector('.hall-node.is-active');
+    el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   }, [selectedPalace?.id]);
 
+  // 全屏状态同步
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    const el = stageRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    } else {
+      el.requestFullscreen?.();
+    }
+  };
+
   return (
-    <div className="museum-app">
-      {/* 顶部栏 */}
-      <header className="museum-topbar">
-        {/* Logo 品牌区 */}
-        <div className="topbar-brand">
-          <div className="topbar-seal">
-            <span>故<br/>宫</span>
-          </div>
-          <div className="topbar-logo">
-            <h1>故宫可视化</h1>
-            <span className="logo-subtitle">中国古代建筑数字博物馆</span>
+    <div className="hall-app">
+      {/* ===== 极简顶栏 ===== */}
+      <header className="hall-topbar">
+        <div className="hall-brand" onClick={() => navigate('/')}>
+          <div className="hall-seal">华</div>
+          <div className="hall-brand-text">
+            <strong>华夏古建</strong>
+            <span>ANCIENT ARCHITECTURE</span>
           </div>
         </div>
 
-        {/* 页面导航 */}
-        <nav className="topbar-nav">
-          <button className="topbar-nav-btn" onClick={() => navigate('/map')}>
-            <i className="fas fa-map" />
-            <span>时空地图</span>
-          </button>
-          <button className="topbar-nav-btn" onClick={() => navigate('/encyclopedia')}>
-            <i className="fas fa-book" />
-            <span>营造法式</span>
-          </button>
-          <button className="topbar-nav-btn" onClick={() => navigate('/timeline')}>
-            <i className="fas fa-hourglass-half" />
-            <span>历史沿革</span>
-          </button>
-          <button
-            className="topbar-nav-btn quiz-entry"
-            onClick={() => navigate('/quiz')}
-          >
-            <i className="fas fa-graduation-cap" />
-            <span>翰林院</span>
-          </button>
+        <nav className="hall-nav">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.key}
+              className={`hall-nav-btn${location.pathname === item.key ? ' active' : ''}`}
+              onClick={() => navigate(item.key)}
+            >
+              {item.label}
+            </button>
+          ))}
         </nav>
 
-        {/* 搜索区 */}
-        <div className="topbar-search-area">
-          <SearchBar
-            value={searchQuery}
-            onChange={handleSearch}
-            onClear={() => {
-              setSearchQuery('');
-              setIsSearching(false);
-              setSearchResults([]);
-            }}
-            results={isSearching ? searchResults : []}
-            onSelect={handleSelectPalace}
-            palaces={palaces}
-          />
-        </div>
-
-        {/* 右侧功能区 */}
-        <div className="topbar-actions">
-          {/* 胶囊筛选器 */}
-          <div className="filter-capsule-group">
-            <button
-              className={`filter-capsule${filterCategory ? ' active' : ''}`}
-              onClick={() => toggleFilter('category')}
-            >
-              {filterCategory || '全部类别'}
-            </button>
-            <button
-              className={`filter-capsule${filterDynasty ? ' active' : ''}`}
-              onClick={() => toggleFilter('dynasty')}
-            >
-              {filterDynasty || '全部朝代'}
-            </button>
-          </div>
-
-          {/* 背景切换器 */}
-          <div className="bg-switcher" title="切换背景">
-            <div
-              className={`bg-swatch bg-swatch--warm${bgMode === 'warm' ? ' active' : ''}`}
-              onClick={() => setBgMode('warm')}
-            />
-            <div
-              className={`bg-swatch bg-swatch--sky${bgMode === 'sky' ? ' active' : ''}`}
-              onClick={() => setBgMode('sky')}
+        <div className="hall-topbar-right">
+          <div className="hall-search">
+            <SearchBar
+              value={searchQuery}
+              onChange={handleSearch}
+              onClear={() => {
+                setSearchQuery('');
+                setIsSearching(false);
+                setSearchResults([]);
+              }}
+              results={isSearching ? searchResults : []}
+              onSelect={handleSelectPalace}
+              palaces={palaces}
             />
           </div>
-
-          {/* 用户头像 — 已登录状态，跳转到个人中心 */}
           <button
-            className="topbar-auth-btn logged-in"
-            onClick={() => navigate('/profile')}
-            title={`${user?.username || '用户'} · 功德: ${user?.points || 0}`}
+            className="hall-user"
+            onClick={() => navigate(isLoggedIn ? '/profile' : '/login')}
+            title={
+              isLoggedIn
+                ? `${user?.username || '用户'} · 功德: ${user?.points || 0}`
+                : '登录 / 注册'
+            }
           >
-            <span className="topbar-auth-avatar">
-              {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
-            </span>
+            {user?.username ? user.username.charAt(0).toUpperCase() : (isLoggedIn ? 'U' : '登')}
           </button>
         </div>
       </header>
 
-      {/* 主内容区 */}
-      <main className="museum-main">
-        {loading && <div className="loading-overlay">加载中...</div>}
-        {error && (
-          <div className="error-message">
-            <i className="fas fa-exclamation-triangle" style={{ fontSize: '2rem', opacity: 0.5 }}></i>
-            {error}
-          </div>
-        )}
-
-        {!loading && !error && (
-          <>
-            <aside className="sidebar">
-              <PalaceList
+      {/* ===== 主区 ===== */}
+      <main id="main" className="hall-main">
+        {/* 左侧档案 */}
+        <aside className={`hall-archive${archiveOpen ? '' : ' is-collapsed'}`}>
+          <div className="hall-archive-inner">
+            <div className="hall-archive-head">
+              <span className="hall-archive-label">建筑档案</span>
+              <button
+                className="hall-archive-close"
+                onClick={() => setArchiveOpen(false)}
+                title="收起档案"
+              >
+                <i className="fas fa-chevron-left" />
+              </button>
+            </div>
+            {selectedPalace ? (
+              <DetailPanel
+                palace={selectedPalace}
                 palaces={palaces}
-                selectedId={selectedPalace?.id}
-                onSelect={handleSelectPalace}
+                onNavigate={handleSelectPalace}
+                loading={detailLoading}
               />
-            </aside>
+            ) : (
+              <div className="hall-empty">
+                <i className="fas fa-folder-open" />
+                <p>选择一座建筑查看档案</p>
+              </div>
+            )}
+          </div>
+        </aside>
 
-            <section
-              className="viewer-area"
-              onMouseMove={handleViewerMouseMove}
-              onMouseLeave={handleViewerMouseLeave}
+        {/* 中央舞台 */}
+        <section
+          className={`hall-stage${archiveOpen ? '' : ' has-archive-open'}`}
+          ref={stageRef}
+          onMouseMove={handleViewerMouseMove}
+          onMouseLeave={handleViewerMouseLeave}
+        >
+          {!archiveOpen && (
+            <button
+              className="hall-archive-open"
+              onClick={() => setArchiveOpen(true)}
+              title="展开建筑档案"
             >
-              {selectedPalace ? (
-                <ModelViewer
-                  palace={selectedPalace}
-                  bgMode={bgMode}
-                  showHud={showHud}
-                  palaces={palaces}
-                  onNavigate={handleSelectPalace}
-                  onQuizTrigger={() => { setQuizPalaceId(selectedPalace?.id); setShowQuiz(true); }}
-                />
-              ) : (
-                <div className="empty-viewer">
-                  <div className="empty-icon">
-                    <i className="fas fa-landmark"></i>
-                  </div>
-                  <p>请选择一座宫殿开始浏览</p>
-                </div>
-              )}
-              {detailLoading && <div className="loading-overlay">加载详情...</div>}
-            </section>
+              <i className="fas fa-scroll" />
+              建筑档案
+            </button>
+          )}
 
-            <aside className="detail-panel">
-              {selectedPalace ? (
-                <DetailPanel
-                  palace={selectedPalace}
-                  palaces={palaces}
-                  onNavigate={handleSelectPalace}
-                  loading={detailLoading}
-                />
-              ) : (
-                <div className="empty-detail">
-                  <p>选择一座宫殿查看详情</p>
-                </div>
-              )}
-            </aside>
-          </>
-        )}
+          {/* 百科「三维联动」定位提示 */}
+          {activeHotspot && (
+            <div className="hall-highlight-banner">
+              <i className={`fas ${activeHotspot.icon || 'fa-location-crosshairs'}`} />
+              <span>来自营造法式 · 已定位「{activeHotspot.label}」</span>
+              <button title="关闭高亮" onClick={() => setHighlightTermId(null)}>
+                <i className="fas fa-times" />
+              </button>
+            </div>
+          )}
+
+          <HotspotInfoCard
+            hotspot={activeInfoHotspot}
+            palaceId={selectedPalace?.id}
+            onClose={() => setActiveInfoHotspot(null)}
+            onNavigateToTerm={(spot) => {
+              setActiveInfoHotspot(null);
+              if (spot?.termId) {
+                navigate(`/encyclopedia?term=${encodeURIComponent(spot.termId)}`);
+              }
+            }}
+          />
+
+          {selectedPalace ? (
+            quotaBlocked ? (
+              <div className="hall-quota-stage">
+                {promptDismissed || hidden.registerPrompt ? (
+                  <div className="hall-quota-muted">
+                    <i className="fas fa-image" />
+                    <p>今日 3D 试看额度已用完，图文档案仍可浏览</p>
+                  </div>
+                ) : (
+                  <PosterFallback
+                    palace={selectedPalace}
+                    reason="quota"
+                    onDismiss={() => {
+                      setPromptDismissed(true);
+                      guestSession.markDismissed('registerPrompt');
+                    }}
+                    onOpenDetail={() => setArchiveOpen(true)}
+                    onLogin={() =>
+                      navigate('/login', { state: { from: '/gallery' } })
+                    }
+                  />
+                )}
+              </div>
+            ) : (
+              <ModelViewer
+                palace={selectedPalace}
+                bgMode={bgMode}
+                showHud={showHud}
+                palaces={palaces}
+                onNavigate={handleSelectPalace}
+                onQuizTrigger={() => {
+                  if (showQuiz) return;
+                  setQuizPalaceId(selectedPalace?.id);
+                  setShowQuiz(true);
+                }}
+                autoRotate={autoRotate}
+                onAutoRotateChange={setAutoRotate}
+                resetToken={resetToken}
+                activeHotspotId={activeHotspot?.id || null}
+                activeSkin={skin}
+                assetManifest={assetManifest}
+                onOpenDetail={() => setArchiveOpen(true)}
+                onLogin={() => navigate('/login', { state: { from: '/gallery' } })}
+                onHotspotClick={(spot) => setActiveInfoHotspot(spot)}
+                minimal
+              />
+            )
+          ) : (
+            <div className="hall-empty">
+              <i className="fas fa-landmark" />
+              <p>{loading ? '正在载入建筑…' : error || '请选择一座建筑开始浏览'}</p>
+            </div>
+          )}
+
+          {detailLoading && <div className="hall-loading">档案加载中…</div>}
+        </section>
+
+        {/* 右侧竖向工具栏 */}
+        <aside className="hall-toolbar">
+          <button
+            className={`hall-tool${autoRotate ? ' is-active' : ''}`}
+            title={autoRotate ? '暂停自转' : '开启自转'}
+            onClick={() => setAutoRotate((v) => !v)}
+          >
+            <i className={`fas ${autoRotate ? 'fa-pause' : 'fa-rotate'}`} />
+          </button>
+          <button
+            className="hall-tool"
+            title="重置视角"
+            onClick={() => setResetToken((t) => t + 1)}
+          >
+            <i className="fas fa-camera-rotate" />
+          </button>
+
+          <span className="hall-tool-sep" />
+
+          <button
+            className={`hall-tool${bgMode === 'sky' ? ' is-active' : ''}`}
+            title={bgMode === 'warm' ? '切换为天光' : '切换为暖光'}
+            onClick={() => setBgMode((m) => (m === 'warm' ? 'sky' : 'warm'))}
+          >
+            <i className="fas fa-sun" />
+          </button>
+          <button
+            className="hall-tool"
+            title={isFullscreen ? '退出全屏' : '全屏观赏'}
+            onClick={toggleFullscreen}
+          >
+            <i className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand'}`} />
+          </button>
+
+          <span className="hall-tool-sep" />
+
+          <button className="hall-tool" title="上一座建筑" disabled={!hasPrev} onClick={goPrev}>
+            <i className="fas fa-chevron-up" />
+          </button>
+          <button className="hall-tool" title="下一座建筑" disabled={!hasNext} onClick={goNext}>
+            <i className="fas fa-chevron-down" />
+          </button>
+
+          <div className="hall-toolbar-foot">
+            <span className="hall-tool-sep" />
+            <CollectionButton
+              palaceId={selectedPalace?.id}
+              variant="icon"
+              className="hall-tool"
+            />
+            <button
+              className="hall-tool"
+              title="翰林问答"
+              onClick={() => {
+                setQuizPalaceId(selectedPalace?.id);
+                setShowQuiz(true);
+              }}
+            >
+              <i className="fas fa-graduation-cap" />
+            </button>
+            <button
+              className={`hall-tool${archiveOpen ? ' is-active' : ''}`}
+              title={archiveOpen ? '收起档案' : '展开档案'}
+              onClick={() => setArchiveOpen((v) => !v)}
+            >
+              <i className="fas fa-scroll" />
+            </button>
+          </div>
+        </aside>
       </main>
+
+      {/* ===== 底部建筑轴 ===== */}
+      <footer className="hall-axis">
+        <div className="hall-axis-head">
+          <span className="hall-axis-title">建筑轴</span>
+          <div className="hall-axis-filters">
+            <button
+              className={`hall-chip${filterCategory ? ' is-active' : ''}`}
+              onClick={() => toggleFilter('category')}
+              title="按类别筛选"
+            >
+              {filterCategory || '全部类别'}
+            </button>
+            <button
+              className={`hall-chip${filterDynasty ? ' is-active' : ''}`}
+              onClick={() => toggleFilter('dynasty')}
+              title="按朝代筛选"
+            >
+              {filterDynasty ? `${filterDynasty}代` : '全部朝代'}
+            </button>
+          </div>
+          <span className="hall-axis-count">
+            {currentIndex >= 0 ? String(currentIndex + 1).padStart(2, '0') : '--'}
+            {' / '}
+            {String(palaces.length).padStart(2, '0')}
+          </span>
+        </div>
+
+        <div className="hall-axis-track" ref={axisRef}>
+          {palaces.map((p) => (
+            <button
+              key={p.id}
+              className={`hall-node${selectedPalace?.id === p.id ? ' is-active' : ''}`}
+              onClick={() => handleSelectPalace(p)}
+              title={`${p.name} · ${p.dynasty || '—'}${p.built_year ? ` · ${p.built_year}` : ''}`}
+            >
+              <span className="hall-node-year">{p.dynasty || '—'}</span>
+              <span className="hall-node-dot" />
+              <span className="hall-node-name">{p.name}</span>
+            </button>
+          ))}
+        </div>
+      </footer>
 
       {/* 翰林院答题弹窗 */}
       <QuizModal

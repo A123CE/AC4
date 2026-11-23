@@ -13,9 +13,22 @@ USE ac4_db;
 
 -- ==================== 删除旧表（幂等） ====================
 DROP TABLE IF EXISTS user_recommendations;
+DROP TABLE IF EXISTS metrics_events;
+DROP TABLE IF EXISTS audio_guides;
+DROP TABLE IF EXISTS hotspot_reads;
+DROP TABLE IF EXISTS content_translations;
+DROP TABLE IF EXISTS user_route_progress;
+DROP TABLE IF EXISTS route_stops;
+DROP TABLE IF EXISTS curated_routes;
+DROP TABLE IF EXISTS search_hot_terms;
+DROP TABLE IF EXISTS share_visits;
+DROP TABLE IF EXISTS user_stamps;
+DROP TABLE IF EXISTS user_points_log;
 DROP TABLE IF EXISTS user_signins;
 DROP TABLE IF EXISTS user_skins;
 DROP TABLE IF EXISTS user_tags;
+DROP TABLE IF EXISTS quiz_abuse_flags;
+DROP TABLE IF EXISTS quiz_answer_facts;
 DROP TABLE IF EXISTS quiz_records;
 DROP TABLE IF EXISTS quiz_questions;
 DROP TABLE IF EXISTS encyclopedia_terms;
@@ -48,6 +61,16 @@ CREATE TABLE palaces (
   has_video TINYINT(1) DEFAULT 0,
   video_url VARCHAR(255),
   category VARCHAR(20),
+  region VARCHAR(50) COMMENT '所在地区',
+  city VARCHAR(50) COMMENT '所在城市/地点',
+  tagline VARCHAR(200) COMMENT '一句话副标题',
+  quote TEXT COMMENT '经典诗句/文献引用',
+  quote_by VARCHAR(100) COMMENT '诗句出处',
+  tags VARCHAR(255) COMMENT '标签(逗号分隔)',
+  stats VARCHAR(500) COMMENT '关键数据 JSON: [["72 万㎡","占地"],...]',
+  poster_path VARCHAR(255) COMMENT '海报图路径',
+  views_data TEXT COMMENT '四视图 JSON: [{src,zh,en},...]',
+  camera_preset VARCHAR(255) COMMENT '相机预设 JSON: {theta,phi,radius,target}',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_name (name),
@@ -507,6 +530,174 @@ INSERT INTO palaces (id, name, name_en, order_num, axis_position, description, d
  '神武门是故宫的北门,高31.6米,原名玄武门,因避康熙帝名讳改名。清代选秀女时,秀女们从此门进入紫禁城。',
  0, NULL, '关隘');
 
+-- ==================== 11-17. 华夏名筑（全国古建筑扩展） ====================
+-- 与迁移脚本 server/db/migration_national_monuments.sql 保持一致
+INSERT INTO palaces
+  (id, name, name_en, order_num, axis_position, description, dynasty, built_year,
+   height, area, style, significance, model_path, category,
+   region, city, tagline, quote, quote_by, tags, stats, poster_path, views_data, camera_preset)
+VALUES
+  ('changcheng', '长城', 'THE GREAT WALL', 11, 0,
+   '上下两千年, 纵横两万里。城墙随山势起伏, 烽燧关隘相望, 把一个文明的边疆意志砌进群山, 是人类历史上体量最大的军事工程。',
+   '秦—明', '延筑两千余年', '—', '21196 km', '依山就势 · 夯土包砖', '世界遗产, 人类历史上体量最大的军事防御工程',
+   'national/changcheng.glb', '军事工程',
+   '横贯北疆', '北方边境', '横亘万里的大地脊梁',
+   '秦时明月汉时关, 万里长征人未还。', '王昌龄《出塞》',
+   '军事防御,烽燧关隘,依山就势,世界遗产',
+   '[["21196 km","总长"],["2000+ 年","修筑"],["15 省","跨越"]]',
+   'posters/changcheng.webp',
+   '[{"src":"views/changcheng-front.webp","zh":"正面","en":"Front"},{"src":"views/changcheng-back.webp","zh":"背面","en":"Back"},{"src":"views/changcheng-left.webp","zh":"左侧","en":"Left"},{"src":"views/changcheng-right.webp","zh":"右侧","en":"Right"}]',
+   '{"theta":0,"phi":1.12,"radius":3.3,"target":[0,0.15,0]}'),
+  ('gugong', '故宫全景', 'THE FORBIDDEN CITY', 12, 0,
+   '明清两代皇家宫城, 世界现存规模最大、保存最完整的木构古建筑群。殿宇沿子午中轴铺展, 九千余间房屋以黄瓦朱墙, 写就「普天之下」的秩序。',
+   '明清', '1406—1420 年建成', '—', '72 万㎡', '黄瓦朱墙 · 中轴对称', '世界遗产, 世界现存规模最大的木构古建筑群',
+   'national/gugong.glb', '宫殿',
+   '北京', '北京 · 中轴线核心', '七十二万平方米的天下中枢',
+   '匠人营国, 方九里, 旁三门。', '《周礼 · 考工记》',
+   '皇家宫城,中轴对称,黄瓦朱墙,世界遗产',
+   '[["72 万㎡","占地"],["8707 间","殿宇"],["1987 年","世界遗产"]]',
+   'posters/gugong.webp',
+   '[{"src":"views/gugong-front.webp","zh":"正面","en":"Front"},{"src":"views/gugong-back.webp","zh":"背面","en":"Back"},{"src":"views/gugong-left.webp","zh":"左侧","en":"Left"},{"src":"views/gugong-right.webp","zh":"右侧","en":"Right"}]',
+   '{"theta":0,"phi":1.46,"radius":3.9,"target":[0,0.2,0]}'),
+  ('huanghelou', '黄鹤楼', 'YELLOW CRANE TOWER', 13, 0,
+   '始建于三国, 屡毁屡建, 今楼五层飞檐, 如黄鹤振翅欲举。因崔颢一首七律名动天下, 千载文人於此登临送目, 望尽大江东去。',
+   '三国吴', '223 年始建', '51.4 米', '—', '江南名楼 · 五层飞檐', '江南三大名楼之一, 千年诗文名胜',
+   'national/huanghelou.glb', '楼阁',
+   '湖北', '武汉 · 蛇山', '江城之巅的千古名楼',
+   '昔人已乘黄鹤去, 此地空余黄鹤楼。', '崔颢《黄鹤楼》',
+   '江南名楼,飞檐五层,屡毁屡建,诗文名胜',
+   '[["51.4 米","楼高"],["5 层","飞檐"],["1800 年","兴废"]]',
+   'posters/huanghelou.webp',
+   '[{"src":"views/huanghelou-front.webp","zh":"正面","en":"Front"},{"src":"views/huanghelou-back.webp","zh":"背面","en":"Back"}]',
+   '{"theta":0,"phi":1.38,"radius":4.3,"target":[0,0.84,0]}'),
+  ('mogao', '莫高窟', 'MOGAO GROTTOES', 14, 0,
+   '自建元二年第一凿起, 历十朝营造千年。七百余窟凿于鸣沙山崖壁, 四万五千平方米壁画绘尽佛国与人间, 是丝路上最盛大的艺术宝藏。',
+   '前秦', '366 年开凿', '—', '4.5 万㎡ 壁画', '崖壁石窟 · 壁画彩塑', '世界遗产, 丝路上最盛大的艺术宝藏',
+   'national/mogao.glb', '石窟',
+   '甘肃', '敦煌 · 鸣沙山', '大漠深处的千佛画廊',
+   '大漠孤烟直, 长河落日圆。', '王维《使至塞上》',
+   '丝路瑰宝,千佛洞窟,壁画彩塑,世界遗产',
+   '[["735 个","洞窟"],["4.5 万㎡","壁画"],["1650 年","营造"]]',
+   'posters/mogao.webp',
+   '[{"src":"views/mogao-front.webp","zh":"正面","en":"Front"},{"src":"views/mogao-back.webp","zh":"背面","en":"Back"},{"src":"views/mogao-left.webp","zh":"左侧","en":"Left"},{"src":"views/mogao-right.webp","zh":"右侧","en":"Right"}]',
+   '{"theta":0,"phi":1.22,"radius":3.7,"target":[0,0.5,0]}'),
+  ('potala', '布达拉宫', 'POTALA PALACE', 15, 0,
+   '依红山而建, 宫堡相衔十三层, 白宫红宫叠上云端。这是世界上海拔最高的宫殿建筑群, 以土石之身, 在雪域高原立成信仰的形状。',
+   '唐', '631 年始建', '海拔 3700 米', '—', '高原宫堡 · 白宫红宫', '世界遗产, 世界上海拔最高的宫殿建筑群',
+   'national/potala.glb', '宫殿',
+   '西藏', '拉萨 · 红山', '世界屋脊上的天上宫阙',
+   '在那东山顶上, 升起白白的月亮。', '仓央嘉措《情歌》',
+   '高原宫堡,白宫红宫,依山而建,世界遗产',
+   '[["3700 米","海拔"],["13 层","宫宇"],["1300 年","沧桑"]]',
+   'posters/potala.webp',
+   '[{"src":"views/potala-front.webp","zh":"正面","en":"Front"},{"src":"views/potala-back.webp","zh":"背面","en":"Back"},{"src":"views/potala-left.webp","zh":"左侧","en":"Left"},{"src":"views/potala-right.webp","zh":"右侧","en":"Right"}]',
+   '{"theta":0,"phi":1.42,"radius":3.4,"target":[0,0.28,0]}'),
+  ('tiantan', '天坛', 'TEMPLE OF HEAVEN', 16, 0,
+   '明清两代帝王祭天祈谷之所。祈年殿三重攒尖直指苍穹, 二十八根楠木金柱撑起纯木榫卯的穹顶, 不施一钉, 是「与天对话」的建筑绝唱。',
+   '明', '1420 年建成', '38 米', '273 万㎡', '攒尖穹顶 · 榫卯无钉', '世界遗产, 皇家祭天礼制建筑群',
+   'national/tiantan.glb', '坛庙',
+   '北京', '北京 · 南城', '无梁无钉的祈天穹顶',
+   '以苍璧礼天, 以黄琮礼地。', '《周礼 · 春官》',
+   '祭天礼制,攒尖穹顶,榫卯无钉,世界遗产',
+   '[["38 米","殿高"],["28 根","楠木金柱"],["273 万㎡","坛域"]]',
+   'posters/tiantan.webp',
+   '[{"src":"views/tiantan-front.webp","zh":"正面","en":"Front"},{"src":"views/tiantan-back.webp","zh":"背面","en":"Back"}]',
+   '{"theta":0,"phi":1.44,"radius":5.4,"target":[0,0.58,0]}'),
+  ('tulou', '福建土楼', 'FUJIAN TULOU', 17, 0,
+   '客家人以生土夯筑的巨型民居, 环形围合, 一楼即一村。厚墙御外而中庭向天, 把宗族的秩序与烟火的温情, 浇筑成大地上的圆。',
+   '宋元以降', '跨越八百年', '—', '—', '生土夯筑 · 环形围合', '世界遗产, 客家聚族而居的圆形堡垒',
+   'national/tulou.glb', '民居',
+   '福建', '闽西南', '聚族而居的圆形堡垒',
+   '一本所生, 共楼居住, 出入相见。', '永定承启楼楹联 · 节录',
+   '生土夯筑,环形围合,聚族而居,世界遗产',
+   '[["46 处","世界遗产"],["3000 余座","现存"],["800 年","传承"]]',
+   'posters/tulou.webp',
+   '[{"src":"views/tulou-front.webp","zh":"正面","en":"Front"},{"src":"views/tulou-back.webp","zh":"背面","en":"Back"}]',
+   '{"theta":0,"phi":1.40,"radius":3.6,"target":[0,0.15,0]}');
+
+-- ==================== 18-20. 程序化复原建筑（无 GLB, 前端实时生成） ====================
+-- 与迁移脚本 server/db/migration_procedural_buildings.sql 保持一致
+INSERT INTO palaces
+  (id, name, name_en, order_num, axis_position, description, dynasty, built_year,
+   height, area, style, significance, model_path, category,
+   region, city, tagline, quote, quote_by, tags, stats)
+VALUES
+  ('yingxian_muta', '应县木塔', 'YINGXIAN WOODEN PAGODA', 18, 0,
+   '辽清宁二年建成, 八角五层六檐, 通高 67.31 米。全塔以榫卯咬合, 不用一钉一铁, 历经近千年风雨与数次地震仍巍然矗立, 是世界现存最高、最古老的纯木构楼阁式塔。',
+   '辽', '1056 年建成', '67.31 米', '—', '八角五层 · 楼阁式木塔', '世界现存最高最古老的纯木构楼阁式塔',
+   'procedural:yingxian_muta', '佛塔',
+   '山西', '朔州 · 应县', '千年木塔, 无一钉一铁',
+   '如鸟斯革, 如翚斯飞。', '《诗经 · 小雅 · 斯干》',
+   '纯木榫卯,明五暗四,楼阁式塔,世界遗产预备',
+   '[["67.31 米","塔高"],["5 层","明层"],["1056 年","建成"]]'),
+  ('foguangsi', '佛光寺东大殿', 'EAST HALL OF FOGUANG TEMPLE', 19, 0,
+   '唐大中十一年重建, 面阔七间、进深四间, 单檐庑殿顶。斗拱雄大、出檐深远, 殿内唐代彩塑、壁画与题记并存, 被梁思成誉为「中国第一国宝」, 是中国现存最早的唐代木构殿堂之一。',
+   '唐', '857 年重建', '—', '七间四进', '单檐庑殿顶 · 七铺作斗拱', '中国现存最早的唐代木构殿堂之一',
+   'procedural:foguangsi', '寺庙',
+   '山西', '忻州 · 五台山', '斗拱雄大, 出檐深远的唐代殿堂',
+   '斗拱雄大, 出檐深远。', '梁思成《中国建筑史》',
+   '唐代木构,庑殿顶,七铺作斗拱,梁思成发现',
+   '[["857 年","重建"],["7 间","面阔"],["4 间","进深"]]'),
+  ('yueyanglou', '岳阳楼', 'YUEYANG TOWER', 20, 0,
+   '始建于三国吴黄武二年, 现存楼体为三层三檐四角盔顶。楼临洞庭, 衔远山、吞长江, 范仲淹一篇《岳阳楼记》使其名动千古, 与黄鹤楼、滕王阁并称江南三大名楼。',
+   '三国吴', '223 年始建', '19.42 米', '—', '三层三檐 · 四角盔顶', '江南三大名楼之一, 《岳阳楼记》诞生地',
+   'procedural:yueyanglou', '楼阁',
+   '湖南', '岳阳 · 洞庭湖畔', '洞庭天下水, 岳阳天下楼',
+   '先天下之忧而忧, 后天下之乐而乐。', '范仲淹《岳阳楼记》',
+   '江南名楼,盔顶飞檐,范仲淹,洞庭湖',
+   '[["19.42 米","楼高"],["3 层","三檐"],["223 年","始建"]]');
+
+INSERT INTO palace_timeline (palace_id, year, event) VALUES
+  ('yingxian_muta', '1056', '辽清宁二年建成, 为佛宫寺释迦塔'),
+  ('yingxian_muta', '金明昌六年', '完成塔身全部木构与塑像'),
+  ('yingxian_muta', '1961', '列为第一批全国重点文物保护单位'),
+  ('yingxian_muta', '2016', '被列入中国世界文化遗产预备名单'),
+  ('foguangsi', '857', '唐大中十一年重建东大殿'),
+  ('foguangsi', '1937', '梁思成、林徽因发现并考证东大殿为唐代木构'),
+  ('foguangsi', '1961', '列为第一批全国重点文物保护单位'),
+  ('foguangsi', '2009', '作为五台山组成部分列入世界遗产'),
+  ('yueyanglou', '223', '东吴鲁肃始建阅军楼, 为岳阳楼前身'),
+  ('yueyanglou', '1045', '滕子京重修岳阳楼, 范仲淹作《岳阳楼记》'),
+  ('yueyanglou', '1984', '按清代形制落架大修, 即现存楼体'),
+  ('yueyanglou', '2001', '列为全国重点文物保护单位');
+
+INSERT INTO palace_fun_facts (palace_id, fact) VALUES
+  ('yingxian_muta', '全塔使用斗拱 54 种、数量以万计, 被称为「斗拱博物馆」'),
+  ('yingxian_muta', '塔身外观五层, 内部实有九层, 形成「明五暗四」的结构'),
+  ('yingxian_muta', '近千年间经历数十次地震, 木塔依靠榫卯节点的柔性耗能而屹立不倒'),
+  ('foguangsi', '1937 年梁思成、林徽因依据敦煌壁画线索找到佛光寺, 打破「中国无唐代木构」的论断'),
+  ('foguangsi', '东大殿出檐约 3.96 米, 约为柱高的两倍, 是唐代雄浑风格的代表'),
+  ('foguangsi', '殿内佛坛上保存有唐代彩塑 35 尊, 与建筑同期'),
+  ('yueyanglou', '岳阳楼现存楼体虽为 1984 年重修, 仍严格遵循清代同治年间的形制'),
+  ('yueyanglou', '楼顶为独特的盔顶形制, 曲线流畅, 如古代将军头盔'),
+  ('yueyanglou', '《岳阳楼记》中「先忧后乐」一句, 使岳阳楼成为士大夫精神的象征');
+
+-- 程序化建筑海报与四视图 (截图资源位于 images/posters/ 与 images/views/)
+UPDATE palaces SET
+  poster_path = 'posters/yingxian_muta.png',
+  views_data = '[{"src":"views/yingxian_muta-front.png","zh":"正面","en":"Front"},{"src":"views/yingxian_muta-right.png","zh":"右侧","en":"Right"},{"src":"views/yingxian_muta-back.png","zh":"背面","en":"Back"},{"src":"views/yingxian_muta-left.png","zh":"左侧","en":"Left"}]'
+WHERE id = 'yingxian_muta';
+UPDATE palaces SET
+  poster_path = 'posters/foguangsi.png',
+  views_data = '[{"src":"views/foguangsi-front.png","zh":"正面","en":"Front"},{"src":"views/foguangsi-right.png","zh":"右侧","en":"Right"},{"src":"views/foguangsi-back.png","zh":"背面","en":"Back"},{"src":"views/foguangsi-left.png","zh":"左侧","en":"Left"}]'
+WHERE id = 'foguangsi';
+UPDATE palaces SET
+  poster_path = 'posters/yueyanglou.png',
+  views_data = '[{"src":"views/yueyanglou-front.png","zh":"正面","en":"Front"},{"src":"views/yueyanglou-right.png","zh":"右侧","en":"Right"},{"src":"views/yueyanglou-back.png","zh":"背面","en":"Back"},{"src":"views/yueyanglou-left.png","zh":"左侧","en":"Left"}]'
+WHERE id = 'yueyanglou';
+
+-- 故宫 10 座建筑封面图 (图片位于 images/posters/forbidden-city/ 下, 以 palace id 命名)
+UPDATE palaces SET poster_path = 'posters/forbidden-city/wumen.png' WHERE id = 'wumen';
+UPDATE palaces SET poster_path = 'posters/forbidden-city/taihemen.png' WHERE id = 'taihemen';
+UPDATE palaces SET poster_path = 'posters/forbidden-city/taihedian.png' WHERE id = 'taihedian';
+UPDATE palaces SET poster_path = 'posters/forbidden-city/zhonghedian.png' WHERE id = 'zhonghedian';
+UPDATE palaces SET poster_path = 'posters/forbidden-city/baohedian.png' WHERE id = 'baohedian';
+UPDATE palaces SET poster_path = 'posters/forbidden-city/qianqingmen.png' WHERE id = 'qianqingmen';
+UPDATE palaces SET poster_path = 'posters/forbidden-city/qianqinggong.png' WHERE id = 'qianqinggong';
+UPDATE palaces SET poster_path = 'posters/forbidden-city/jiaotaidian.png' WHERE id = 'jiaotaidian';
+UPDATE palaces SET poster_path = 'posters/forbidden-city/kunninggong.png' WHERE id = 'kunninggong';
+UPDATE palaces SET poster_path = 'posters/forbidden-city/shenwumen.png' WHERE id = 'shenwumen';
+
 INSERT INTO palace_images (palace_id, image_path, sort_order) VALUES
 ('shenwumen', 'images/forbidden-city/general-1.png.jpeg', 1),
 ('shenwumen', 'images/forbidden-city/general-2.png.jpeg', 2),
@@ -750,3 +941,497 @@ INSERT INTO quiz_questions (question, options, correct_answer, explanation, rela
 ('五爪龙纹在明清时期由谁专用？', '["A: 所有官员", "B: 亲王和皇帝", "C: 仅皇帝", "D: 所有皇室成员"]', 'C', '五爪龙纹为皇帝专用，亲王只能使用四爪龙纹（蟒纹）。这是明清时期严格的服飾和装饰等级制度。', 'longwen', NULL, 1, '["纹饰","龙纹","等级"]'),
 ('照壁的风水功能是什么？', '["A: 增强采光", "B: 挡煞聚气", "C: 增加通风", "D: 加固建筑"]', 'B', '照壁在风水学中被称为"隐避"，可以挡住直冲而来的"煞气"，使气流回旋后再进入院内，有"挡煞聚气"的功能。', 'screen-wall', NULL, 2, '["风水","照壁","装饰"]'),
 ('中国古代木结构建筑的核心连接技术是什么？', '["A: 铁钉连接", "B: 榫卯结构", "C: 胶水粘合", "D: 绳索捆绑"]', 'B', '榫卯结构是中国古代木结构建筑的核心连接技术。利用木材本身的弹性变形，将榫头插入卯眼中形成牢固的连接，不用一根钉子。', 'goudang', NULL, 1, '["结构","榫卯","技术"]');
+-- ==================== 公开迁移 03：收藏时间戳与积分流水 ====================
+-- 与 migration_public_03_collections.sql 保持同结构，便于空库一次性初始化
+
+SET @has_updated_at := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE()
+    AND table_name = 'user_collections'
+    AND column_name = 'updated_at'
+);
+SET @sql := IF(
+  @has_updated_at = 0,
+  'ALTER TABLE user_collections ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+UPDATE user_collections SET category = '默认' WHERE category IS NULL OR category = '';
+
+ALTER TABLE user_collections
+  MODIFY COLUMN category VARCHAR(20) NOT NULL DEFAULT '默认';
+
+CREATE TABLE IF NOT EXISTS user_points_log (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  source_type VARCHAR(32) NOT NULL,
+  source_key VARCHAR(64) NOT NULL,
+  points INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_user_source (user_id, source_type, source_key),
+  INDEX idx_user_time (user_id, created_at),
+  CONSTRAINT fk_points_log_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- ==================== 公开迁移 04：集章表与徽章阈值 ====================
+
+CREATE TABLE IF NOT EXISTS user_stamps (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  palace_id VARCHAR(50) NOT NULL,
+  palace_name_snapshot VARCHAR(100),
+  earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_user_palace (user_id, palace_id),
+  INDEX idx_user_time (user_id, earned_at),
+  CONSTRAINT fk_stamps_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+UPDATE badges
+SET condition_value = 20,
+    description = '探访全部建筑'
+WHERE condition_type = 'palaces_viewed';
+
+SET @has_history_idx := (
+  SELECT COUNT(1) FROM information_schema.statistics
+  WHERE table_schema = DATABASE()
+    AND table_name = 'user_history'
+    AND index_name = 'idx_user_palace'
+);
+SET @sql := IF(
+  @has_history_idx = 0,
+  'ALTER TABLE user_history ADD INDEX idx_user_palace (user_id, palace_id)',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+-- ==================== 公开迁移 05：分享回流聚合 ====================
+
+CREATE TABLE IF NOT EXISTS share_visits (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  entity_type VARCHAR(16) NOT NULL,
+  entity_id VARCHAR(64) NOT NULL,
+  channel VARCHAR(16) NOT NULL DEFAULT 'unknown',
+  visit_date DATE NOT NULL,
+  referer_class VARCHAR(32) NULL,
+  count INT NOT NULL DEFAULT 0,
+  UNIQUE KEY uk_entity_channel_date (entity_type, entity_id, channel, visit_date),
+  INDEX idx_date (visit_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- ==================== 公开迁移 06：热门搜索词 ====================
+
+CREATE TABLE IF NOT EXISTS search_hot_terms (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  term VARCHAR(64) NOT NULL,
+  locale VARCHAR(10) NOT NULL DEFAULT 'zh-CN',
+  weight INT DEFAULT 0,
+  is_active TINYINT(1) DEFAULT 1,
+  UNIQUE KEY uk_term_locale (term, locale)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO search_hot_terms (term, locale, weight, is_active) VALUES
+  ('斗拱', 'zh-CN', 100, 1),
+  ('太和殿', 'zh-CN', 90, 1),
+  ('庑殿顶', 'zh-CN', 80, 1),
+  ('彩画', 'zh-CN', 70, 1),
+  ('中轴线', 'zh-CN', 60, 1);
+-- ==================== 公开迁移 07：主题导览路线 ====================
+
+CREATE TABLE IF NOT EXISTS curated_routes (
+  id VARCHAR(50) PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  name_en VARCHAR(100),
+  description TEXT,
+  cover_path VARCHAR(255),
+  duration_minutes INT DEFAULT 60,
+  difficulty VARCHAR(16) DEFAULT 'easy',
+  sort_order INT DEFAULT 0,
+  is_published TINYINT(1) DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS route_stops (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  route_id VARCHAR(50) NOT NULL,
+  palace_id VARCHAR(50) NOT NULL,
+  stop_order INT NOT NULL,
+  highlight VARCHAR(255),
+  stay_minutes INT DEFAULT 10,
+  UNIQUE KEY uk_route_order (route_id, stop_order),
+  UNIQUE KEY uk_route_palace (route_id, palace_id),
+  CONSTRAINT fk_route_stops_route FOREIGN KEY (route_id) REFERENCES curated_routes(id) ON DELETE CASCADE,
+  CONSTRAINT fk_route_stops_palace FOREIGN KEY (palace_id) REFERENCES palaces(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS user_route_progress (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  route_id VARCHAR(50) NOT NULL,
+  stop_order INT NOT NULL DEFAULT 1,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_user_route (user_id, route_id),
+  CONSTRAINT fk_route_progress_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO curated_routes
+  (id, name, name_en, description, cover_path, duration_minutes, difficulty, sort_order, is_published)
+VALUES
+  (
+    'axis-day',
+    '中轴线一日',
+    'One Day on the Central Axis',
+    '沿紫禁城中轴线由南向北，依次走过午门、三大殿与后三宫，用一天读懂皇家建筑的秩序与礼制。',
+    'posters/forbidden-city/wumen.png',
+    240,
+    'easy',
+    1,
+    1
+  );
+
+INSERT IGNORE INTO route_stops
+  (route_id, palace_id, stop_order, highlight, stay_minutes)
+VALUES
+  ('axis-day', 'wumen', 1, '午门五凤楼与雁翅楼', 15),
+  ('axis-day', 'taihemen', 2, '太和门铜狮与金水河', 10),
+  ('axis-day', 'taihedian', 3, '三大殿之首与屋脊兽', 30),
+  ('axis-day', 'zhonghedian', 4, '方形中和大殿', 10),
+  ('axis-day', 'baohedian', 5, '殿试与云龙石雕', 15),
+  ('axis-day', 'qianqingmen', 6, '内廷正门', 10),
+  ('axis-day', 'qianqinggong', 7, '皇帝正寝', 20),
+  ('axis-day', 'kunninggong', 8, '中宫与萨满祭祀', 15);
+-- ==================== 公开迁移 11：个性化推荐 ====================
+
+SET @has_pref := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'users'
+    AND column_name = 'personalization_enabled'
+);
+SET @sql := IF(
+  @has_pref = 0,
+  'ALTER TABLE users ADD COLUMN personalization_enabled TINYINT(1) DEFAULT 1',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+ALTER TABLE user_recommendations MODIFY COLUMN route_id VARCHAR(50) NULL;
+
+SET @has_item_type := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'user_recommendations'
+    AND column_name = 'item_type'
+);
+SET @sql := IF(
+  @has_item_type = 0,
+  "ALTER TABLE user_recommendations ADD COLUMN item_type VARCHAR(16) DEFAULT 'palace'",
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @has_item_id := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'user_recommendations'
+    AND column_name = 'item_id'
+);
+SET @sql := IF(
+  @has_item_id = 0,
+  'ALTER TABLE user_recommendations ADD COLUMN item_id VARCHAR(64) NULL',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @has_reason := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'user_recommendations'
+    AND column_name = 'reason_code'
+);
+SET @sql := IF(
+  @has_reason = 0,
+  'ALTER TABLE user_recommendations ADD COLUMN reason_code VARCHAR(32) NULL',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @has_clicked := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'user_recommendations'
+    AND column_name = 'is_clicked'
+);
+SET @sql := IF(
+  @has_clicked = 0,
+  'ALTER TABLE user_recommendations ADD COLUMN is_clicked TINYINT(1) DEFAULT 0',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @has_clicked_at := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'user_recommendations'
+    AND column_name = 'clicked_at'
+);
+SET @sql := IF(
+  @has_clicked_at = 0,
+  'ALTER TABLE user_recommendations ADD COLUMN clicked_at TIMESTAMP NULL',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+-- ==================== 公开迁移 09：双语内容 ====================
+
+CREATE TABLE IF NOT EXISTS content_translations (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  entity_type VARCHAR(16) NOT NULL,
+  entity_id VARCHAR(64) NOT NULL,
+  field VARCHAR(32) NOT NULL,
+  locale VARCHAR(10) NOT NULL DEFAULT 'en',
+  value TEXT NOT NULL,
+  status VARCHAR(16) NOT NULL DEFAULT 'full',
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_entity_field_locale (entity_type, entity_id, field, locale),
+  INDEX idx_locale (locale)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+SET @has_locale := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'users'
+    AND column_name = 'locale'
+);
+SET @sql := IF(
+  @has_locale = 0,
+  "ALTER TABLE users ADD COLUMN locale VARCHAR(10) DEFAULT 'zh-CN'",
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+INSERT IGNORE INTO content_translations
+  (entity_type, entity_id, field, locale, value, status)
+VALUES
+  ('palace', 'taihedian', 'name', 'en', 'Hall of Supreme Harmony', 'full'),
+  ('palace', 'taihedian', 'description', 'en', 'The principal hall of the Outer Court of the Forbidden City, used for great imperial ceremonies.', 'full'),
+  ('palace', 'tiantan', 'name', 'en', 'Temple of Heaven', 'full'),
+  ('palace', 'tiantan', 'description', 'en', 'The imperial sacrificial complex in Beijing, famous for the Circular Mound Altar and Hall of Prayer for Good Harvests.', 'full'),
+  ('palace', 'wumen', 'name', 'en', 'Meridian Gate', 'full');
+-- ==================== 公开迁移 13：热点已读 ====================
+
+CREATE TABLE IF NOT EXISTS hotspot_reads (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  palace_id VARCHAR(50) NOT NULL,
+  hotspot_id VARCHAR(64) NOT NULL,
+  read_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_user_hotspot (user_id, palace_id, hotspot_id),
+  INDEX idx_user_time (user_id, read_at),
+  CONSTRAINT fk_hotspot_reads_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- ==================== 公开迁移 08：导览音频元数据 ====================
+
+CREATE TABLE IF NOT EXISTS audio_guides (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  entity_type VARCHAR(16) NOT NULL DEFAULT 'palace',
+  entity_id VARCHAR(64) NOT NULL,
+  audio_url VARCHAR(255) NOT NULL,
+  duration_seconds INT DEFAULT NULL,
+  transcript TEXT,
+  transcript_hash CHAR(40) DEFAULT NULL,
+  narrator VARCHAR(64) DEFAULT NULL,
+  locale VARCHAR(10) DEFAULT 'zh-CN',
+  status VARCHAR(16) DEFAULT 'published',
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_entity_locale (entity_type, entity_id, locale)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- ==================== 公开迁移 12：发布状态与草稿隔离 ====================
+
+SET @has_status := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'palaces'
+    AND column_name = 'status'
+);
+SET @sql := IF(
+  @has_status = 0,
+  "ALTER TABLE palaces ADD COLUMN status VARCHAR(16) NOT NULL DEFAULT 'published'",
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+UPDATE palaces SET status = 'published' WHERE status IS NULL OR status = '';
+
+SET @has_status_idx := (
+  SELECT COUNT(1) FROM information_schema.statistics
+  WHERE table_schema = DATABASE() AND table_name = 'palaces'
+    AND index_name = 'idx_palaces_status'
+);
+SET @sql := IF(
+  @has_status_idx = 0,
+  'ALTER TABLE palaces ADD INDEX idx_palaces_status (status)',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+-- ==================== 公开迁移 10：匿名埋点 ====================
+
+CREATE TABLE IF NOT EXISTS metrics_events (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  event_name VARCHAR(32) NOT NULL,
+  entity_type VARCHAR(16) DEFAULT NULL,
+  entity_id VARCHAR(64) DEFAULT NULL,
+  anon_hash CHAR(64) DEFAULT NULL,
+  session_hash CHAR(64) DEFAULT NULL,
+  locale VARCHAR(10) DEFAULT NULL,
+  tier VARCHAR(16) DEFAULT NULL,
+  path VARCHAR(255) DEFAULT NULL,
+  props JSON DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_name_time (event_name, created_at),
+  INDEX idx_date (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+SET @has_analytics := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'users'
+    AND column_name = 'analytics_enabled'
+);
+SET @sql := IF(
+  @has_analytics = 0,
+  'ALTER TABLE users ADD COLUMN analytics_enabled TINYINT(1) DEFAULT 1',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+-- ==================== 公开迁移 14：答题事实与排行 ====================
+
+CREATE TABLE IF NOT EXISTS quiz_answer_facts (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  question_id INT NOT NULL,
+  is_correct TINYINT(1) NOT NULL DEFAULT 0,
+  first_answered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  first_correct_at TIMESTAMP NULL,
+  counted TINYINT(1) NOT NULL DEFAULT 1,
+  last_answered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_user_question (user_id, question_id),
+  INDEX idx_rank (is_correct, counted, user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS quiz_abuse_flags (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  window_start TIMESTAMP NULL,
+  reason VARCHAR(32) NOT NULL,
+  evidence_json JSON DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_user_time (user_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+SET @has_minor := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'users'
+    AND column_name = 'minor_mode'
+);
+SET @sql := IF(
+  @has_minor = 0,
+  "ALTER TABLE users ADD COLUMN minor_mode VARCHAR(8) DEFAULT 'unset'",
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @has_opt_out := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'users'
+    AND column_name = 'leaderboard_opt_out'
+);
+SET @sql := IF(
+  @has_opt_out = 0,
+  'ALTER TABLE users ADD COLUMN leaderboard_opt_out TINYINT(1) DEFAULT 0',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+INSERT IGNORE INTO quiz_answer_facts
+  (user_id, question_id, is_correct, first_answered_at, first_correct_at, counted, last_answered_at)
+SELECT first_row.user_id,
+       first_row.question_id,
+       first_row.is_correct,
+       first_row.answered_at,
+       correct_row.first_correct_at,
+       1,
+       last_row.last_answered_at
+FROM (
+  SELECT qr.user_id, qr.question_id, qr.is_correct, qr.answered_at
+  FROM quiz_records qr
+  JOIN (
+    SELECT user_id, question_id, MIN(id) AS first_id
+    FROM quiz_records
+    GROUP BY user_id, question_id
+  ) first_ids ON first_ids.first_id = qr.id
+) first_row
+LEFT JOIN (
+  SELECT user_id, question_id, MIN(answered_at) AS first_correct_at
+  FROM quiz_records
+  WHERE is_correct = 1
+  GROUP BY user_id, question_id
+) correct_row
+  ON correct_row.user_id = first_row.user_id
+ AND correct_row.question_id = first_row.question_id
+JOIN (
+  SELECT user_id, question_id, MAX(answered_at) AS last_answered_at
+  FROM quiz_records
+  GROUP BY user_id, question_id
+) last_row
+  ON last_row.user_id = first_row.user_id
+ AND last_row.question_id = first_row.question_id;
+
+-- ==================== 迁移 15 等价段：课堂模式偏好 ====================
+SET @has_classroom_mode := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'users'
+    AND column_name = 'classroom_mode'
+);
+SET @sql := IF(
+  @has_classroom_mode = 0,
+  'ALTER TABLE users ADD COLUMN classroom_mode TINYINT(1) NOT NULL DEFAULT 0',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @has_classroom_font_scale := (
+  SELECT COUNT(1) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'users'
+    AND column_name = 'classroom_font_scale'
+);
+SET @sql := IF(
+  @has_classroom_font_scale = 0,
+  "ALTER TABLE users ADD COLUMN classroom_font_scale VARCHAR(8) NOT NULL DEFAULT 'large'",
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+UPDATE users
+SET classroom_font_scale = 'large'
+WHERE classroom_font_scale IS NULL
+   OR classroom_font_scale NOT IN ('standard', 'large', 'xlarge');

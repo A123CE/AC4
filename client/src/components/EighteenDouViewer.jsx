@@ -2,6 +2,8 @@ import { useRef, useState, useEffect, useMemo, useLayoutEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
+import { useTier } from '../context/TierContext';
+import { getCanvasSettings } from '../lib/modelLoader';
 
 /* ============================================
    清式十八斗 · 独立单体3D展示组件（重构版）
@@ -207,6 +209,8 @@ function EighteenDouModel({ explodeProgress = 0 }) {
  * 主查看器组件
  */
 export default function EighteenDouViewer({ autoRotate = true, explodeProgress = 0 }) {
+  const { tier, supports3D } = useTier();
+  const canvasSettings = getCanvasSettings(tier);
   const [noMotion, setNoMotion] = useState(false);
 
   useEffect(() => {
@@ -219,14 +223,27 @@ export default function EighteenDouViewer({ autoRotate = true, explodeProgress =
 
   const doRotate = !noMotion && autoRotate;
 
+  if (!supports3D) {
+    return (
+      <div className="poster-fallback poster-fallback--simple">
+        <div className="poster-fallback-body">
+          <h3>清式十八斗</h3>
+          <p>当前设备不支持 3D 渲染，已切换为图文模式。</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <Canvas
+        shadows={canvasSettings.shadows}
+        dpr={canvasSettings.dpr}
         camera={{ position: [2.5, 2, 2.5], fov: 38 }}
         gl={{
-          antialias: true,
+          antialias: canvasSettings.antialias,
           alpha: false,
-          powerPreference: 'high-performance',
+          powerPreference: canvasSettings.powerPreference,
         }}
         onCreated={({ gl }) => {
           gl.domElement.style.touchAction = 'none';

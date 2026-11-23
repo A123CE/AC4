@@ -1,7 +1,23 @@
 import { useRef, useState, Suspense, useMemo, useEffect, useCallback } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Html } from '@react-three/drei';
+import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
+import { OrbitControls, Html, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
+import {
+  sharedGLTFLoader,
+  normalizeAndGround,
+  fitCameraToBox,
+  MODEL_TARGET_SIZE,
+  MODEL_LOAD_TIMEOUT_MS,
+  resolveModelUrl,
+  getCanvasSettings,
+} from '../lib/modelLoader';
+import HotspotSystem from './HotspotSystem';
+import PosterFallback from './PosterFallback';
+import { ProceduralStage, PROCEDURAL_LAYERS, isProceduralPath, proceduralKeyOf } from './procedural';
+import { useSkin } from '../context/SkinContext';
+import { useTier } from '../context/TierContext';
+import { useReducedMotion } from '../lib/motion';
+import { useSkinMaterials, applySkinToObject } from '../lib/skinMaterials';
 
 /* ============================================
    背景颜色映射
@@ -15,40 +31,74 @@ const BG_COLORS = {
  * 克隆 GLTF 场景
  */
 function cloneScene(scene) {
-  return scene.clone();
+  const cloned = scene.clone();
+  cloned.traverse((obj) => {
+    if (obj.isMesh) {
+      obj.castShadow = true;
+      obj.receiveShadow = true;
+    }
+  });
+  return cloned;
 }
 
 /**
  * 3D 模型加载器 — 可传入 modelRef 用于热点坐标计算
+ * 使用共享 GLTFLoader (Draco / Meshopt 双解码器),
+ * 兼容故宫 meshopt 压缩模型与华夏名筑 draco 压缩模型,
+ * 并统一归一化到 MODEL_TARGET_SIZE。
  */
-function PalaceModel({ modelPath, modelRef }) {
-  const { scene } = useGLTF(modelPath);
+function PalaceModel({
+  modelPath,
+  modelRef,
+  groupRef,
+  controlsRef,
+  resetToken = 0,
+  onReady,
+  skinMode = 'default',
+}) {
+  const { camera } = useThree();
+  const { scene } = useLoader(sharedGLTFLoader, modelPath);
   const clonedScene = useMemo(() => cloneScene(scene), [scene]);
-  const wrapperRef = useRef();
-  const adjusted = useRef(false);
 
-  // 将 wrapperRef 同步到外部 modelRef
+  useEffect(() => applySkinToObject(clonedScene, skinMode), [clonedScene, skinMode]);
+  const wrapperRef = useRef();
+  const done = useRef(false);
+  // 记录自动构图后的相机位姿, 供"重置视角"还原
+  const poseRef = useRef(null);
+
+  // 将 wrapperRef 同步到外部 ref（热点定位需要真实模型分组）
   useEffect(() => {
     if (modelRef) modelRef.current = wrapperRef.current;
-  }, [modelRef, wrapperRef.current]);
+    if (groupRef) groupRef.current = wrapperRef.current;
+  }, [modelRef, groupRef, wrapperRef.current]);
 
+  // 归一化完成后立即自动构图, 保证模型完整适配画面
   useFrame(() => {
-    if (adjusted.current || !wrapperRef.current) return;
-    adjusted.current = true;
-
+    if (!wrapperRef.current || done.current) return;
+    if (!normalizeAndGround(wrapperRef.current, MODEL_TARGET_SIZE)) return;
+    done.current = true;
     const box = new THREE.Box3().setFromObject(wrapperRef.current);
-    const size = box.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z);
-
-    const targetSize = 6;
-    const scale = targetSize / maxDim;
-    wrapperRef.current.scale.setScalar(scale);
-
-    const scaledBox = new THREE.Box3().setFromObject(wrapperRef.current);
-    const center = scaledBox.getCenter(new THREE.Vector3());
-
-    wrapperRef.current.position.set(-center.x, -scaledBox.min.y, -center.z);
+    if (!box.isEmpty()) {
+      // 略高的 3/4 俯视 + 更满的构图, 突出大画幅
+      fitCameraToBox(camera, controlsRef?.current, box, { phi: 0.98, margin: 1.04 });
+      poseRef.current = {
+        position: camera.position.clone(),
+        target: controlsRef?.current?.target?.clone?.() || new THREE.Vector3(),
+      };
+    }
+    onReady?.();
   });
+
+  // 重置视角
+  useEffect(() => {
+    if (!resetToken || !poseRef.current) return;
+    const { position, target } = poseRef.current;
+    camera.position.copy(position);
+    if (controlsRef?.current) {
+      controlsRef.current.target.copy(target);
+      controlsRef.current.update();
+    }
+  }, [resetToken, camera, controlsRef]);
 
   return (
     <group ref={wrapperRef}>
@@ -58,19 +108,13 @@ function PalaceModel({ modelPath, modelRef }) {
 }
 
 /**
- * 简洁展台地面 — 无网格、无阴影，模型自然落地
+ * 展台地面 — 只接收柔和阴影, 保留庭院底色
  */
 function CleanGround() {
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
-      <circleGeometry args={[8, 64]} />
-      <meshStandardMaterial
-        color="#F0EBE0"
-        roughness={0.9}
-        metalness={0.0}
-        transparent
-        opacity={0.35}
-      />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
+      <circleGeometry args={[20, 64]} />
+      <shadowMaterial transparent opacity={0.24} color="#3d2a18" />
     </mesh>
   );
 }
@@ -110,11 +154,18 @@ function PlaceholderBuilding() {
 /**
  * 注视检测组件 — 当用户持续注视模型超过5秒时触发答题
  */
-function GazeDetector({ onGazeTrigger, isRotating }) {
+function GazeDetector({ onGazeTrigger, isRotating, resetKey }) {
   const gazeStartRef = useRef(null);
   const lastCheckRef = useRef(0);
+  const firedRef = useRef(false);
   const THRESHOLD = 5000; // 5秒
   const CHECK_INTERVAL = 2000; // 每2秒检查一次
+
+  // 每座建筑只触发一次, 防止答题面板弹出后又被重新随机
+  useEffect(() => {
+    firedRef.current = false;
+    gazeStartRef.current = null;
+  }, [resetKey]);
 
   useFrame(({ camera }) => {
     const now = Date.now();
@@ -135,7 +186,8 @@ function GazeDetector({ onGazeTrigger, isRotating }) {
     if (dot > 0.7) {
       if (!gazeStartRef.current) {
         gazeStartRef.current = now;
-      } else if (now - gazeStartRef.current >= THRESHOLD) {
+      } else if (now - gazeStartRef.current >= THRESHOLD && !firedRef.current) {
+        firedRef.current = true;
         onGazeTrigger?.();
         gazeStartRef.current = null;
       }
@@ -150,8 +202,7 @@ function GazeDetector({ onGazeTrigger, isRotating }) {
 /**
  * 雪花粒子系统 — 雪景模式
  */
-function SnowParticles({ active }) {
-  const count = 500;
+function SnowParticles({ active, count = 500 }) {
   const pointsRef = useRef();
   const velocitiesRef = useRef([]);
 
@@ -215,17 +266,103 @@ function SnowParticles({ active }) {
  * 新增：触摸交互、光标反馈、减少动画兼容、3D 悬停检测、
  *       皮肤支持、3D热点标注、点击模型构件展示讲解
  */
-function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], onNavigate, onQuizTrigger, activeSkin = 'default' }) {
-  const [autoRotate, setAutoRotate] = useState(true);
+function ModelViewer({
+  palace,
+  bgMode = 'warm',
+  showHud = false,
+  palaces = [],
+  onNavigate,
+  onQuizTrigger,
+  activeSkin = 'default',
+  /* 以下为展厅新版可选控制 */
+  autoRotate: autoRotateProp,
+  onAutoRotateChange,
+  resetToken = 0,
+  minimal = false,
+  /* 由百科「三维联动」传入：需要高亮的热点ID */
+  activeHotspotId = null,
+  onHotspotClick,
+  assetManifest = null,
+  onOpenDetail,
+  onLogin,
+  showHotspots = true,
+}) {
+  const { skin: contextSkin } = useSkin();
+  const { tier, supports3D } = useTier();
+  const reduceMotion = useReducedMotion();
+  const [autoRotateLocal, setAutoRotateLocal] = useState(true);
+  const autoRotate = autoRotateProp === undefined ? autoRotateLocal : autoRotateProp;
+  const setAutoRotate = useCallback(
+    (v) => {
+      setAutoRotateLocal(v);
+      onAutoRotateChange?.(v);
+    },
+    [onAutoRotateChange]
+  );
   const [modelError] = useState(false);
   const [noMotion, setNoMotion] = useState(false);
+  const [contextLost, setContextLost] = useState(false);
+  const [loadTimeout, setLoadTimeout] = useState(false);
+  const [retryToken, setRetryToken] = useState(0);
+  const [internalResetToken, setInternalResetToken] = useState(0);
   const canvasRef = useRef(null);
+  const controlsRef = useRef(null);
+  const modelGroupRef = useRef(null);
   const gazeTimerRef = useRef(null);
   const gazeActiveRef = useRef(false);
 
   const modelPath = palace.model_path || '';
-  const fullModelUrl = `/models/${modelPath}`;
+  const isProcedural = isProceduralPath(modelPath);
+  const proceduralKey = isProcedural ? proceduralKeyOf(modelPath) : null;
+  const resolvedModelUrl = isProcedural
+    ? ''
+    : resolveModelUrl(palace, tier, assetManifest);
+  const fullModelUrl = resolvedModelUrl || '';
   const colors = BG_COLORS[bgMode] || BG_COLORS.warm;
+  const effectiveSkin = activeSkin || contextSkin || 'default';
+  const skinVisual = useSkinMaterials(effectiveSkin, tier, isProcedural);
+  const canvasSettings = getCanvasSettings(tier);
+
+  const needsPosterFallback =
+    !isProcedural && (!supports3D || (tier === 'smooth' && !resolvedModelUrl));
+  const useFallback = needsPosterFallback || contextLost || loadTimeout;
+  const fallbackReason = !supports3D
+    ? 'no-webgl'
+    : contextLost
+      ? 'context-lost'
+      : loadTimeout
+        ? 'load-timeout'
+        : 'missing-lite';
+
+  // 程序化模型的分层显隐与拆解状态
+  const [layerState, setLayerState] = useState({});
+  const [exploded, setExploded] = useState(false);
+  useEffect(() => {
+    setLayerState({});
+    setExploded(false);
+  }, [proceduralKey]);
+
+  // 模型首帧就绪后才允许定位热点（热点需要真实包围盒）
+  const [modelReady, setModelReady] = useState(false);
+  useEffect(() => {
+    setModelReady(false);
+  }, [fullModelUrl, proceduralKey]);
+
+  // 模型体量较大(单件 9~33MB)，加载与切换期间给出明确反馈，避免舞台看起来"空白"
+  const { active: modelActive, progress: modelProgress } = useProgress();
+  const modelLoading = !!modelPath && !isProcedural && modelActive && modelProgress < 100;
+
+  useEffect(() => {
+    if (!fullModelUrl || isProcedural || modelReady) {
+      setLoadTimeout(false);
+      return undefined;
+    }
+    const timer = window.setTimeout(
+      () => setLoadTimeout(true),
+      MODEL_LOAD_TIMEOUT_MS
+    );
+    return () => window.clearTimeout(timer);
+  }, [fullModelUrl, isProcedural, modelReady, retryToken]);
 
   // 检测用户减少动画偏好
   useEffect(() => {
@@ -251,12 +388,79 @@ function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], o
   const nextPalace = currentIndex < palaces.length - 1 ? palaces[currentIndex + 1] : null;
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div
+      style={{ width: '100%', height: '100%', position: 'relative' }}
+      onDoubleClick={() => setInternalResetToken((value) => value + 1)}
+    >
       {/* 标题覆盖层 */}
       <div className="viewer-title-overlay">
         <h2>{palace.name}</h2>
-        <p>{palace.dynasty} · {palace.built_year}年建成 · {palace.category}</p>
+        <p>{palace.tagline || `${palace.dynasty} · ${palace.built_year}年建成 · ${palace.category}`}</p>
+        {isProcedural && (
+          <span className="viewer-procedural-badge">
+            <i className="fas fa-cubes"></i>
+            程序化重建 · 可拆解
+          </span>
+        )}
       </div>
+
+      {/* 营造拆解面板 — 仅程序化重建建筑 */}
+      {isProcedural && (
+        <div className="procedural-layer-panel">
+          <div className="procedural-layer-head">
+            <i className="fas fa-cubes"></i>
+            <span>营造拆解</span>
+          </div>
+          <div className="procedural-layer-chips">
+            {PROCEDURAL_LAYERS.map(({ key, label, icon }) => {
+              const active = layerState[key] !== false;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  className={`procedural-chip${active ? ' active' : ''}`}
+                  aria-pressed={active}
+                  onClick={() =>
+                    setLayerState((prev) => ({
+                      ...prev,
+                      [key]: prev[key] === false ? true : false,
+                    }))
+                  }
+                >
+                  <i className={`fas ${icon}`} />
+                  <span>{label}</span>
+                </button>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            className={`procedural-explode${exploded ? ' active' : ''}`}
+            onClick={() => setExploded((v) => !v)}
+          >
+            <i className="fas fa-arrows-up-down"></i>
+            {exploded ? '合拢归位' : '拆解层叠'}
+          </button>
+        </div>
+      )}
+
+      {(skinVisual.simplified || skinVisual.fallbackReason) && (
+        <div className="viewer-skin-notice">
+          {skinVisual.fallbackReason === 'procedural_unsupported'
+            ? '该建筑暂不支持此皮肤，已回退为默认模式'
+            : '皮肤已简化'}
+        </div>
+      )}
+
+      {/* 模型加载反馈 — 大模型(9~33MB)载入时舞台不再是空白 */}
+      {modelLoading && (
+        <div className="viewer-model-loading">
+          <span className="viewer-model-loading-ring" />
+          <span className="viewer-model-loading-text">
+            模型载入中 {Math.round(modelProgress)}%
+          </span>
+        </div>
+      )}
 
       {/* 操作HUD — 鼠标静止3秒后浮现 */}
       <div className={`viewer-hud${showHud ? ' visible' : ''}`}>
@@ -274,8 +478,8 @@ function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], o
         </div>
       </div>
 
-      {/* 自转开关 — 底部居中 */}
-      {!noMotion && (
+      {/* 自转开关 — 底部居中(新版展厅由右侧工具栏接管) */}
+      {!minimal && !noMotion && (
         <div
           className={`auto-rotate-toggle${autoRotate ? ' active' : ''}`}
           onClick={() => setAutoRotate(!autoRotate)}
@@ -295,22 +499,24 @@ function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], o
         </div>
       )}
 
-      {/* 中轴线迷你地图 */}
-      <div className="axis-minimap">
-        <div className="axis-minimap-label">中轴位置</div>
-        <div className="axis-minimap-line">
-          {Array.from({ length: totalBuildings }, (_, i) => (
-            <div
-              key={i}
-              className={`axis-minimap-dot${i === axisIndex ? ' highlight' : ''}`}
-              title={palaces[i]?.name || `建筑${i + 1}`}
-            />
-          ))}
+      {/* 中轴线迷你地图 — 仅故宫中轴线建筑显示 */}
+      {!minimal && palace.order_num && palace.order_num <= 10 && (
+        <div className="axis-minimap">
+          <div className="axis-minimap-label">中轴位置</div>
+          <div className="axis-minimap-line">
+            {Array.from({ length: totalBuildings }, (_, i) => (
+              <div
+                key={i}
+                className={`axis-minimap-dot${i === axisIndex ? ' highlight' : ''}`}
+                title={palaces[i]?.name || `建筑${i + 1}`}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* 导航箭头 — 上一个/下一个建筑 */}
-      {prevPalace && (
+      {/* 导航箭头 — 上一个/下一个建筑(新版由工具栏/建筑轴接管) */}
+      {!minimal && prevPalace && (
         <button
           style={{
             position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
@@ -327,7 +533,7 @@ function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], o
           <i className="fas fa-chevron-left"></i>
         </button>
       )}
-      {nextPalace && (
+      {!minimal && nextPalace && (
         <button
           style={{
             position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
@@ -345,32 +551,64 @@ function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], o
         </button>
       )}
 
+      {useFallback ? (
+        <PosterFallback
+          palace={palace}
+          reason={fallbackReason}
+          onRetry={() => {
+            setContextLost(false);
+            setLoadTimeout(false);
+            setRetryToken((value) => value + 1);
+          }}
+          onOpenDetail={onOpenDetail}
+          onLogin={onLogin}
+        />
+      ) : (
       <Canvas
+        key={retryToken}
         ref={canvasRef}
+        shadows={canvasSettings.shadows}
+        dpr={canvasSettings.dpr}
         camera={{ position: [8, 6, 10], fov: 45 }}
         gl={{
-          antialias: true,
+          antialias: canvasSettings.antialias,
           alpha: false,
-          powerPreference: 'high-performance',
+          powerPreference: canvasSettings.powerPreference,
         }}
         // 触摸事件 — 移动端支持
         onCreated={({ gl }) => {
           gl.domElement.style.touchAction = 'none';
           // 禁止浏览器右键菜单，让 OrbitControls 右键平移正常工作
           gl.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+          gl.domElement.addEventListener('webglcontextlost', (event) => {
+            event.preventDefault();
+            setContextLost(true);
+          });
         }}
       >
         {/* 背景色 */}
-        <color attach="background" args={[colors.bg]} />
+        <color attach="background" args={[skinVisual.background || colors.bg]} />
 
         {/* 环境光照 */}
         <ambientLight intensity={0.7} color={colors.ambient} />
 
-        {/* 主光源 */}
+        {/* 天光/地面反射 — 增强庭院环境感 */}
+        <hemisphereLight args={[colors.ambient, '#c9b492', 0.5]} />
+
+        {/* 主光源 — 投影 */}
         <directionalLight
           position={[-8, 12, 8]}
           intensity={1.2}
           color={colors.sun}
+          castShadow
+          shadow-mapSize={[1024, 1024]}
+          shadow-camera-near={1}
+          shadow-camera-far={40}
+          shadow-camera-left={-12}
+          shadow-camera-right={12}
+          shadow-camera-top={12}
+          shadow-camera-bottom={-12}
+          shadow-bias={-0.0004}
         />
 
         {/* 补光 */}
@@ -387,13 +625,32 @@ function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], o
           color={colors.ambient}
         />
 
-        {/* 简洁展台地面 */}
+        {/* 简洁展台地面 — 接收模型落地阴影 */}
         <CleanGround />
 
         <Suspense fallback={null}>
-          {!modelError && fullModelUrl ? (
+          {isProcedural ? (
+            <ProceduralStage
+              key={proceduralKey}
+              type={proceduralKey}
+              layers={layerState}
+              exploded={exploded}
+              groupRef={modelGroupRef}
+              controlsRef={controlsRef}
+              resetToken={resetToken + internalResetToken}
+              onReady={() => setModelReady(true)}
+            />
+          ) : !modelError && fullModelUrl ? (
             <>
-              <PalaceModel modelPath={fullModelUrl} />
+              <PalaceModel
+                key={fullModelUrl}
+                modelPath={fullModelUrl}
+                groupRef={modelGroupRef}
+                controlsRef={controlsRef}
+                resetToken={resetToken + internalResetToken}
+                onReady={() => setModelReady(true)}
+                skinMode={skinVisual.mode}
+              />
               {modelError && (
                 <Html center>
                   <div style={{
@@ -420,13 +677,13 @@ function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], o
         </Suspense>
 
         <OrbitControls
+          ref={controlsRef}
           enableDamping
           dampingFactor={0.08}
           autoRotate={!noMotion && autoRotate}
           autoRotateSpeed={noMotion ? 0 : 1.5}
-          minDistance={3}
-          maxDistance={30}
-          target={[0, 1.5, 0]}
+          minDistance={2}
+          maxDistance={60}
           // 触摸支持
           enablePan={true}
           enableZoom={true}
@@ -437,12 +694,34 @@ function ModelViewer({ palace, bgMode = 'warm', showHud = false, palaces = [], o
           }}
         />
 
+        {/* 构件热点 — 百科「三维联动」跳转后高亮对应构件 */}
+        {!isProcedural &&
+          modelReady &&
+          (showHotspots || activeHotspotId) && (
+            <HotspotSystem
+              palaceId={palace.id}
+              modelGroupRef={modelGroupRef}
+              activeHotspotId={activeHotspotId}
+              onHotspotClick={onHotspotClick}
+              onlyActive={!showHotspots}
+              reduceMotion={reduceMotion}
+            />
+          )}
+
         {/* 注视检测 */}
-        <GazeDetector onGazeTrigger={onQuizTrigger} isRotating={autoRotate} />
+        <GazeDetector
+          onGazeTrigger={onQuizTrigger}
+          isRotating={autoRotate}
+          resetKey={fullModelUrl || proceduralKey}
+        />
 
         {/* 雪花粒子 */}
-        <SnowParticles active={activeSkin === 'snow'} />
+        <SnowParticles
+          active={skinVisual.mode === 'snow'}
+          count={skinVisual.snowCount || 500}
+        />
       </Canvas>
+      )}
     </div>
   );
 }

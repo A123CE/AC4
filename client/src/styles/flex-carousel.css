@@ -1,0 +1,57 @@
+/* ============================================================
+   Flex Carousel — 无限滚动影像带 + 液体玻璃边缘
+   ============================================================ */
+
+.flex-carousel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  /* 边缘渐隐 — 图片在两端"融化"进背景 */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 12%,
+    #000 88%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 12%,
+    #000 88%,
+    transparent
+  );
+}
+
+.flex-carousel__track {
+  display: flex;
+  width: max-content;
+  /* 液体玻璃折射滤镜 */
+  filter: url(#fc-liquid-glass);
+  animation: fc-scroll var(--fc-duration, 45s) linear infinite;
+  will-change: transform;
+}
+
+.flex-carousel:hover .flex-carousel__track {
+  animation-play-state: paused;
+}
+
+.flex-carousel__track > * {
+  flex-shrink: 0;
+  margin-right: var(--fc-gap, 20px);
+}
+
+@keyframes fc-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flex-carousel__track {
+    animation: none;
+  }
+}

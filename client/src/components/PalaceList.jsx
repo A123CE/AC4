@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 
 /**
- * 宫殿分组定义 — 按故宫中轴线区域
+ * 宫殿分组定义 — 按故宫中轴线区域 + 华夏名筑
  */
 const PALACE_GROUPS = [
   {
@@ -16,6 +16,18 @@ const PALACE_GROUPS = [
     icon: 'fa-building-columns',
     ids: ['qianqingmen', 'qianqinggong', 'jiaotaidian', 'kunninggong', 'shenwumen'],
   },
+  {
+    key: 'national',
+    label: '华夏名筑',
+    icon: 'fa-mountain-city',
+    ids: ['changcheng', 'gugong', 'huanghelou', 'mogao', 'potala', 'tiantan', 'tulou'],
+  },
+  {
+    key: 'procedural',
+    label: '营造复原 · 程序化',
+    icon: 'fa-cubes',
+    ids: ['yingxian_muta', 'foguangsi', 'yueyanglou'],
+  },
 ];
 
 /**
@@ -23,6 +35,13 @@ const PALACE_GROUPS = [
  */
 function getPalaceIcon(palace) {
   if (palace.category === '关隘') return 'fa-archway';
+  if (palace.category === '楼阁') return 'fa-chess-rook';
+  if (palace.category === '佛塔') return 'fa-chess-rook';
+  if (palace.category === '寺庙') return 'fa-vihara';
+  if (palace.category === '石窟') return 'fa-mountain';
+  if (palace.category === '军事工程') return 'fa-shield-halved';
+  if (palace.category === '坛庙') return 'fa-umbrella';
+  if (palace.category === '民居') return 'fa-house';
   return 'fa-gopuram';
 }
 

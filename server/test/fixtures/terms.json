@@ -1,0 +1,11 @@
+[
+  {
+    "id": "dougong",
+    "category": "斗拱",
+    "term": "斗拱",
+    "synopsis": "中国古建筑特有的承重与装饰构件。",
+    "content": "斗拱由斗、拱、昂等构件组合而成。",
+    "related_palaces": ["taihedian"],
+    "related_terms": ["queti"]
+  }
+]
