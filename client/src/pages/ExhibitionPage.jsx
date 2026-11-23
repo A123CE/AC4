@@ -104,21 +104,11 @@ export default function ExhibitionPage() {
       .catch(() => {});
   }, []);
 
-  // 注入模型路径到全局（供ExhibitionViewer读取）
   // 程序化建筑没有 GLB 资源, 走 proceduralKey 分支
   const proceduralKey =
     palace?.model_path?.startsWith('procedural:')
       ? palace.model_path.slice('procedural:'.length)
       : null;
-
-  useEffect(() => {
-    if (palace?.model_path && !proceduralKey) {
-      window.__EXHIBITION_MODEL_PATH = `/models/${palace.model_path}`;
-    } else {
-      window.__EXHIBITION_MODEL_PATH = '';
-    }
-    return () => { window.__EXHIBITION_MODEL_PATH = ''; };
-  }, [palace?.model_path, proceduralKey]);
 
   useEffect(() => {
     loadPalace();
@@ -286,6 +276,7 @@ export default function ExhibitionPage() {
           </div>
         ) : (
           <ExhibitionViewer
+            key={palace?.id || 'empty'}
             autoRotate={autoRotate}
             proceduralKey={proceduralKey}
             activeSkin={skin}

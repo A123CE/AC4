@@ -61,6 +61,14 @@ function PalaceModel({
   const clonedScene = useMemo(() => cloneScene(scene), [scene]);
 
   useEffect(() => applySkinToObject(clonedScene, skinMode), [clonedScene, skinMode]);
+
+  // 切换建筑时释放上一座模型的 GLTF 缓存：
+  // 否则每浏览一座建筑都会在显存中常驻一份，累积后触发 WebGL 上下文丢失。
+  useEffect(() => {
+    return () => {
+      useLoader.clear(sharedGLTFLoader, modelPath);
+    };
+  }, [modelPath]);
   const wrapperRef = useRef();
   const done = useRef(false);
   // 记录自动构图后的相机位姿, 供"重置视角"还原
@@ -325,7 +333,7 @@ function ModelViewer({
 
   const needsPosterFallback =
     !isProcedural && (!supports3D || (tier === 'smooth' && !resolvedModelUrl));
-  const useFallback = needsPosterFallback || contextLost || loadTimeout;
+  const useFallback = needsPosterFallback || loadTimeout;
   const fallbackReason = !supports3D
     ? 'no-webgl'
     : contextLost
@@ -564,6 +572,7 @@ function ModelViewer({
           onLogin={onLogin}
         />
       ) : (
+      <>
       <Canvas
         key={retryToken}
         ref={canvasRef}
@@ -583,6 +592,10 @@ function ModelViewer({
           gl.domElement.addEventListener('webglcontextlost', (event) => {
             event.preventDefault();
             setContextLost(true);
+          });
+          // 浏览器恢复上下文后直接沿用，不再重建新上下文（重建会瞬时叠加显存压力）
+          gl.domElement.addEventListener('webglcontextrestored', () => {
+            setContextLost(false);
           });
         }}
       >
@@ -721,7 +734,33 @@ function ModelViewer({
           count={skinVisual.snowCount || 500}
         />
       </Canvas>
+
+      {contextLost && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 30,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+            background: 'rgba(237, 231, 218, 0.92)',
+          }}
+        >
+          <PosterFallback
+            palace={palace}
+            reason="context-lost"
+            onRetry={() => {
+              setContextLost(false);
+              setRetryToken((value) => value + 1);
+            }}
+            onOpenDetail={onOpenDetail}
+            onLogin={onLogin}
+          />
+        </div>
       )}
+      </>)}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useRef, Suspense, useMemo, useEffect } from 'react';
+import { useRef, Suspense, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -63,6 +63,13 @@ function ExhibitionModel({ modelPath, controlsRef, skinMode = 'default' }) {
     [filteredScene, skinMode]
   );
 
+  // 离开当前建筑时释放该模型的 GLTF 缓存，避免多建筑浏览累积显存
+  useEffect(() => {
+    return () => {
+      useLoader.clear(sharedGLTFLoader, modelPath);
+    };
+  }, [modelPath]);
+
   useFrame(() => {
     if (!ref.current || done.current) return;
     if (!normalizeAndGround(ref.current, MODEL_TARGET_SIZE)) return;
@@ -93,13 +100,16 @@ export default function ExhibitionViewer({
   const canvasSettings = getCanvasSettings(tier);
 
   const controlsRef = useRef();
+  const [contextLost, setContextLost] = useState(false);
+  const [retryToken, setRetryToken] = useState(0);
   const resolvedPath = proceduralKey
     ? ''
     : resolveModelUrl(palace, tier, assetManifest);
+  // 模型路径必须由当前 palace 派生：切换建筑时随 props 变化重新挂载，
+  // 不能再读全局变量（effect 写入不触发重渲染，会导致「名字变了模型没变」）。
   const modelPath = proceduralKey
     ? ''
-    : resolvedPath ||
-      (typeof window !== 'undefined' ? window.__EXHIBITION_MODEL_PATH || '' : '');
+    : resolvedPath || (palace?.model_path ? `/models/${palace.model_path}` : '');
 
   if (!supports3D) {
     return <PosterFallback palace={palace} reason="no-webgl" onRetry={onRetry} />;
@@ -114,6 +124,7 @@ export default function ExhibitionViewer({
   return (
     <>
       <Canvas
+        key={retryToken}
         shadows={canvasSettings.shadows}
         dpr={canvasSettings.dpr}
         camera={{ position: [8, 5, 10], fov: 40 }}
@@ -125,6 +136,14 @@ export default function ExhibitionViewer({
         onCreated={({ gl }) => {
           gl.domElement.style.touchAction = 'none';
           gl.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+          gl.domElement.addEventListener('webglcontextlost', (event) => {
+            event.preventDefault();
+            setContextLost(true);
+          });
+          gl.domElement.addEventListener('webglcontextrestored', () => {
+            // 直接沿用恢复后的上下文，避免重建新上下文造成二次丢失
+            setContextLost(false);
+          });
         }}
       >
         <color attach="background" args={[skinVisual.background || '#EDE7DA']} />
@@ -161,6 +180,30 @@ export default function ExhibitionViewer({
           enablePan enableZoom enableRotate
         />
       </Canvas>
+
+      {contextLost && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 30,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+            background: 'rgba(237, 231, 218, 0.92)',
+          }}
+        >
+          <PosterFallback
+            palace={palace}
+            reason="context-lost"
+            onRetry={() => {
+              setContextLost(false);
+              setRetryToken((value) => value + 1);
+            }}
+          />
+        </div>
+      )}
 
       {(skinVisual.simplified || skinVisual.fallbackReason) && (
         <div className="viewer-skin-notice">

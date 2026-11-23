@@ -18,9 +18,10 @@ export const MODEL_LOAD_TIMEOUT_MS = 8000;
 
 /**
  * 按档位选择模型地址
- * - smooth：只认 lite，缺失返回 null（由 PosterFallback 兜底）
- * - standard：优先 lite，其次 high
  * - high：优先 high
+ * - standard：优先 standard，其次 high
+ * - smooth：优先 lite，缺失时回退 standard/high，再回退原始 model_path
+ *   （不能因缺少 lite 就让低配设备整站只剩图文）
  * - 清单缺失时回退原始 model_path，保证旧环境可用
  */
 export function getCanvasSettings(tier) {
@@ -55,12 +56,19 @@ export function resolveModelUrl(palace, tier, manifest) {
 
   const entry = manifest?.palaces?.[palace.id];
   if (entry) {
-    if (tier === 'smooth') return entry.smooth || null;
-    if (tier === 'standard') return entry.standard || entry.high || null;
-    return entry.high || entry.standard || null;
+    const preferred = tier === 'smooth'
+      ? [entry.smooth, entry.standard, entry.high]
+      : tier === 'standard'
+        ? [entry.standard, entry.high, entry.smooth]
+        : [entry.high, entry.standard, entry.smooth];
+
+    const chosen = preferred.find(Boolean);
+    if (chosen) return chosen;
+
+    // 清单存在但无可用档位时，回退原始模型，避免低配设备整站图文
+    return `/models/${palace.model_path}`;
   }
 
-  if (tier === 'smooth') return null;
   return `/models/${palace.model_path}`;
 }
 
