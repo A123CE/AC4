@@ -666,18 +666,17 @@ function ModelViewer({
               />
               {modelError && (
                 <Html center>
-                  <div style={{
+                  <div className="t-body" style={{
                     background: 'rgba(255,255,255,0.9)',
                     borderRadius: 8,
                     padding: '16px 24px',
                     textAlign: 'center',
-                    fontFamily: "'Noto Serif SC', serif",
                     boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
                   }}>
-                    <p style={{ margin: 0, color: '#c0392b', fontSize: 14 }}>
+                    <p style={{ margin: 0, color: '#c0392b', fontSize: 'var(--fs-body)' }}>
                       ⚠️ 模型加载失败
                     </p>
-                    <p style={{ margin: '4px 0 0', color: '#888', fontSize: 12 }}>
+                    <p style={{ margin: '4px 0 0', color: '#888', fontSize: 'var(--fs-meta)' }}>
                       请检查网络连接或稍后重试
                     </p>
                   </div>

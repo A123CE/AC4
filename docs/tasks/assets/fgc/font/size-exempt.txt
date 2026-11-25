@@ -1,0 +1,27 @@
+client/src/styles/global.css :: 4rem
+client/src/styles/global.css :: 2.4rem
+client/src/styles/global.css :: 3rem
+client/src/styles/global.css :: 2.5rem
+client/src/styles/global.css :: 2.5rem
+client/src/styles/global.css :: 4rem
+client/src/styles/global.css :: 2.5rem
+client/src/styles/global.css :: 3rem
+client/src/styles/global.css :: 3rem
+client/src/styles/global.css :: 2.5rem
+client/src/styles/global.css :: 0.72em
+client/src/styles/global.css :: 3rem
+client/src/styles/global.css :: 0.66em
+client/src/styles/global.css :: calc(var(--font-base, 16px) * var(--font-scale, 1))
+client/src/styles/encyclopedia.css :: clamp(11px, calc(12px * var(--g3d-inv-scale, 1)), 14px)
+client/src/styles/overview.css :: clamp(32px, 3.4vw, 48px)
+client/src/styles/overview.css :: clamp(22px, 1.9vw, 28px)
+client/src/styles/overview.css :: 0.85em
+client/src/styles/overview.css :: clamp(40px, 3.4vw, 62px)
+client/src/styles/overview.css :: clamp(13px, 0.9vw, 17px)
+client/src/styles/overview.css :: 40px
+client/src/styles/overview.css :: 38px
+client/src/styles/overview.css :: clamp(30px, 5vw, 40px)
+client/src/styles/curator.css :: 12px !important
+client/src/styles/hall.css :: 38px
+client/src/styles/guards.css :: 2.4rem
+client/src/styles/guards.css :: 0.76rem !important

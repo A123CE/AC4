@@ -1,0 +1,4 @@
+/* T-CARD-21：加载骨架占满首屏，避免加载完成后滚动条突然出现造成横向位移 */
+.profile-loading {
+  min-block-size: calc(100vh - 220px);
+}

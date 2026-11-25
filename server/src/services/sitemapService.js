@@ -39,7 +39,7 @@ async function loadEntries() {
     "SELECT id, updated_at FROM palaces WHERE status = 'published' ORDER BY id ASC"
   );
   const [terms] = await pool.query(
-    'SELECT id, created_at FROM encyclopedia_terms ORDER BY id ASC'
+    "SELECT id, COALESCE(updated_at, created_at) AS lastmod FROM encyclopedia_terms WHERE status = 'published' ORDER BY sort_order ASC, id ASC"
   );
   const [routes] = await pool.query(
     'SELECT id, created_at FROM curated_routes WHERE is_published = 1 ORDER BY id ASC'
@@ -52,11 +52,11 @@ async function loadEntries() {
     })),
     ...terms.map((row) => ({
       path: `/encyclopedia?term=${encodeURIComponent(row.id)}`,
-      lastmod: row.created_at,
+      lastmod: row.lastmod,
     })),
     ...routes.map((row) => ({
       path: `/routes/${encodeURIComponent(row.id)}`,
-      lastmod: row.created_at,
+      lastmod: row.lastmod,
     })),
   ];
 }

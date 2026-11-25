@@ -4,5 +4,21 @@
       "*": "string"
     }
   ],
+  "meta": {
+    "buildings_total": "number",
+    "filters_applied": {
+      "building": "null",
+      "category": "string",
+      "dynasty": "string",
+      "entry_type": "string",
+      "include": "string",
+      "region": "string",
+      "search": "null"
+    },
+    "non_forbidden_total": "number",
+    "page": "number",
+    "page_size": "number",
+    "total": "number"
+  },
   "success": "boolean"
 }

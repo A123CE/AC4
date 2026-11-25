@@ -9,7 +9,7 @@
   flex-direction: column;
   background: var(--paper-white);
   color: var(--ink);
-  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* ---------------- 顶部栏 ---------------- */
@@ -39,7 +39,7 @@
   background: transparent;
   color: var(--ink-light);
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: var(--fs-note);
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: background var(--duration-fast) var(--ease-out-expo),
@@ -72,24 +72,24 @@
   border: 1px solid var(--vermillion);
   border-radius: 3px;
   color: var(--vermillion);
-  font-family: 'Noto Serif SC', 'STSong', 'SimSun', serif;
-  font-size: 11px;
+  font-family: var(--font-serif-display);
+  font-size: var(--fs-caption);
   line-height: 1.15;
   letter-spacing: 1px;
 }
 
 .curator-title {
   margin: 0;
-  font-family: 'Noto Serif SC', 'STSong', 'SimSun', serif;
-  font-size: 1.16rem;
-  font-weight: 500;
+  font-family: var(--font-serif-display);
+  font-size: var(--fs-section);
+  font-weight: var(--fw-title);
   letter-spacing: 3px;
   color: var(--ink);
 }
 
 .curator-subtitle {
   margin: 2px 0 0;
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.8px;
   color: var(--ink-muted);
 }
@@ -112,7 +112,7 @@
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: var(--fs-note);
   letter-spacing: 0.8px;
   cursor: pointer;
   transition: transform var(--duration-fast) var(--ease-out-expo),
@@ -174,7 +174,7 @@
   margin: 12px 24px 0;
   padding: 10px 14px;
   border-radius: var(--radius-md);
-  font-size: 12.5px;
+  font-size: var(--fs-note);
   letter-spacing: 0.5px;
   border: 1px solid transparent;
 }
@@ -229,15 +229,15 @@
 
 .curator-list-head h2 {
   margin: 0;
-  font-family: 'Noto Serif SC', 'STSong', 'SimSun', serif;
-  font-size: 0.92rem;
-  font-weight: 500;
+  font-family: var(--font-serif-display);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-title);
   letter-spacing: 2px;
   color: var(--ink);
 }
 
 .curator-list-count {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--ink-muted);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.5px;
@@ -261,7 +261,7 @@
 }
 
 .curator-list-search i {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--ink-muted);
 }
 
@@ -272,7 +272,7 @@
   background: transparent;
   outline: none;
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: var(--fs-note);
   color: var(--ink);
 }
 
@@ -287,7 +287,7 @@
   gap: 8px;
   padding: 28px 8px;
   margin: 0;
-  font-size: 12.5px;
+  font-size: var(--fs-note);
   color: var(--ink-muted);
 }
 
@@ -329,14 +329,14 @@
 }
 
 .curator-list-name {
-  font-family: 'Noto Serif SC', 'STSong', 'SimSun', serif;
-  font-size: 0.86rem;
+  font-family: var(--font-serif-display);
+  font-size: var(--fs-body);
   letter-spacing: 1px;
   color: var(--ink);
 }
 
 .curator-list-meta {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--ink-muted);
   letter-spacing: 0.4px;
 }
@@ -349,7 +349,7 @@
   border-radius: 3px;
   background: rgba(200, 150, 12, 0.14);
   color: #8a6708;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   letter-spacing: 0.5px;
 }
 
@@ -368,12 +368,12 @@
   gap: 12px;
   padding: 120px 0;
   color: var(--ink-muted);
-  font-size: 13px;
+  font-size: var(--fs-note);
   letter-spacing: 1px;
 }
 
 .curator-loading i {
-  font-size: 1.4rem;
+  font-size: var(--fs-section);
   color: var(--vermillion);
 }
 
@@ -388,16 +388,16 @@
 
 .curator-editor-eyebrow {
   margin: 0 0 4px;
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   letter-spacing: 2.4px;
   color: var(--ink-muted);
 }
 
 .curator-editor-title {
   margin: 0;
-  font-family: 'Noto Serif SC', 'STSong', 'SimSun', serif;
-  font-size: 1.5rem;
-  font-weight: 500;
+  font-family: var(--font-serif-display);
+  font-size: var(--fs-page-title);
+  font-weight: var(--fw-title);
   letter-spacing: 3px;
   color: var(--ink);
 }
@@ -408,8 +408,8 @@
   border-radius: var(--radius-sm);
   background: var(--paper-dark);
   color: var(--ink-light);
-  font-family: 'SFMono-Regular', Consolas, monospace;
-  font-size: 11px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
   letter-spacing: 0.6px;
   white-space: nowrap;
 }
@@ -439,8 +439,8 @@
 }
 
 .curator-section-index {
-  font-family: 'Noto Serif SC', 'STSong', 'SimSun', serif;
-  font-size: 0.78rem;
+  font-family: var(--font-serif-display);
+  font-size: var(--fs-meta);
   color: var(--vermillion);
   letter-spacing: 1px;
   font-variant-numeric: tabular-nums;
@@ -453,16 +453,16 @@
 
 .curator-section-text h3 {
   margin: 0;
-  font-family: 'Noto Serif SC', 'STSong', 'SimSun', serif;
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-family: var(--font-serif-display);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-title);
   letter-spacing: 2px;
   color: var(--ink);
 }
 
 .curator-section-text p {
   margin: 2px 0 0;
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   color: var(--ink-muted);
   letter-spacing: 0.4px;
 }
@@ -473,7 +473,7 @@
 }
 
 .curator-section-chevron {
-  font-size: 0.7rem;
+  font-size: var(--fs-caption);
   color: var(--ink-muted);
   transition: transform var(--duration-fast) var(--ease-out-expo);
 }
@@ -498,7 +498,7 @@
   background: var(--paper-white);
   color: var(--ink-light);
   font-family: inherit;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out-expo);
@@ -533,14 +533,14 @@
   display: flex;
   align-items: baseline;
   gap: 6px;
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   letter-spacing: 1px;
   color: var(--ink-light);
 }
 
 .curator-field-label em {
   font-style: normal;
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   color: var(--ink-muted);
   letter-spacing: 0.3px;
 }
@@ -554,7 +554,7 @@
   background: var(--paper-white);
   color: var(--ink);
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--fs-note);
   line-height: 1.6;
   outline: none;
   transition: border-color var(--duration-fast) var(--ease-out-expo),
@@ -585,7 +585,7 @@
 }
 
 .curator-input--sm {
-  font-size: 12.5px;
+  font-size: var(--fs-note);
 }
 
 .curator-input--year {
@@ -627,7 +627,7 @@
   border-radius: var(--radius-full);
   background: rgba(var(--vermillion-rgb), 0.08);
   color: var(--vermillion);
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.4px;
 }
 
@@ -642,7 +642,7 @@
   border-radius: 50%;
   background: transparent;
   color: inherit;
-  font-size: 9px;
+  font-size: var(--fs-caption);
   cursor: pointer;
   opacity: 0.6;
 }
@@ -658,7 +658,7 @@
   background: transparent;
   outline: none;
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: var(--fs-note);
   color: var(--ink);
 }
 
@@ -700,7 +700,7 @@
   border-radius: var(--radius-md);
   background: transparent;
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out-expo);
 }
@@ -718,7 +718,7 @@
   border: 1px dashed var(--border-warm);
   border-radius: var(--radius-md);
   color: var(--ink-muted);
-  font-size: 12.5px;
+  font-size: var(--fs-note);
   letter-spacing: 0.6px;
 }
 
@@ -752,7 +752,7 @@
   background: var(--paper-dark);
   color: var(--ink-light);
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.6px;
   cursor: pointer;
   white-space: nowrap;
@@ -790,7 +790,7 @@
 .curator-upload-error {
   margin: 0;
   max-width: 200px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--vermillion);
   letter-spacing: 0.3px;
 }
@@ -815,10 +815,10 @@
 }
 
 .curator-poster-preview span {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--ink-muted);
   word-break: break-all;
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: var(--font-mono);
 }
 
 .curator-thumb {
@@ -887,7 +887,7 @@
   border-radius: 50%;
   background: rgba(var(--vermillion-rgb), 0.08);
   color: var(--vermillion);
-  font-size: 1.15rem;
+  font-size: var(--fs-card-title);
 }
 
 .curator-dropzone-text {
@@ -896,15 +896,15 @@
 
 .curator-dropzone-title {
   margin: 0;
-  font-family: 'Noto Serif SC', 'STSong', 'SimSun', serif;
-  font-size: 0.98rem;
+  font-family: var(--font-serif-display);
+  font-size: var(--fs-body-lg);
   letter-spacing: 2px;
   color: var(--ink);
 }
 
 .curator-dropzone-hint {
   margin: 5px 0 0;
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   line-height: 1.7;
   color: var(--ink-muted);
   letter-spacing: 0.3px;
@@ -934,7 +934,7 @@
   border-radius: var(--radius-sm);
   background: rgba(var(--vermillion-rgb), 0.08);
   color: var(--vermillion);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   letter-spacing: 1px;
 }
 
@@ -944,8 +944,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: 'SFMono-Regular', Consolas, monospace;
-  font-size: 11.5px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
   color: var(--ink-light);
 }
 
@@ -963,7 +963,7 @@
   width: 100%;
   justify-content: center;
   height: 34px;
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   padding: 0 10px;
 }
 
@@ -991,23 +991,23 @@
 }
 
 .curator-gate > i {
-  font-size: 1.6rem;
+  font-size: var(--fs-page-title);
   color: var(--vermillion);
   opacity: 0.85;
 }
 
 .curator-gate h2 {
   margin: 16px 0 10px;
-  font-family: 'Noto Serif SC', 'STSong', 'SimSun', serif;
-  font-size: 1.2rem;
-  font-weight: 500;
+  font-family: var(--font-serif-display);
+  font-size: var(--fs-section);
+  font-weight: var(--fw-title);
   letter-spacing: 3px;
   color: var(--ink);
 }
 
 .curator-gate > p {
   margin: 0 0 14px;
-  font-size: 13px;
+  font-size: var(--fs-note);
   line-height: 1.9;
   color: var(--ink-light);
   letter-spacing: 0.4px;
@@ -1015,12 +1015,12 @@
 
 .curator-gate strong {
   color: var(--vermillion);
-  font-weight: 500;
+  font-weight: var(--fw-body);
 }
 
 .curator-gate code {
-  font-family: 'SFMono-Regular', Consolas, monospace;
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
   color: var(--ink);
   background: var(--paper-dark);
   padding: 1px 6px;
@@ -1040,19 +1040,19 @@
 }
 
 .curator-gate-cmd span {
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   letter-spacing: 1px;
   color: var(--ink-muted);
 }
 
 .curator-gate-cmd code {
   padding: 6px 12px;
-  font-size: 12.5px;
+  font-size: var(--fs-note);
   user-select: all;
 }
 
 .curator-gate-hint {
-  font-size: 12px !important;
+  font-size: var(--fs-meta) !important;
   color: var(--ink-muted) !important;
 }
 
@@ -1149,11 +1149,11 @@
   }
 
   .curator-editor-title {
-    font-size: 1.22rem;
+    font-size: var(--fs-section);
   }
 
   .curator-editor-id {
-    font-size: 10px;
+    font-size: var(--fs-caption);
   }
 
   .curator-asset {
@@ -1173,7 +1173,7 @@
   .curator-dropzone > i {
     width: 38px;
     height: 38px;
-    font-size: 1rem;
+    font-size: var(--fs-card-title);
   }
 
   .curator-dropzone-btns {

@@ -1,0 +1,161 @@
+MAP client/src/styles/global.css :: .topbar-logo h1 [600 / 1.35rem] -> title
+MAP client/src/styles/global.css :: .topbar-nav-btn [500 / 0.8rem] -> body
+DEL client/src/styles/global.css :: /* 当前页面高亮指示 */ .topbar-nav-btn[aria-current="page"], .topbar [600]
+MAP client/src/styles/global.css :: .result-name mark [600 / -] -> title
+MAP client/src/styles/global.css :: .sidebar-title h3 [600 / 1rem] -> title
+DEL client/src/styles/global.css :: .sidebar-item.active .sidebar-item-name [600]
+MAP client/src/styles/global.css :: .viewer-title-overlay h2 [500 / 1.8rem] -> title
+MAP client/src/styles/global.css :: .detail-header h3 [600 / 0.95rem] -> title
+DEL client/src/styles/global.css :: .detail-tab.active [600]
+MAP client/src/styles/global.css :: .detail-accordion-header-left span [600 / 0.85rem] -> title
+MAP client/src/styles/global.css :: .detail-section-title [600 / 0.85rem] -> title
+MAP client/src/styles/global.css :: .detail-stat-value [700 / 1.3rem] -> title
+MAP client/src/styles/global.css :: .timeline-year [700 / 0.8rem] -> body
+MAP client/src/styles/global.css :: .related-section h4 [normal / 0.8rem] -> aux
+MAP client/src/styles/global.css :: .auth-verse-main [500 / 2.4rem] -> title
+MAP client/src/styles/global.css :: .auth-card-seal-box [600 / 0.8rem] -> body
+MAP client/src/styles/global.css :: .auth-card-title [600 / 1.5rem] -> title
+DEL client/src/styles/global.css :: .auth-card-tab.active [600]
+MAP client/src/styles/global.css :: .auth-interest-opt .opt-label [500 / 0.87rem] -> body
+MAP client/src/styles/global.css :: /* === 提交按钮 === */ .auth-btn-submit [600 / 1.02rem] -> body
+MAP client/src/styles/global.css :: .topbar-auth-seal-icon [600 / 0.7rem] -> aux
+MAP client/src/styles/global.css :: .topbar-auth-avatar [600 / 0.65rem] -> aux
+MAP client/src/styles/global.css :: .user-menu-name [600 / 0.85rem] -> title
+MAP client/src/styles/global.css :: .profile-title [700 / 1.3rem] -> title
+MAP client/src/styles/global.css :: .profile-hero-avatar [700 / 1.6rem] -> title
+MAP client/src/styles/global.css :: .profile-stat-card-value [700 / 1.8rem] -> title
+DEL client/src/styles/global.css :: .profile-tab.active [600]
+MAP client/src/styles/global.css :: .stamp-card-name [600 / 0.9rem] -> title
+MAP client/src/styles/global.css :: .history-item-name [600 / 0.9rem] -> title
+MAP client/src/styles/global.css :: .collection-card-name [600 / 1rem] -> title
+MAP client/src/styles/global.css :: .badge-card-name [600 / 0.95rem] -> title
+MAP client/src/styles/global.css :: .timeline-century-marker span [700 / 1.1rem] -> body
+MAP client/src/styles/global.css :: .timeline-event-year-text [700 / 1rem] -> body
+MAP client/src/styles/global.css :: .timeline-event-palace [600 / 0.85rem] -> body
+MAP client/src/styles/global.css :: .encyclopedia-term-item-name [600 / 0.9rem] -> title
+MAP client/src/styles/global.css :: .encyclopedia-section-label [700 / 0.9rem] -> body
+MAP client/src/styles/global.css :: .map-marker-card-name [600 / 0.9rem] -> title
+MAP client/src/styles/global.css :: .map-marker-panel-name [700 / 1.05rem] -> title
+MAP client/src/styles/global.css :: .map-route-card-name [600 / 0.9rem] -> title
+MAP client/src/styles/global.css :: .encyclopedia-palace-card-name [600 / -] -> title
+MAP client/src/styles/global.css :: /* 建筑标签 */ .map-building-label [600 / 0.7rem] -> aux
+MAP client/src/styles/global.css :: .map-building-tooltip-name [700 / 0.9rem] -> title
+MAP client/src/styles/global.css :: .map-building-panel-name [700 / 1.05rem] -> title
+MAP client/src/styles/global.css :: .map-recommend-more-score [600 / 0.75rem] -> aux
+MAP client/src/styles/global.css :: .quiz-number [700 / 1.1rem] -> body
+MAP client/src/styles/global.css :: .quiz-difficulty [600 / 0.7rem] -> aux
+MAP client/src/styles/global.css :: .quiz-option-letter [700 / 0.9rem] -> body
+MAP client/src/styles/global.css :: .quiz-submit-btn [600 / 1rem] -> body
+MAP client/src/styles/global.css :: .quiz-result-title [700 / 1.2rem] -> title
+MAP client/src/styles/global.css :: .quiz-result-points [700 / 1.1rem] -> body
+MAP client/src/styles/global.css :: .quiz-result-badge [600 / -] -> body
+MAP client/src/styles/global.css :: .quiz-next-btn [600 / 0.95rem] -> body
+MAP client/src/styles/global.css :: .quiz-retry-btn [600 / 0.95rem] -> body
+MAP client/src/styles/global.css :: .signin-toast [600 / 0.8rem] -> body
+MAP client/src/styles/global.css :: .signin-cal-day.today [700 / -] -> title
+MAP client/src/styles/global.css :: .achv-name [700 / 0.95rem] -> title
+MAP client/src/styles/global.css :: .quiz-stat-value [700 / 1.5rem] -> title
+MAP client/src/styles/global.css :: .skin-card-name [700 / 0.95rem] -> title
+MAP client/src/styles/global.css :: /* 难度选择 v2 */ .quiz-start-section-v2 h3 [600 / 0.85rem] -> title
+DEL client/src/styles/global.css :: .quiz-difficulty-btn-v2.active [600]
+MAP client/src/styles/global.css :: .quiz-diff-tag [500 / 0.65rem] -> aux
+MAP client/src/styles/global.css :: .quiz-progress-count [700 / 0.9rem] -> body
+MAP client/src/styles/global.css :: .quiz-sidebar-diff [600 / 0.7rem] -> aux
+MAP client/src/styles/global.css :: .quiz-stats-mini-val [700 / 1.2rem] -> title
+MAP client/src/styles/global.css :: .quiz-welcome h2 [600 / 1.4rem] -> title
+MAP client/src/styles/global.css :: .quiz-welcome-stat-val [700 / 1.4rem] -> title
+MAP client/src/styles/global.css :: .quiz-q-num [600 / 0.9rem] -> body
+MAP client/src/styles/global.css :: .quiz-q-diff [600 / 0.7rem] -> aux
+MAP client/src/styles/global.css :: .quiz-option-v2-letter [700 / 0.9rem] -> body
+MAP client/src/styles/global.css :: .quiz-submit-btn-v2 [600 / 1rem] -> body
+MAP client/src/styles/global.css :: .quiz-feedback-title [700 / 1.2rem] -> title
+MAP client/src/styles/global.css :: .quiz-stat-inline-val [700 / 1.3rem] -> title
+MAP client/src/styles/global.css :: .quiz-badges-overview-title-v2 [600 / 0.95rem] -> title
+MAP client/src/styles/global.css :: .badge-card-name-v2 [600 / 0.9rem] -> title
+MAP client/src/styles/global.css :: .quiz-hero-title [600 / 1.85rem] -> title
+MAP client/src/styles/global.css :: .quiz-hero-stat-val [700 / 1.5rem] -> title
+MAP client/src/styles/global.css :: .quiz-cat-pill [600 / 0.72rem] -> aux
+MAP client/src/styles/global.css :: .quiz-cat-picker-name [600 / 0.85rem] -> title
+DEL client/src/styles/global.css :: .quiz-cat-filter-btn.active [600]
+MAP client/src/styles/global.css :: .quiz-cat-overview-name [600 / 0.82rem] -> body
+MAP client/src/styles/global.css :: /* 侧栏题库分布 */ .quiz-sidebar-sub-title [600 / 0.78rem] -> aux
+MAP client/src/styles/global.css :: .quiz-board-my-rank-num [700 / 1.2rem] -> title
+MAP client/src/styles/global.css :: .quiz-rank-no [700 / 0.92rem] -> body
+MAP client/src/styles/global.css :: .quiz-rank-avatar [600 / 0.85rem] -> body
+MAP client/src/styles/global.css :: .quiz-rank-name [600 / 0.85rem] -> title
+MAP client/src/styles/global.css :: .quiz-rank-me-tag [500 / 0.62rem] -> aux
+MAP client/src/styles/global.css :: .quiz-rank-score [700 / 1rem] -> body
+MAP client/src/styles/global.css :: .quiz-rank-score em [400 / 0.65rem] -> aux
+MAP client/src/styles/global.css :: .quiz-board-section-title [600 / 0.88rem] -> title
+MAP client/src/styles/global.css :: .quiz-board-section-count [400 / 0.74rem] -> aux
+MAP client/src/styles/global.css :: .map-title [700 / 1.25rem] -> title
+DEL client/src/styles/global.css :: .map-view-tab.active [600]
+MAP client/src/styles/global.css :: .map-recommend-extra-score [700 / 0.72rem] -> aux
+MAP client/src/styles/global.css :: /* 标签 */ .map-bld-label [600 / 0.68rem] -> aux
+MAP client/src/styles/global.css :: /* 视图专属标记 */ .map-bld-marker [700 / 0.55rem] -> aux
+MAP client/src/styles/global.css :: /* 展馆名称 */ .map-bld-exhibition-name [600 / 0.58rem] -> aux
+MAP client/src/styles/global.css :: .map-bld-tooltip-name [700 / 0.9rem] -> title
+MAP client/src/styles/global.css :: .map-bld-panel-name [700 / 1rem] -> title
+MAP client/src/styles/global.css :: .map-compass-n [700 / 0.6rem] -> aux
+MAP client/src/styles/global.css :: .map-route-chip-name [600 / 0.85rem] -> title
+MAP client/src/styles/global.css :: .map-v3-title [700 / 1.2rem] -> title
+DEL client/src/styles/global.css :: .map-v3-tab.active [600]
+MAP client/src/styles/global.css :: .map-v3-recommend-score [700 / 0.7rem] -> aux
+MAP client/src/styles/global.css :: .map-v3-legend-title [700 / 0.72rem] -> aux
+MAP client/src/styles/global.css :: .map-v3-routechip-name [600 / 0.85rem] -> title
+MAP client/src/styles/global.css :: .map-v4-title [700 / 1.15rem] -> title
+DEL client/src/styles/global.css :: .map-v4-tab.active [600]
+MAP client/src/styles/global.css :: .map-v4-legend-title [700 / 0.7rem] -> aux
+MAP client/src/styles/global.css :: /* ── 悬停标签 ── */ .map-v4-hover-label [600 / 0.8rem] -> body
+MAP client/src/styles/global.css :: .dou-back-btn [500 / 0.85rem] -> body
+MAP client/src/styles/global.css :: .dou-title [700 / 1.5rem] -> title
+MAP client/src/styles/global.css :: .animated-list__title [600 / 0.88rem] -> title
+MAP client/src/styles/global.css :: .quiz-stage-stat em [700 / 1rem] -> body
+MAP client/src/styles/global.css :: .quiz-ring-card-name [700 / 1.02rem] -> title
+MAP client/src/styles/global.css :: .quiz-ring-card-cta [600 / 0.73rem] -> aux
+MAP client/src/styles/global.css :: .quiz-stage-foot-diff strong [600 / -] -> body
+MAP client/src/styles/global.css :: .quiz-stage-start [600 / 0.84rem] -> body
+MAP client/src/styles/global.css :: .quiz-stage-start em [400 / 0.7rem] -> aux
+MAP client/src/styles/global.css :: .quiz-quiz-count em [700 / 1.02rem] -> body
+MAP client/src/styles/global.css :: .quiz-qcard-num [600 / 0.78rem] -> aux
+MAP client/src/styles/global.css :: .quiz-qcard-points [600 / -] -> body
+MAP client/src/styles/encyclopedia.css :: /* 小节标题：朱砂竖条 + 宋体，站内统一的标题句式 */ .enc-bar-title [700 / 15px] -> title
+MAP client/src/styles/encyclopedia.css :: .enc-guide-heading [700 / 18px] -> title
+MAP client/src/styles/encyclopedia.css :: .enc-guide-card .enc-guide-title [700 / 14.5px] -> title
+MAP client/src/styles/encyclopedia.css :: .enc-head-title [700 / 2rem] -> title
+MAP client/src/styles/encyclopedia.css :: .enc-section-head h3 [700 / 15px] -> title
+MAP client/src/styles/encyclopedia.css :: .enc-diagram-titles strong [700 / 13.5px] -> title
+MAP client/src/styles/encyclopedia.css :: .enc-hotspot-label strong [600 / -] -> body
+MAP client/src/styles/encyclopedia.css :: .dougong3d-info-name [700 / 20px] -> title
+MAP client/src/styles/encyclopedia.css :: .enc-3d-text h3 [700 / 17px] -> title
+MAP client/src/styles/encyclopedia.css :: .enc-3d-btn [600 / 13px] -> body
+MAP client/src/styles/encyclopedia.css :: .encyclopedia-page .encyclopedia-cat-chip [600 / 12px] -> aux
+MAP client/src/styles/encyclopedia.css :: .encyclopedia-page .encyclopedia-term-item-name [700 / 14px] -> title
+MAP client/src/styles/encyclopedia.css :: .enc-card-art-mark [600 / 26px] -> title
+MAP client/src/styles/encyclopedia.css :: .enc-card-title [600 / 17px] -> title
+MAP client/src/styles/overview.css :: .ov-sidebar-title h1 [700 / 14px] -> title
+DEL client/src/styles/overview.css :: .ov-side-item.active [600]
+MAP client/src/styles/overview.css :: .ov-side-avatar [600 / 13px] -> body
+MAP client/src/styles/overview.css :: .ov-hero-title [700 / clamp(32px, 3.4vw, 48px)] -> title
+MAP client/src/styles/overview.css :: .ov-hero-attach-name [600 / clamp(22px, 1.9vw, 28px)] -> title
+MAP client/src/styles/overview.css :: .ov-ring-count-cur [600 / -] -> body
+MAP client/src/styles/overview.css :: .ov-stat-eyebrow [600 / 11px] -> aux
+MAP client/src/styles/overview.css :: .ov-stat-value [400 / clamp(40px, 3.4vw, 62px)] -> title
+MAP client/src/styles/overview.css :: .ov-filter-title [700 / 22px] -> title
+MAP client/src/styles/overview.css :: .ov-filter-label [500 / 14px] -> body
+MAP client/src/styles/overview.css :: .ov-filter-tag [600 / 13px] -> body
+MAP client/src/styles/overview.css :: .building-card-title [700 / 18px] -> title
+MAP client/src/styles/curator.css :: .curator-title [500 / 1.16rem] -> title
+MAP client/src/styles/curator.css :: .curator-list-head h2 [500 / 0.92rem] -> title
+MAP client/src/styles/curator.css :: .curator-editor-title [500 / 1.5rem] -> title
+MAP client/src/styles/curator.css :: .curator-section-text h3 [500 / 0.95rem] -> title
+MAP client/src/styles/curator.css :: .curator-gate h2 [500 / 1.2rem] -> title
+MAP client/src/styles/curator.css :: .curator-gate strong [500 / -] -> body
+MAP client/src/styles/hall.css :: .hall-brand-text strong [700 / 14px] -> body
+DEL client/src/styles/hall.css :: .hall-nav-btn.active [600]
+MAP client/src/styles/hall.css :: .hall-user [600 / 13px] -> body
+DEL client/src/styles/hall.css :: .hall-node.is-active .hall-node-name [600]
+MAP client/src/styles/guards.css :: .quiz-guest-score em [700 / 1.8rem] -> title
+MAP client/src/styles/guards.css :: .quiz-guest-answer-question [600 / -] -> body
+MAP client/src/styles/guards.css :: .profile-next-label [600 / 0.78rem] -> aux
+MAP client/src/components/CoinAnimation.css :: .coin-animation-text [700 / 22px] -> title

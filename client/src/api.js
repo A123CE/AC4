@@ -305,6 +305,19 @@ export const getEncyclopediaCategories = () =>
 export const getEncyclopediaTerm = (id) =>
   api.get(`/encyclopedia/${id}`);
 
+/**
+ * 获取百科分类体系与覆盖率
+ * @param {string} [lang] - 语言标记（可选）
+ */
+export const getEncyclopediaTaxonomy = (lang) =>
+  api.get('/encyclopedia/taxonomy', { params: lang ? { lang } : {} });
+
+/**
+ * 获取百科覆盖率统计
+ */
+export const getEncyclopediaStats = () =>
+  api.get('/encyclopedia/stats');
+
 // ============================================================
 //  每日签到 API
 // ============================================================

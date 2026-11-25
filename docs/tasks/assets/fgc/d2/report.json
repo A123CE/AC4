@@ -1,0 +1,81 @@
+{
+  "generatedAt": "2026-11-24T13:47:33.864Z",
+  "dark": {
+    "theme": "dark",
+    "bg": "rgb(20, 23, 28)",
+    "chipCount": 53,
+    "widthMin": 76,
+    "widthMax": 156,
+    "fonts": [
+      "13px",
+      "13px",
+      "13px",
+      "13px",
+      "13px"
+    ],
+    "nodeTransform": "translate3d(0px, 0px, 0px) rotateY(calc(-1 * var(--g3d-az))) rotateX(calc(-1 * var(--g3d-pitch)))",
+    "backCount": 20,
+    "backTabs": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ],
+    "stored": null
+  },
+  "light": {
+    "theme": "light",
+    "bg": "rgb(247, 243, 235)",
+    "chipCount": 53,
+    "widthMin": 76,
+    "widthMax": 154,
+    "fonts": [
+      "13px",
+      "13px",
+      "13px",
+      "13px",
+      "13px"
+    ],
+    "nodeTransform": "translate3d(0px, 0px, 0px) rotateY(calc(-1 * var(--g3d-az))) rotateX(calc(-1 * var(--g3d-pitch)))",
+    "backCount": 20,
+    "backTabs": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ],
+    "stored": "light"
+  }
+}

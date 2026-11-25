@@ -45,5 +45,129 @@
   },
   "common": {
     "greeting": "你好，{name}"
+  },
+  "encyclopedia": {
+    "page": {
+      "title": "营造法式",
+      "subtitle": "中国古代建筑知识百科 · 已发布 {count} 条 · 建筑覆盖 {rate}%",
+      "lead": "按建筑、构件、朝代或地区筛选，右侧知识图谱会同步呈现它们的关联",
+      "back": "返回宫城"
+    },
+    "guide": {
+      "heading": "营造导引",
+      "hint": "从建筑或构件进入，查看对应的古建筑知识",
+      "flow": {
+        "pick": "选择条目",
+        "diagram": "读图解",
+        "model": "进三维"
+      },
+      "foot": "点击卡片进入对应分类，或从左侧列表直接选择词条",
+      "lead": "先选一类构件或一座建筑，右侧图谱会展示它们的关联",
+      "cardDesc": "从{label}开始认识古建筑"
+    },
+    "graph": {
+      "title": "知识图谱",
+      "hint": "从一座建筑或一个构件出发，沿连线继续阅读",
+      "legend": {
+        "node": {
+          "building": "建筑",
+          "term": "词条",
+          "category": "类目",
+          "dynasty": "朝代",
+          "region": "地区"
+        },
+        "edge": {
+          "primary": "主关联",
+          "palace": "关联建筑",
+          "term": "关联术语",
+          "peer": "同域"
+        }
+      },
+      "scale": "已展示 {shown} / 共 {total} 个节点",
+      "collapse": "收起图谱",
+      "expand": "展开图谱",
+      "reset": "复位视图",
+      "zoomIn": "放大",
+      "zoomOut": "缩小",
+      "listView": "列表视图",
+      "skip": "跳至正文",
+      "loading": "知识图谱加载中",
+      "empty": "当前筛选下暂无可展示的关联",
+      "fallback": "图谱暂不可用，已切换为关联列表",
+      "nodeLabel": "{type}：{label}",
+      "unavailableTarget": "该内容已下线"
+    },
+    "filter": {
+      "all": "全部",
+      "building": "按建筑",
+      "category": "按构件",
+      "dynasty": "按朝代",
+      "region": "按地区",
+      "reset": "清除筛选",
+      "more": "更多"
+    },
+    "group": {
+      "building": "名筑档案 · 建筑专属知识",
+      "craft": "营造术语",
+      "count": "{{count}} 条"
+    },
+    "empty": {
+      "title": "未找到匹配的词条",
+      "hint": "试试清除筛选，或从建筑详情页进入",
+      "clear": "清除筛选"
+    },
+    "coverage": {
+      "label": "建筑知识覆盖",
+      "value": "{{covered}} / {{total}} 座"
+    },
+    "knowledge": {
+      "title": "关联建筑知识",
+      "fromDetail": "查看该建筑的知识",
+      "empty": "暂未收录该建筑的知识"
+    },
+    "englishComingSoon": "英文版整理中",
+    "summaryInChinese": "中文摘要",
+    "card": {
+      "deckLabel": "建筑知识卡片，共 {count} 张",
+      "hint": "左右方向键移动，Enter 选择，Esc 返回",
+      "cardLabel": "{title}，{category}，{type}，第 {index}/{total} 张",
+      "type": {
+        "building": "建筑专属",
+        "craft": "通用术语"
+      },
+      "badge": {
+        "building": "建筑",
+        "threeD": "3D",
+        "threeDLabel": "可查看三维模型"
+      },
+      "unnamed": "未命名词条",
+      "uncategorized": "未分类",
+      "skip": "跳过卡片，直接到正文",
+      "prev": "上一张（第 {index}/{total} 张）",
+      "next": "下一张（第 {index}/{total} 张）",
+      "pause": "暂停轮播",
+      "play": "继续轮播",
+      "autoplayOff": "已暂停自动轮播",
+      "dragHint": "左右拖动切换卡片",
+      "empty": "当前筛选下没有匹配的词条",
+      "emptyAction": "清除筛选",
+      "error": "卡片暂不可用，已切换为列表",
+      "degraded": "已切换为平面视图，功能不变",
+      "backToDeck": "返回卡片选择"
+    },
+    "graph3d": {
+      "stageLabel": "三维知识图谱",
+      "hint": "拖动旋转，滚轮缩放，点节点继续阅读",
+      "rotateOn": "暂停旋转",
+      "rotateOff": "继续旋转",
+      "rotateOnShort": "已开启自动旋转",
+      "rotateOffShort": "已关闭自动旋转",
+      "reset": "复位视角",
+      "zoomIn": "放大图谱",
+      "zoomOut": "缩小图谱",
+      "backfacing": "背向节点已隐藏文字，仍可朗读与点击",
+      "degraded25d": "已切换为静态立体视图",
+      "degraded2d": "已切换为平面图谱"
+    }
   }
 }

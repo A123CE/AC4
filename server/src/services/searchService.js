@@ -139,7 +139,7 @@ async function searchPalaces(query, limit, lang, filters = {}) {
 
 async function searchTerms(query, limit, lang, filters = {}) {
   const like = `%${query}%`;
-  const conditions = ['(term LIKE ? OR synopsis LIKE ? OR content LIKE ?)'];
+  const conditions = ["status = 'published'", '(term LIKE ? OR synopsis LIKE ? OR content LIKE ?)'];
   const params = [like, like, like];
 
   if (filters.category) {

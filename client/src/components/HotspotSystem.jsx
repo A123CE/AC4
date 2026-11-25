@@ -125,13 +125,12 @@ function HotspotMarker({
             transform: 'translateY(-20px)',
           }}
         >
-          <div style={{
+          <div className="t-aux" style={{
             background: 'rgba(40, 24, 12, 0.92)',
             color: '#F5F0E5',
             padding: '4px 10px',
             borderRadius: 6,
-            fontSize: '0.7rem',
-            fontFamily: "'Noto Serif SC', serif",
+            fontSize: 'var(--fs-caption)',
             whiteSpace: 'nowrap',
             border: '1px solid rgba(200, 150, 12, 0.3)',
             backdropFilter: 'blur(4px)',

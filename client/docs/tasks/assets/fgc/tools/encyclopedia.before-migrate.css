@@ -1,0 +1,2317 @@
+/* ═══════════════════════════════════════════════════════════════
+   营造法式 · 导引看板 / 词条详情 / 图解与三维拆解
+   视觉语言对齐站内既有体系：宣纸底 + 墨线 + 朱砂点睛，
+   禁用渐变、玻璃拟态与大圆角，层级靠留白与 1px 细线建立。
+   ═══════════════════════════════════════════════════════════════ */
+
+.encyclopedia-page {
+  --enc-surface: #fdfbf6;
+  --enc-sunken: #f6f1e4;
+  --enc-line: var(--border-warm);
+  --enc-muted: #7c736c;
+  --enc-serif: var(--font-serif-display);
+}
+
+.enc-art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* 小节标题：朱砂竖条 + 宋体，站内统一的标题句式 */
+.enc-bar-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--enc-serif);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-title);
+  letter-spacing: 0.12em;
+  color: var(--ink);
+}
+
+.enc-bar-title::before {
+  content: '';
+  flex-shrink: 0;
+  width: 3px;
+  height: 15px;
+  background: var(--vermillion);
+}
+
+/* ─────────── 状态一：营造导引看板 ─────────── */
+.enc-guide {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 28px 28px 22px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--radius-lg);
+  background: var(--enc-surface);
+  overflow: hidden;
+}
+
+.enc-guide-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.enc-guide-watermark {
+  position: absolute;
+  right: -60px;
+  bottom: -70px;
+  width: 460px;
+  color: #6d5a45;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.enc-guide-watermark .enc-art {
+  width: 100%;
+}
+
+.enc-guide-watermark--low {
+  left: -120px;
+  top: -110px;
+  right: auto;
+  bottom: auto;
+  width: 340px;
+  opacity: 0.045;
+  transform: rotate(8deg);
+}
+
+.enc-guide-head {
+  margin-bottom: 20px;
+}
+
+.enc-guide-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--enc-serif);
+  font-size: var(--fs-card-title);
+  font-weight: var(--fw-title);
+  letter-spacing: 0.16em;
+  color: var(--ink);
+}
+
+.enc-guide-heading::before {
+  content: '';
+  width: 3px;
+  height: 18px;
+  background: var(--vermillion);
+}
+
+.enc-guide-hint {
+  max-width: 46ch;
+  margin: 12px 0 0 13px;
+  font-size: var(--fs-note);
+  line-height: 1.75;
+  letter-spacing: 0.04em;
+  color: var(--ink-light);
+}
+
+/* 四条导引连成一条索引带，而不是四张悬空卡片 */
+.enc-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--enc-line);
+  border-radius: var(--radius-md);
+  background: var(--enc-surface);
+  overflow: hidden;
+}
+
+.enc-guide-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 15px 16px;
+  border: 0;
+  border-left: 1px solid var(--enc-line);
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.24s var(--ease-out-expo);
+}
+
+.enc-guide-card:first-child {
+  border-left: 0;
+}
+
+.enc-guide-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--vermillion);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.32s var(--ease-out-expo);
+}
+
+.enc-guide-card:hover:not(:disabled),
+.enc-guide-card:focus-visible {
+  background: rgba(var(--vermillion-rgb), 0.045);
+}
+
+.enc-guide-card:hover:not(:disabled)::after,
+.enc-guide-card:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.enc-guide-card:disabled {
+  cursor: not-allowed;
+}
+
+.enc-guide-card:disabled .enc-guide-art,
+.enc-guide-card:disabled .enc-guide-title,
+.enc-guide-card:disabled .enc-guide-desc {
+  opacity: 0.35;
+}
+
+.enc-guide-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 148px;
+  margin-bottom: 8px;
+  color: #7d6247;
+  transition: color 0.24s ease;
+}
+
+.enc-guide-art .enc-art {
+  width: 100%;
+  height: 100%;
+}
+
+.enc-guide-card:hover:not(:disabled) .enc-guide-art {
+  color: var(--vermillion);
+}
+
+.enc-guide-title,
+.enc-guide-desc {
+  display: block;
+}
+
+.enc-guide-card .enc-guide-title {
+  font-family: var(--enc-serif);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-title);
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+.enc-guide-card .enc-guide-desc {
+  min-height: 42px;
+  font-size: var(--fs-meta);
+  line-height: 1.72;
+  letter-spacing: 0.02em;
+  color: var(--enc-muted);
+}
+
+.enc-guide-flow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  font-family: var(--enc-serif);
+  font-size: var(--fs-meta);
+  letter-spacing: 0.14em;
+  color: var(--enc-muted);
+}
+
+.enc-guide-flow i {
+  font-style: normal;
+  color: rgba(var(--border-warm-rgb), 1);
+}
+
+.enc-guide-foot {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px dashed var(--enc-line);
+  font-size: var(--fs-meta);
+  letter-spacing: 0.06em;
+  color: var(--enc-muted);
+}
+
+/* ─────────── 状态二：词条详情（单张档案纸，靠细线分节） ─────────── */
+.enc-article {
+  display: flex;
+  flex-direction: column;
+  max-width: 1040px;
+  padding: 30px 32px 34px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--radius-lg);
+  background: var(--enc-surface);
+}
+
+.enc-article-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 320px;
+  font-size: var(--fs-note);
+  color: var(--ink-light);
+}
+
+.enc-head {
+  padding-bottom: 18px;
+}
+
+.enc-head-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.enc-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-meta);
+  letter-spacing: 0.08em;
+}
+
+.enc-tag--cat {
+  border: 1px solid rgba(var(--vermillion-rgb), 0.28);
+  background: transparent;
+  color: var(--vermillion);
+}
+
+.enc-tag--level {
+  color: #fff;
+}
+
+.enc-head-title {
+  margin: 0 0 14px;
+  font-family: var(--enc-serif);
+  font-size: var(--fs-display);
+  font-weight: var(--fw-title);
+  letter-spacing: 0.14em;
+  line-height: 1.25;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.enc-head-synopsis {
+  max-width: 68ch;
+  margin: 0;
+  padding: 15px 18px;
+  border-radius: var(--radius-md);
+  background: var(--enc-sunken);
+  font-size: var(--fs-body);
+  line-height: 1.9;
+  letter-spacing: 0.03em;
+  color: var(--ink-light);
+  text-wrap: pretty;
+}
+
+.enc-section {
+  padding-top: 24px;
+  margin-top: 24px;
+  border-top: 1px solid var(--enc-line);
+}
+
+.enc-section:first-of-type {
+  padding-top: 0;
+  margin-top: 0;
+  border-top: 0;
+}
+
+.enc-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.enc-section-head h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--enc-serif);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-title);
+  letter-spacing: 0.12em;
+  color: var(--ink);
+}
+
+.enc-section-head h3::before {
+  content: '';
+  flex-shrink: 0;
+  width: 3px;
+  height: 15px;
+  background: var(--vermillion);
+}
+
+.enc-section-head h3 i {
+  display: none;
+}
+
+.enc-section-hint {
+  flex-shrink: 0;
+  font-size: var(--fs-meta);
+  letter-spacing: 0.04em;
+  color: var(--enc-muted);
+}
+
+.enc-section .encyclopedia-carousel-track {
+  max-height: 400px;
+}
+
+/* ─────────── 图解示意 ─────────── */
+.enc-diagram-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.enc-diagram-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.enc-diagram-titles strong {
+  font-family: var(--enc-serif);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-title);
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+.enc-diagram-titles span {
+  font-size: var(--fs-meta);
+  letter-spacing: 0.03em;
+  color: var(--enc-muted);
+}
+
+.enc-diagram-stage {
+  padding: 12px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--radius-md);
+  background: #faf6ec;
+}
+
+.enc-diagram-canvas {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 640 / 360;
+}
+
+.enc-diagram-art {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: #6f563f;
+}
+
+.enc-hotspot {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+.enc-hotspot-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--enc-surface);
+  border: 1.5px solid var(--vermillion);
+  transition: transform 0.2s var(--ease-out-expo), background-color 0.2s ease;
+}
+
+.enc-hotspot:hover .enc-hotspot-dot,
+.enc-hotspot:focus-visible .enc-hotspot-dot,
+.enc-hotspot.is-active .enc-hotspot-dot {
+  background: var(--vermillion);
+  transform: scale(1.25);
+}
+
+.enc-hotspot-label {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: max-content;
+  min-width: 132px;
+  max-width: 236px;
+  padding: 9px 11px;
+  border-radius: var(--radius-sm);
+  background: #2f2419;
+  color: #f6efe2;
+  font-size: var(--fs-meta);
+  line-height: 1.6;
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%);
+  transition: opacity 0.18s ease, visibility 0.18s ease;
+  pointer-events: none;
+}
+
+.enc-hotspot-label strong {
+  font-family: var(--enc-serif);
+  font-weight: var(--fw-body);
+  letter-spacing: 0.12em;
+}
+
+.enc-hotspot-label em {
+  font-style: normal;
+  font-size: var(--fs-caption);
+  color: rgba(246, 239, 226, 0.78);
+}
+
+.enc-hotspot.is-active .enc-hotspot-label,
+.enc-hotspot:focus-visible .enc-hotspot-label {
+  opacity: 1;
+  visibility: visible;
+}
+
+.enc-diagram-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.enc-diagram-legend button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-light);
+  font-family: inherit;
+  font-size: var(--fs-meta);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
+}
+
+.enc-diagram-legend button:hover,
+.enc-diagram-legend button.is-active {
+  border-color: var(--vermillion);
+  background: rgba(var(--vermillion-rgb), 0.05);
+  color: var(--vermillion);
+}
+
+.enc-diagram-legend-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ─────────── 斗拱三维拆解 ─────────── */
+.dougong3d {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 234px;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.dougong3d-stage {
+  position: relative;
+  height: 400px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--radius-md);
+  background: #f8f3e7;
+  overflow: hidden;
+}
+
+.dougong3d-info {
+  display: flex;
+  flex-direction: column;
+  padding-left: 18px;
+  border-left: 1px solid var(--enc-line);
+}
+
+.dougong3d-info-eyebrow {
+  margin: 0 0 8px;
+  font-size: var(--fs-caption);
+  letter-spacing: 0.16em;
+  color: var(--enc-muted);
+}
+
+.dougong3d-info-name {
+  margin: 0 0 8px;
+  font-family: var(--enc-serif);
+  font-size: var(--fs-section);
+  font-weight: var(--fw-title);
+  letter-spacing: 0.16em;
+  color: var(--ink);
+}
+
+.dougong3d-info-note {
+  margin: 0 0 16px;
+  font-size: var(--fs-note);
+  line-height: 1.85;
+  color: var(--ink-light);
+}
+
+.dougong3d-stage canvas {
+  display: block;
+  touch-action: pan-y;
+}
+
+.dougong3d-tools {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+}
+
+.dougong3d-tools button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--radius-sm);
+  background: rgba(253, 251, 246, 0.92);
+  color: var(--ink-light);
+  font-family: inherit;
+  font-size: var(--fs-meta);
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+
+.dougong3d-tools button:hover,
+.dougong3d-tools button.is-on {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.dougong3d-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: auto 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dougong3d-legend button {
+  padding: 4px 10px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-light);
+  font-family: var(--enc-serif);
+  font-size: var(--fs-meta);
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
+}
+
+.dougong3d-legend button:hover,
+.dougong3d-legend button.is-active {
+  border-color: var(--vermillion);
+  background: rgba(var(--vermillion-rgb), 0.05);
+  color: var(--vermillion);
+}
+
+/* ─────────── 三维联动 ─────────── */
+.enc-3d-card {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 22px 24px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--radius-md);
+  background: var(--enc-sunken);
+}
+
+.enc-3d-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.enc-3d-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--enc-serif);
+  font-size: var(--fs-meta);
+  letter-spacing: 0.18em;
+  color: var(--vermillion);
+}
+
+.enc-3d-text h3 {
+  margin: 9px 0 7px;
+  font-family: var(--enc-serif);
+  font-size: var(--fs-card-title);
+  font-weight: var(--fw-title);
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.enc-3d-text p {
+  max-width: 62ch;
+  margin: 0;
+  font-size: var(--fs-note);
+  line-height: 1.8;
+  color: var(--ink-light);
+}
+
+.enc-3d-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: var(--fs-meta);
+  letter-spacing: 0.04em;
+  color: var(--enc-muted);
+}
+
+.enc-3d-chips button {
+  padding: 4px 10px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-light);
+  font-family: inherit;
+  font-size: var(--fs-meta);
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+
+.enc-3d-chips button:hover {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-3d-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 20px;
+  border: 1px solid var(--vermillion);
+  border-radius: var(--radius-sm);
+  background: var(--vermillion);
+  color: #fff;
+  font-family: inherit;
+  font-size: var(--fs-note);
+  font-weight: var(--fw-body);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.enc-3d-btn:hover {
+  background: #a03022;
+  border-color: #a03022;
+}
+
+/* ─────────── 相关术语 ─────────── */
+.enc-related-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.enc-related-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 12px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.enc-related-tag:hover {
+  border-color: var(--vermillion);
+  background: rgba(var(--vermillion-rgb), 0.04);
+}
+
+.enc-related-cat {
+  font-size: var(--fs-caption);
+  letter-spacing: 0.1em;
+  color: var(--enc-muted);
+}
+
+.enc-related-name {
+  font-family: var(--enc-serif);
+  font-size: var(--fs-note);
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+.enc-related-tag i {
+  font-size: var(--fs-caption);
+  color: var(--enc-muted);
+}
+
+.enc-related-tag:hover i {
+  color: var(--vermillion);
+}
+
+/* ─────────── 左侧索引栏：与正文同一套线条语言 ─────────── */
+.encyclopedia-page .encyclopedia-sidebar {
+  background: #faf6ed;
+}
+
+.encyclopedia-page .encyclopedia-categories {
+  gap: 10px;
+  padding: 16px 16px 12px;
+}
+
+.encyclopedia-page .encyclopedia-cat-chip {
+  --chip-bg: #fff;
+  --chip-fg: #a4182f;
+  --chip-edge: #d4a0a9;
+  --chip-glow: rgba(94, 58, 34, 0.09);
+  border-radius: 5px;
+  border: 1px solid #cf8f9b;
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  padding: 5px 10px;
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-aux);
+  letter-spacing: 0.06em;
+  box-shadow: 0 3px 0 var(--chip-edge), 0 4px 8px var(--chip-glow);
+  transition: transform 0.14s ease, box-shadow 0.14s ease,
+    background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.encyclopedia-page .encyclopedia-cat-chip i {
+  font-size: var(--fs-caption);
+  opacity: 0.7;
+}
+
+.encyclopedia-page .encyclopedia-cat-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 var(--chip-edge), 0 6px 10px var(--chip-glow);
+}
+
+.encyclopedia-page .encyclopedia-cat-chip:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--chip-edge), 0 1px 3px var(--chip-glow);
+}
+
+.encyclopedia-page .encyclopedia-cat-chip.active {
+  --chip-bg: var(--vermillion);
+  --chip-fg: #fff;
+  --chip-edge: #8f1730;
+  --chip-glow: rgba(143, 23, 48, 0.28);
+  border-color: #8f1730;
+  color: #fff;
+}
+
+.encyclopedia-page .encyclopedia-cat-chip.active i {
+  opacity: 0.9;
+}
+
+.encyclopedia-page .encyclopedia-cat-chip.active i {
+  opacity: 0.85;
+}
+
+.encyclopedia-page .encyclopedia-term-item {
+  border-left: 0;
+  border-bottom: 1px dashed rgba(var(--border-warm-rgb), 0.7);
+  padding: 13px 18px;
+}
+
+.encyclopedia-page .encyclopedia-term-item.active {
+  background: rgba(var(--vermillion-rgb), 0.05);
+  border-bottom-color: var(--vermillion);
+}
+
+.encyclopedia-page .encyclopedia-term-item.active .encyclopedia-term-item-name {
+  color: var(--vermillion);
+}
+
+.encyclopedia-page .encyclopedia-term-item-name {
+  font-family: var(--enc-serif);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-title);
+  letter-spacing: 0.06em;
+}
+
+.encyclopedia-page .encyclopedia-term-item-synopsis {
+  margin-top: 4px;
+  color: var(--enc-muted);
+  line-height: 1.7;
+}
+
+/* ─────────── 响应式 ─────────── */
+@media (max-width: 1180px) {
+  .enc-guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .enc-guide-card:nth-child(2n + 1) {
+    border-left: 0;
+  }
+
+  .enc-guide-card:nth-child(n + 3) {
+    border-top: 1px solid var(--enc-line);
+  }
+
+  .enc-3d-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+}
+
+@media (max-width: 720px) {
+  .enc-guide {
+    padding: 20px 16px 18px;
+  }
+
+  .enc-guide-heading {
+    font-size: var(--fs-card-title);
+  }
+
+  .enc-guide-hint {
+    margin-left: 0;
+  }
+
+  .enc-guide-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .enc-guide-card {
+    border-left: 0;
+    border-top: 1px solid var(--enc-line);
+    padding: 14px;
+  }
+
+  .enc-guide-card:first-child {
+    border-top: 0;
+  }
+
+  .enc-guide-art {
+    height: 104px;
+  }
+
+  .enc-guide-card .enc-guide-desc {
+    min-height: 0;
+  }
+
+  .encyclopedia-detail {
+    padding: 18px 14px;
+  }
+
+  .enc-article {
+    padding: 20px 16px 24px;
+  }
+
+  .enc-head-title {
+    font-size: var(--fs-page-title);
+  }
+
+  .enc-section {
+    padding-top: 20px;
+    margin-top: 20px;
+  }
+
+  .enc-section-head {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .enc-3d-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dougong3d {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .dougong3d-stage {
+    height: 300px;
+  }
+
+  .dougong3d-info {
+    padding-left: 0;
+    padding-top: 14px;
+    border-left: 0;
+    border-top: 1px solid var(--enc-line);
+  }
+
+  .dougong3d-info-name {
+    font-size: var(--fs-card-title);
+  }
+
+  .enc-hotspot-label {
+    min-width: 108px;
+    max-width: 170px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enc-guide-card,
+  .enc-guide-card::after,
+  .enc-guide-art,
+  .enc-hotspot-dot,
+  .enc-hotspot-label {
+    transition: none;
+  }
+}
+
+/* ===== 建筑知识双主轴（T-BK-15，仅在末尾追加） ===== */
+.enc-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.enc-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-warm, #d4c9b8);
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--ink, #2c2c2c);
+  font-size: var(--fs-meta);
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.enc-filter-chip:hover {
+  border-color: rgba(196, 30, 58, 0.35);
+}
+
+.enc-filter-chip.active {
+  border-color: rgba(196, 30, 58, 0.5);
+  background: rgba(196, 30, 58, 0.1);
+  color: #8a2418;
+}
+
+.enc-filter-chip:focus-visible,
+.enc-filter-more:focus-visible,
+.enc-filter-count:focus-visible {
+  outline: 2px solid #8a2418;
+  outline-offset: 2px;
+}
+
+.enc-filter-chip--ghost {
+  background: transparent;
+}
+
+.enc-filter-chip--clear {
+  margin-top: 4px;
+}
+
+.enc-filter-count {
+  margin-left: 4px;
+  font-size: var(--fs-caption);
+  color: var(--ink-light, #5a5252);
+}
+
+.enc-filter-more {
+  border: none;
+  background: none;
+  color: var(--ink-light, #5a5252);
+  font-size: var(--fs-meta);
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.enc-badge--building {
+  /* #ffffff on #8a2418 ≈ 7.4:1 */
+  background: #8a2418;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: var(--fs-caption);
+  line-height: 1.6;
+}
+
+.enc-group-head {
+  padding: 10px 4px 6px;
+  margin-top: 6px;
+  font-size: var(--fs-meta);
+  letter-spacing: 0.06em;
+  color: var(--ink-light, #5a5252);
+  border-bottom: 1px solid rgba(212, 201, 184, 0.65);
+}
+
+.enc-result-count {
+  margin: 6px 0;
+  font-size: var(--fs-meta);
+  color: var(--ink-light, #5a5252);
+}
+
+.enc-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.enc-coverage {
+  font-size: var(--fs-meta);
+  color: var(--ink-light, #5a5252);
+}
+
+@media (max-width: 900px) {
+  .enc-filter-bar {
+    max-height: 132px;
+    overflow-y: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enc-filter-chip {
+    transition: none;
+  }
+}
+/* ===== 知识图谱全局样式（T-BG-11，仅末尾追加） =====
+   变量与 lib/encyclopediaGraph.js 的 GRAPH_CONFIG 对齐：
+   --enc-graph-w: GRAPH_WIDTH.min/max（320~420）
+   --enc-graph-rail-w: GRAPH_WIDTH.rail（52）
+   --enc-reading-measure: 74ch（§13.4 行宽目标 60~75ch）
+*/
+.enc-detail-grid {
+  --enc-detail-pad: 24px;
+  --enc-detail-gap: 28px;
+  --enc-graph-w: clamp(320px, 26vw, 420px);
+  --enc-graph-rail-w: 52px;
+  --enc-reading-measure: 74ch;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--enc-graph-w);
+  gap: var(--enc-detail-gap);
+  align-items: start;
+  min-width: 0;
+}
+
+.enc-detail-main {
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.enc-article.enc-article--fluid {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.enc-reading.encyclopedia-article-content {
+  max-width: var(--enc-reading-measure);
+  margin-inline: auto;
+  overflow-wrap: anywhere;
+}
+
+.encyclopedia-page-lead {
+  margin: 6px 0 0;
+  color: var(--ink-light);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+
+/* ---------- 面板 ---------- */
+.enc-graph-panel {
+  position: sticky;
+  top: 84px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 280px;
+  max-height: calc(100vh - 73px - 64px);
+  padding: 16px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--radius-lg);
+  background: var(--paper-white);
+  color: var(--ink);
+  overflow: auto;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+}
+
+.enc-graph-panel--loading .enc-graph-skeleton {
+  flex: 1;
+  min-height: 220px;
+  border-radius: 8px;
+  background: var(--border-warm);
+  opacity: 0.4;
+}
+
+.enc-graph-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.enc-graph-title {
+  margin: 0;
+  font-size: var(--fs-card-title);
+  color: var(--ink);
+}
+
+.enc-graph-hint {
+  margin: 0;
+  font-size: var(--fs-meta);
+  line-height: 1.5;
+  color: var(--ink-light);
+}
+
+.enc-graph-toggle {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 3px 8px;
+  border: 1px solid var(--enc-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-light);
+  font-size: var(--fs-meta);
+  cursor: pointer;
+}
+
+.enc-graph-toggle:focus-visible,
+.enc-graph-tool:focus-visible,
+.enc-graph-list button:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: 2px;
+}
+
+/* ---------- 图例（形状 + 线型双编码） ---------- */
+.enc-graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 6px 0;
+  border-top: 1px solid var(--enc-line);
+  border-bottom: 1px solid var(--enc-line);
+}
+
+.enc-graph-legend-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.enc-graph-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-caption);
+  color: var(--ink-light);
+  white-space: nowrap;
+}
+
+.enc-graph-legend-shape {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper-white);
+  flex: 0 0 auto;
+}
+
+.enc-graph-legend-shape--building {
+  border-radius: 2px;
+  border-color: var(--vermillion);
+}
+
+.enc-graph-legend-shape--category {
+  border: none;
+  border-radius: 0;
+  background: var(--ink-light);
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+
+.enc-graph-legend-shape--dynasty {
+  border-radius: 0;
+  transform: rotate(45deg);
+  width: 8px;
+  height: 8px;
+}
+
+.enc-graph-legend-shape--region {
+  border: none;
+  border-radius: 0;
+  background: var(--ink-light);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.enc-graph-legend-line {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  border-top: 1.5px solid var(--ink-light);
+  flex: 0 0 auto;
+}
+
+.enc-graph-legend-line--term {
+  border-top-style: dashed;
+}
+
+.enc-graph-legend-line--peer {
+  border-top-style: dotted;
+}
+
+/* ---------- 画布 ---------- */
+.enc-graph-canvas {
+  flex: 1;
+  min-height: 240px;
+}
+
+.enc-graph-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: calc(100vh - 73px - 200px);
+  touch-action: none;
+  user-select: none;
+}
+
+.enc-graph-svg:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: 2px;
+}
+
+.enc-graph-edge {
+  fill: none;
+  stroke: var(--ink-light);
+  stroke-width: 1;
+  opacity: 0.35;
+}
+
+.enc-graph-edge--primary {
+  stroke: var(--vermillion);
+  stroke-width: 1.6;
+  opacity: 0.6;
+}
+
+.enc-graph-edge--palace {
+  stroke: var(--ink-light);
+  stroke-width: 1.2;
+  opacity: 0.45;
+}
+
+.enc-graph-edge--term {
+  stroke: var(--ink-light);
+  stroke-width: 1;
+  opacity: 0.35;
+}
+
+.enc-graph-edge--peer {
+  stroke: var(--ink-light);
+  stroke-width: 0.8;
+  opacity: 0.28;
+}
+
+.enc-graph-node {
+  outline: none;
+  cursor: pointer;
+}
+
+.enc-graph-node-shape {
+  fill: var(--paper-white);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  transition: stroke-width 0.12s ease, stroke 0.12s ease;
+}
+
+.enc-graph-node-shape--building {
+  stroke: var(--vermillion);
+}
+
+.enc-graph-node-shape--category {
+  stroke: var(--ink-light);
+  stroke-width: 2;
+}
+
+.enc-graph-node-shape--dynasty,
+.enc-graph-node-shape--region {
+  stroke: var(--ink-light);
+}
+
+.enc-graph-node.is-center .enc-graph-node-shape {
+  stroke-width: 2.5;
+}
+
+.enc-graph-node.is-neighbor .enc-graph-node-shape {
+  stroke: var(--vermillion);
+  stroke-width: 2;
+}
+
+.enc-graph-node.is-dimmed {
+  opacity: 0.28;
+}
+
+.enc-graph-node:focus-visible .enc-graph-node-shape {
+  stroke: var(--vermillion);
+  stroke-width: 2.5;
+}
+
+.enc-graph-node-label {
+  fill: var(--ink);
+  font-size: var(--fs-meta);
+  pointer-events: none;
+}
+
+.enc-graph-node-hit {
+  stroke: transparent;
+}
+
+.enc-graph-node-state {
+  fill: none;
+  stroke: none;
+}
+
+/* ---------- 规模、工具、跳过 ---------- */
+.enc-graph-scale {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--ink-light);
+}
+
+.enc-graph-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.enc-graph-tool {
+  padding: 3px 8px;
+  border: 1px solid var(--enc-line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-light);
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
+
+.enc-graph-skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  padding: 4px 8px;
+  background: var(--paper-white);
+  border: 1px solid var(--vermillion);
+  color: var(--vermillion);
+  font-size: var(--fs-meta);
+  z-index: 2;
+}
+
+.enc-graph-skip:focus {
+  left: 8px;
+  top: 8px;
+}
+
+/* ---------- 空态与降级 ---------- */
+.enc-graph-empty,
+.enc-graph-fallback {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 4px;
+  color: var(--ink-light);
+  font-size: var(--fs-note);
+  line-height: 1.6;
+}
+
+.enc-graph-empty p,
+.enc-graph-fallback p {
+  margin: 0;
+}
+
+.enc-graph-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.enc-graph-list button {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--enc-line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  font-size: var(--fs-meta);
+  cursor: pointer;
+}
+
+/* ---------- 折叠条（不得 display:none） ---------- */
+.enc-graph-panel--rail {
+  width: var(--enc-graph-rail-w);
+  min-width: var(--enc-graph-rail-w);
+  max-width: var(--enc-graph-rail-w);
+  padding: 6px;
+  min-height: 180px;
+}
+
+.enc-graph-toggle--rail {
+  writing-mode: vertical-rl;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  font-size: var(--fs-meta);
+  letter-spacing: 0.08em;
+}
+
+/* ---------- 列表模式 ---------- */
+.enc-graph-panel--list .enc-graph-list {
+  max-height: calc(100vh - 240px);
+  overflow: auto;
+}
+
+/* ---------- 断点 ---------- */
+@media (max-width: 1439px) {
+  .enc-detail-grid {
+    --enc-graph-w: 320px;
+    --enc-detail-gap: 20px;
+  }
+}
+
+@media (max-width: 1283px) {
+  .enc-detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .enc-graph-panel {
+    position: static;
+    order: -1;
+    max-height: none;
+    width: 100%;
+  }
+
+  .enc-graph-panel--rail {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    min-height: 0;
+    padding: 4px;
+  }
+
+  .enc-graph-toggle--rail {
+    writing-mode: horizontal-tb;
+    min-height: 34px;
+  }
+
+  .enc-graph-svg {
+    max-height: 420px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .enc-detail-grid {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .enc-detail-grid {
+    gap: 12px;
+  }
+
+  .enc-graph-panel {
+    padding: 10px;
+  }
+}
+
+@container (max-width: 780px) {
+  .enc-guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media print {
+  .enc-graph-panel {
+    display: none;
+  }
+
+  .enc-detail-grid {
+    display: block;
+  }
+
+  .enc-article.enc-article--fluid {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enc-graph-panel,
+  .enc-graph-node-shape,
+  .enc-graph-tool,
+  .enc-graph-toggle {
+    transition: none;
+    animation: none;
+  }
+}/* ==========================================================================
+ * 百科 3D 卡片组（T-CARD-15）
+ * 仅追加：纸质视觉契约，只用描边 / 位移 / 透明度，无渐变、无玻璃质感。
+ * ========================================================================== */
+
+.enc-deck {
+  --enc-card-h: 320px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-block-size: 45vh;
+  margin-block: 4px 18px;
+  color: var(--ink);
+  font-family: var(--enc-serif);
+}
+
+@media (max-height: 860px) {
+  .enc-deck {
+    --enc-card-h: 288px;
+  }
+}
+
+.enc-deck-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-block-size: 240px;
+  block-size: clamp(240px, min(40vh, 45vh - 66px), 430px);
+  max-inline-size: 100%;
+  overflow: hidden;
+  touch-action: pan-y;
+  perspective: var(--deck-perspective, 900px);
+  transform-style: preserve-3d;
+  transform: translate3d(
+    calc(var(--deck-shift, 0px) + var(--deck-px, 0px)),
+    var(--deck-py, 0px),
+    0
+  );
+}
+
+.enc-deck-card {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  inline-size: clamp(240px, 26vw, 400px);
+  block-size: var(--enc-card-h);
+  padding: 14px 16px 12px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--deck-radius, 18px);
+  background: var(--enc-surface);
+  box-shadow: 0 2px 8px rgba(44, 44, 44, 0.06);
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  cursor: pointer;
+  outline: none;
+  overflow: hidden;
+  will-change: transform, opacity;
+  transition:
+    transform var(--deck-spring-ms, 300ms) var(--deck-spring, ease),
+    opacity 160ms linear;
+}
+
+.enc-deck-card.is-active {
+  box-shadow:
+    inset 0 0 0 2px var(--vermillion),
+    0 2px 8px rgba(44, 44, 44, 0.06);
+}
+
+.enc-deck-card:focus-visible {
+  box-shadow:
+    inset 0 0 0 2px var(--vermillion),
+    0 0 0 2px var(--enc-surface),
+    0 0 0 4px var(--vermillion);
+}
+
+.enc-deck-stage.is-swapping .enc-deck-card {
+  transition: none;
+}
+
+.enc-deck.is-flat .enc-deck-card {
+  transition-duration: 0ms;
+}
+
+.enc-deck.is-dragging .enc-deck-card {
+  will-change: auto;
+}
+
+.enc-card-badge--building,
+.enc-card-badge--3d {
+  position: absolute;
+  inset-block-start: 10px;
+  padding: 1px 6px;
+  border: 1px solid var(--enc-line);
+  border-radius: 999px;
+  background: var(--enc-sunken);
+  color: var(--enc-muted);
+  font-size: var(--fs-caption);
+  line-height: 18px;
+  pointer-events: none;
+}
+
+.enc-card-badge--building {
+  inset-inline-start: 12px;
+}
+
+.enc-card-badge--3d {
+  inset-inline-end: 12px;
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-card-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: 128px;
+  margin-block-start: 18px;
+  border: 1px dashed var(--enc-line);
+  border-radius: 10px;
+  background: var(--enc-sunken);
+  color: var(--enc-muted);
+  overflow: hidden;
+}
+
+.enc-card-art img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.enc-card-art-mark {
+  font-size: var(--fs-page-title);
+  font-weight: var(--fw-title);
+  letter-spacing: 2px;
+  opacity: 0.6;
+}
+
+.enc-card-title {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--enc-serif);
+  font-size: var(--fs-card-title);
+  font-weight: var(--fw-title);
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.enc-card-synopsis {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--enc-muted);
+  font-size: var(--fs-note);
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.enc-card-meta {
+  margin-block-start: auto;
+  color: var(--enc-muted);
+  font-size: var(--fs-meta);
+}
+
+.enc-card-index {
+  position: absolute;
+  inset-block-end: 10px;
+  inset-inline-end: 14px;
+  color: var(--enc-muted);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.enc-card-body {
+  display: contents;
+}
+
+.enc-card-skip,
+.enc-deck-hint,
+.enc-deck-status,
+.enc-graph3d-hint {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.enc-card-skip:focus-visible {
+  inset-block-start: 8px;
+  inset-inline-start: 8px;
+  inline-size: auto;
+  block-size: auto;
+  margin: 0;
+  padding: 6px 10px;
+  clip-path: none;
+  border: 1px solid var(--vermillion);
+  background: var(--enc-surface);
+  color: var(--vermillion);
+}
+
+.enc-deck-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 10px;
+}
+
+.enc-deck-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-inline-size: 32px;
+  min-block-size: 32px;
+  padding: 4px 8px;
+  border: 1px solid var(--enc-line);
+  border-radius: 8px;
+  background: var(--enc-surface);
+  color: var(--ink-light);
+  font-family: var(--enc-serif);
+  font-size: var(--fs-meta);
+  cursor: pointer;
+}
+
+.enc-deck-toggle {
+  padding-inline: 6px;
+}
+
+.enc-deck-toggle-label {
+  display: none;
+}
+
+.enc-deck-control:hover {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-deck-control:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: 2px;
+}
+
+.enc-deck-toggle[aria-pressed='false'] {
+  border-color: var(--enc-muted);
+}
+
+.enc-deck-toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.enc-deck-empty {
+  padding: 22px 18px;
+  border: 1px dashed var(--enc-line);
+  border-radius: 12px;
+  background: var(--enc-sunken);
+}
+
+.enc-deck-empty-text {
+  margin: 0 0 10px;
+  color: var(--enc-muted);
+  font-family: var(--enc-serif);
+  font-size: var(--fs-body);
+}
+
+.enc-deck-empty-action {
+  padding: 6px 14px;
+  border: 1px solid var(--vermillion);
+  border-radius: 8px;
+  background: var(--enc-surface);
+  color: var(--vermillion);
+  font-family: var(--enc-serif);
+  cursor: pointer;
+}
+
+.enc-deck-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--enc-line);
+  border-radius: 12px;
+  background: var(--enc-surface);
+  overflow: hidden;
+}
+
+.enc-deck-list li + li {
+  border-block-start: 1px solid var(--enc-line);
+}
+
+.enc-deck-list-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  inline-size: 100%;
+  min-block-size: 48px;
+  padding: 10px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--enc-serif);
+  text-align: start;
+  cursor: pointer;
+}
+
+.enc-deck-list-item[aria-current='true'] {
+  box-shadow: inset 3px 0 0 var(--vermillion);
+  background: var(--enc-sunken);
+}
+
+.enc-deck-list-item:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: -2px;
+}
+
+.enc-deck-more {
+  position: sticky;
+  inset-block-end: 0;
+  align-self: flex-start;
+  z-index: 1;
+  margin-block-start: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--enc-line);
+  border-radius: 8px;
+  background: var(--enc-surface);
+  color: var(--ink-light);
+  font-family: var(--enc-serif);
+  cursor: pointer;
+}
+
+.enc-deck-error {
+  padding: 16px;
+  border: 1px dashed var(--enc-line);
+  border-radius: 12px;
+  background: var(--enc-sunken);
+  color: var(--enc-muted);
+  font-family: var(--enc-serif);
+}
+
+.enc-deck-error p {
+  margin: 0 0 8px;
+}
+
+.enc-back-to-deck {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-block-end: 14px;
+  padding: 5px 12px;
+  border: 1px solid var(--enc-line);
+  border-radius: 8px;
+  background: var(--enc-surface);
+  color: var(--ink-light);
+  font-family: var(--enc-serif);
+  font-size: var(--fs-note);
+  cursor: pointer;
+}
+
+.enc-back-to-deck:hover,
+.enc-back-to-deck:focus-visible {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-no-select,
+.enc-no-select * {
+  user-select: none;
+}
+
+@media (max-width: 720px) {
+  .enc-deck {
+    max-block-size: 55vh;
+  }
+
+  .enc-deck-stage {
+    block-size: clamp(260px, 46vh, 380px);
+  }
+
+  .enc-deck-card {
+    inset-inline-start: 12%;
+    inline-size: clamp(168px, 62vw, 280px);
+  }
+}/* ==========================================================================
+ * 百科 3D 知识图谱（T-CARD-16）
+ * 仅追加：分层 DOM + CSS 3D，节点/边均为普通元素；无渐变、无玻璃质感。
+ * ========================================================================== */
+
+.enc-graph3d {
+  --g3d-perspective: 1100px;
+  position: relative;
+  display: block;
+  margin-block-start: 10px;
+}
+
+.enc-graph3d-stage {
+  position: relative;
+  block-size: clamp(260px, 34vh, 430px);
+  max-inline-size: 100%;
+  overflow: hidden;
+  touch-action: pan-y;
+  perspective: var(--g3d-perspective, 1100px);
+  perspective-origin: 50% 50%;
+  background: var(--enc-surface);
+  border: 1px solid var(--enc-line);
+  border-radius: 12px;
+}
+
+.enc-graph3d-stage:focus-within {
+  border-color: var(--vermillion);
+}
+
+.enc-graph3d-world {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 0;
+  block-size: 0;
+  transform-style: preserve-3d;
+  transform:
+    scale3d(var(--g3d-scale, 1), var(--g3d-scale, 1), 1)
+    rotateX(var(--g3d-pitch, -8deg))
+    rotateY(var(--g3d-az, -18deg));
+  transition: transform 120ms linear;
+}
+
+.enc-graph3d-edges,
+.enc-graph3d-nodes {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 0;
+  block-size: 0;
+  transform-style: preserve-3d;
+}
+
+.enc-graph3d-edges {
+  pointer-events: none;
+}
+
+.enc-graph3d-edge {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 1px;
+  block-size: 1px;
+  background: var(--ink-light);
+  transform-origin: 0 50%;
+  opacity: 0.7;
+}
+
+.enc-graph3d-edge[data-edge-kind='term'] {
+  background: none;
+  border-block-start: 1px dotted var(--ink-light);
+}
+
+.enc-graph3d-edge[data-edge-kind='peer'] {
+  background: none;
+  border-block-start: 1px dashed var(--ink-light);
+}
+
+.enc-graph3d-node {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 28px;
+  block-size: 28px;
+  margin-block-start: -14px;
+  margin-inline-start: -14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-family: var(--enc-serif);
+  transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.enc-graph3d-node:focus {
+  outline: none;
+}
+
+.enc-graph3d-shape {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 1px solid var(--ink-light);
+  border-radius: 50%;
+  background: var(--enc-surface);
+  box-shadow: inset 0 0 0 0 transparent;
+  transition:
+    box-shadow 140ms linear,
+    opacity 140ms linear;
+}
+
+.enc-graph3d-shape[data-node-type='building'] {
+  border-radius: 3px;
+  background: var(--enc-sunken);
+}
+
+.enc-graph3d-shape[data-node-type='category'] {
+  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  border-radius: 0;
+}
+
+.enc-graph3d-shape[data-node-type='dynasty'] {
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  border-radius: 0;
+}
+
+.enc-graph3d-shape[data-node-type='region'] {
+  border-radius: 50%;
+  background: var(--enc-sunken);
+}
+
+.enc-graph3d-node:hover .enc-graph3d-shape,
+.enc-graph3d-node.is-active .enc-graph3d-shape {
+  border-color: var(--vermillion);
+  box-shadow: inset 0 0 0 2px var(--vermillion);
+}
+
+.enc-graph3d-node:focus-visible .enc-graph3d-shape {
+  border-color: var(--vermillion);
+  box-shadow:
+    inset 0 0 0 2px var(--vermillion),
+    0 0 0 2px var(--enc-surface),
+    0 0 0 4px var(--vermillion);
+}
+
+.enc-graph3d-node.is-neighbor .enc-graph3d-shape {
+  border-color: var(--vermillion);
+}
+
+.enc-graph3d-node.is-selected .enc-graph3d-shape {
+  box-shadow: inset 0 0 0 2px var(--vermillion);
+}
+
+.enc-graph3d-node.is-dimmed .enc-graph3d-shape,
+.enc-graph3d-node.is-dimmed .enc-graph3d-label {
+  opacity: 0.4;
+}
+
+.enc-graph3d-label {
+  position: absolute;
+  inset-block-start: 30px;
+  inset-inline-start: 50%;
+  display: block;
+  inline-size: max-content;
+  max-inline-size: 7em;
+  translate: -50% 0;
+  color: var(--ink);
+  font-size: clamp(11px, calc(12px * var(--g3d-inv-scale, 1)), 14px);
+  line-height: 1.25;
+  text-align: center;
+  text-shadow: none;
+  pointer-events: none;
+  transform:
+    rotateY(calc(-1 * var(--g3d-az, 0deg)))
+    rotateX(calc(-1 * var(--g3d-pitch, 0deg)));
+}
+
+.enc-graph3d-label-line {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.enc-graph3d-node[data-backfacing='true'] .enc-graph3d-label {
+  opacity: 0;
+}
+
+.enc-graph3d-node[data-backfacing='true'] .enc-graph3d-shape {
+  opacity: 0.55;
+}
+
+.enc-graph3d-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 12px;
+}
+
+.enc-graph3d-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-inline-size: 44px;
+  min-block-size: 32px;
+  padding: 4px 10px;
+  border: 1px solid var(--enc-line);
+  border-radius: 8px;
+  background: var(--enc-surface);
+  color: var(--ink-light);
+  font-family: var(--enc-serif);
+  font-size: var(--fs-note);
+  cursor: pointer;
+}
+
+.enc-graph3d-control:hover {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-graph3d-control:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: 2px;
+}
+
+.enc-graph3d-control[aria-pressed='true'] {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-graph3d-control:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (pointer: coarse) {
+  .enc-graph3d-control,
+  .enc-deck-control {
+    min-block-size: 44px;
+  }
+}
+
+.enc-graph-panel--25d .enc-graph-canvas {
+  perspective: 900px;
+  padding: 6%;
+  overflow: hidden;
+}
+
+.enc-graph-panel--25d .enc-graph-svg {
+  transform: rotateX(-8deg) rotateY(-18deg) scale(0.98);
+  transform-origin: 50% 50%;
+  transition: transform 160ms linear;
+}
+
+@media print {
+  .enc-deck,
+  .enc-graph-panel--3d,
+  .enc-graph3d,
+  .enc-back-to-deck {
+    display: none !important;
+  }
+
+  .enc-graph-panel--25d .enc-graph-svg {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enc-deck-card,
+  .enc-deck-control,
+  .enc-graph3d-world,
+  .enc-graph3d-shape,
+  .enc-graph3d-label,
+  .enc-graph3d-control,
+  .enc-graph-panel--25d .enc-graph-svg {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+/* ==========================================================================
+ * 首帧占位（T-CARD-21 / 设计 §5.6）：数据就绪前后高度不变，避免 CLS
+ * ========================================================================== */
+
+.enc-deck {
+  /* 首屏占位与舞台同源（T-CLOSE-02）：stage 上限 + chrome 66px，断点差异由 40vh/45vh 派生 */
+  min-block-size: calc(min(40vh, 45vh - 66px) + 66px);
+}
+
+.enc-graph-panel--loading,
+.enc-graph-canvas,
+.enc-graph-panel--list {
+  min-block-size: 240px;
+}
+/* T-CARD-21：列表降级自身滚动，高度不超过 55vh */
+.enc-deck.is-list {
+  overflow-y: auto;
+}
+
+.enc-graph-panel--list.enc-graph-panel--loading {
+  min-block-size: 55vh;
+}/* T-CARD-21：顶栏文案在数据加载前后保持同高，避免整体下移 */
+.profile-title-sub {
+  block-size: 1.4em;
+  overflow: hidden;
+}
+
+.encyclopedia-page-lead {
+  block-size: 1.5em;
+  overflow: hidden;
+}/* T-CARD-21：加载骨架占满首屏，避免加载完成后滚动条突然出现造成横向位移 */
+.profile-loading {
+  min-block-size: 100vh;
+}@media (max-width: 480px) {
+  .profile-title-sub {
+    block-size: 2.6em;
+  }
+
+  .encyclopedia-page-lead {
+    block-size: 2.8em;
+  }
+}

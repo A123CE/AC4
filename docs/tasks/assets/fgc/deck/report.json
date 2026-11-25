@@ -1,0 +1,42 @@
+{
+  "generatedAt": "2026-11-24T14:11:35.407Z",
+  "baseUrl": "http://localhost:5173",
+  "rows": [
+    {
+      "viewport": "1920x1080",
+      "deckH": 462,
+      "vh": 1080,
+      "ratio": 0.428,
+      "stageH": 420,
+      "cardH": 324,
+      "cardW": 400,
+      "inside": true,
+      "cards": 4,
+      "overflowX": false
+    },
+    {
+      "viewport": "1440x900",
+      "deckH": 405,
+      "vh": 900,
+      "ratio": 0.45,
+      "stageH": 363,
+      "cardH": 324,
+      "cardW": 374,
+      "inside": true,
+      "cards": 4,
+      "overflowX": false
+    },
+    {
+      "viewport": "1280x800",
+      "deckH": 360,
+      "vh": 800,
+      "ratio": 0.45,
+      "stageH": 318,
+      "cardH": 290,
+      "cardW": 333,
+      "inside": true,
+      "cards": 3,
+      "overflowX": false
+    }
+  ]
+}

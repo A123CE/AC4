@@ -1,130 +1,129 @@
 /**
- * 百科术语API — 营造法式内容服务
- * GET /api/encyclopedia      — 获取所有术语 (支持 ?category=屋顶 筛选)
- * GET /api/encyclopedia/:id  — 获取单条术语详情
+ * 百科术语 API — 营造法式内容服务
+ * GET /api/encyclopedia             — 词条列表（双主轴筛选）
+ * GET /api/encyclopedia/taxonomy    — 建筑/朝代/地区/分类与覆盖率
+ * GET /api/encyclopedia/stats       — 覆盖率统计
+ * GET /api/encyclopedia/categories  — 分类列表
+ * GET /api/encyclopedia/:id         — 词条详情
  */
 
 const express = require('express');
 const router = express.Router();
-const pool = require('../db');
+const service = require('../services/encyclopediaService');
 
-/**
- * GET /api/encyclopedia
- * 获取所有百科术语，支持按分类筛选
- * Query: category (可选) — 分类名
- */
+const ENTRY_TYPES = new Set(['all', 'craft', 'building']);
+const MAX_TEXT_LENGTH = 50;
+
+function validationFailed(res, message) {
+  return res.status(400).json({
+    success: false,
+    code: 'VALIDATION_FAILED',
+    error: message,
+  });
+}
+
+function readText(value) {
+  if (value === undefined || value === null || value === '') return undefined;
+  const text = String(value).trim();
+  if (text.length > MAX_TEXT_LENGTH) return null;
+  return text;
+}
+
+function readPositiveInt(value, min, max) {
+  if (value === undefined || value === null || value === '') return null;
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < min || number > max) return undefined;
+  return number;
+}
+
 router.get('/', async (req, res) => {
   try {
-    const { category, search } = req.query;
-
-    let sql = 'SELECT * FROM encyclopedia_terms WHERE 1=1';
-    const params = [];
-
-    if (category && category !== 'all') {
-      sql += ' AND category = ?';
-      params.push(category);
+    const entryType = req.query.entry_type ? String(req.query.entry_type) : 'all';
+    if (!ENTRY_TYPES.has(entryType)) {
+      return validationFailed(res, 'entry_type 仅支持 all/craft/building');
     }
 
-    if (search && search.trim()) {
-      sql += ' AND (term LIKE ? OR synopsis LIKE ? OR content LIKE ?)';
-      const kw = `%${search.trim()}%`;
-      params.push(kw, kw, kw);
+    const page = readPositiveInt(req.query.page, 1, 100);
+    if (page === undefined) {
+      return validationFailed(res, 'page 需为 1~100 的整数');
+    }
+    const pageSize = readPositiveInt(req.query.page_size, 1, 500);
+    if (pageSize === undefined) {
+      return validationFailed(res, 'page_size 需为 1~500 的整数');
     }
 
-    sql += ' ORDER BY sort_order ASC, level_value ASC';
+    const category = readText(req.query.category);
+    const building = readText(req.query.building);
+    const dynasty = readText(req.query.dynasty);
+    const region = readText(req.query.region);
+    const search = readText(req.query.search);
+    if ([category, building, dynasty, region, search].includes(null)) {
+      return validationFailed(res, `筛选参数长度不得超过 ${MAX_TEXT_LENGTH}`);
+    }
 
-    const [rows] = await pool.execute(sql, params);
+    const include = req.query.include === 'content' ? 'content' : undefined;
 
-    // 解析JSON字段
-    const terms = rows.map(row => ({
-      ...row,
-      related_palaces: safeJSON(row.related_palaces, []),
-      related_terms: safeJSON(row.related_terms, []),
-    }));
+    const result = await service.listTerms({
+      entry_type: entryType === 'all' ? undefined : entryType,
+      category: category === 'all' ? undefined : category,
+      building,
+      dynasty: dynasty === 'all' ? undefined : dynasty,
+      region: region === 'all' ? undefined : region,
+      search,
+      include,
+      page: page || 1,
+      page_size: pageSize || 200,
+    });
 
-    res.json({ success: true, data: terms });
+    res.json({ success: true, data: result.data, meta: result.meta });
   } catch (err) {
     console.error('获取百科术语失败:', err);
     res.status(500).json({ success: false, error: '服务器错误' });
   }
 });
 
-/**
- * GET /api/encyclopedia/categories
- * 获取所有分类列表
- */
+router.get('/taxonomy', async (req, res) => {
+  try {
+    const lang = req.query.lang ? String(req.query.lang).slice(0, 10) : 'zh-CN';
+    const taxonomy = await service.getTaxonomy(lang);
+    res.json({ success: true, data: taxonomy });
+  } catch (err) {
+    console.error('获取百科分类体系失败:', err);
+    res.status(500).json({ success: false, error: '服务器错误' });
+  }
+});
+
+router.get('/stats', async (req, res) => {
+  try {
+    const stats = await service.getStats();
+    res.json({ success: true, data: stats });
+  } catch (err) {
+    console.error('获取百科统计失败:', err);
+    res.status(500).json({ success: false, error: '服务器错误' });
+  }
+});
+
 router.get('/categories', async (req, res) => {
   try {
-    const [rows] = await pool.execute(
-      'SELECT DISTINCT category, category_icon FROM encyclopedia_terms ORDER BY category'
-    );
-    res.json({ success: true, data: rows });
+    const taxonomy = await service.getTaxonomy();
+    res.json({ success: true, data: taxonomy.categories });
   } catch (err) {
     console.error('获取百科分类失败:', err);
     res.status(500).json({ success: false, error: '服务器错误' });
   }
 });
 
-/**
- * GET /api/encyclopedia/:id
- * 获取单条术语详情 (含关联术语和关联宫殿)
- */
 router.get('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const [rows] = await pool.execute(
-      'SELECT * FROM encyclopedia_terms WHERE id = ?',
-      [id]
-    );
-
-    if (rows.length === 0) {
+    const term = await service.getTermDetail(req.params.id);
+    if (!term) {
       return res.status(404).json({ success: false, error: '术语不存在' });
     }
-
-    const term = {
-      ...rows[0],
-      related_palaces: safeJSON(rows[0].related_palaces, []),
-      related_terms: safeJSON(rows[0].related_terms, []),
-    };
-
-    // 获取关联术语的简要信息
-    if (term.related_terms && term.related_terms.length > 0) {
-      const [relatedRows] = await pool.execute(
-        `SELECT id, term, category, synopsis FROM encyclopedia_terms
-         WHERE id IN (${term.related_terms.map(() => '?').join(',')})`,
-        term.related_terms
-      );
-      term._relatedTerms = relatedRows;
-    }
-
-    // 获取关联宫殿的简要信息
-    if (term.related_palaces && term.related_palaces.length > 0) {
-      const [palaceRows] = await pool.execute(
-        `SELECT id, name, dynasty FROM palaces
-         WHERE id IN (${term.related_palaces.map(() => '?').join(',')})`,
-        term.related_palaces
-      );
-      term._relatedPalaces = palaceRows;
-    }
-
     res.json({ success: true, data: term });
   } catch (err) {
     console.error('获取百科术语详情失败:', err);
     res.status(500).json({ success: false, error: '服务器错误' });
   }
 });
-
-/**
- * 安全解析 JSON 字段
- */
-function safeJSON(val, defaultVal = null) {
-  if (!val) return defaultVal;
-  if (typeof val === 'object') return val;
-  try {
-    return JSON.parse(val);
-  } catch {
-    return defaultVal;
-  }
-}
 
 module.exports = router;

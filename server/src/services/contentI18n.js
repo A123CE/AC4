@@ -61,7 +61,32 @@ async function getCoverage() {
   );
 
   const [[termRow]] = await pool.query(
-    'SELECT COUNT(*) AS total FROM encyclopedia_terms'
+    "SELECT COUNT(*) AS total FROM encyclopedia_terms WHERE status = 'published'"
+  );
+
+  const [[termTranslatedRow]] = await pool.query(
+    `SELECT COUNT(*) AS translated FROM (
+       SELECT entity_id FROM content_translations
+       WHERE entity_type = 'term' AND locale = 'en'
+         AND field IN ('term', 'synopsis') AND status = 'full'
+       GROUP BY entity_id HAVING COUNT(DISTINCT field) = 2
+     ) t
+     JOIN encyclopedia_terms e ON e.id = t.entity_id AND e.status = 'published'`
+  );
+
+  const [[termTitleOnlyRow]] = await pool.query(
+    `SELECT COUNT(*) AS title_only FROM (
+       SELECT t.entity_id FROM content_translations t
+       WHERE t.entity_type = 'term' AND t.locale = 'en'
+         AND t.field = 'term' AND t.status IN ('full', 'title')
+         AND NOT EXISTS (
+           SELECT 1 FROM content_translations s
+           WHERE s.entity_type = 'term' AND s.entity_id = t.entity_id
+             AND s.locale = 'en' AND s.field = 'synopsis' AND s.status = 'full'
+         )
+       GROUP BY t.entity_id
+     ) x
+     JOIN encyclopedia_terms e ON e.id = x.entity_id AND e.status = 'published'`
   );
 
   const total = Number(palaceRow.total || 0);
@@ -80,10 +105,27 @@ async function getCoverage() {
     },
     encyclopedia: {
       total: Number(termRow.total || 0),
-      translated: 0,
+      translated: Number(termTranslatedRow.translated || 0),
+      title_only: Number(termTitleOnlyRow.title_only || 0),
     },
     ui: { total: 0, translated: 0 },
   };
 }
 
-module.exports = { getTranslations, getPalaceContent, getCoverage };
+async function getTermTranslations(id, locale = 'en') {
+  const map = await getTranslations('term', id, locale);
+  return {
+    title: map.term ? { value: map.term.value, status: map.term.status } : null,
+    synopsis:
+      map.synopsis && map.synopsis.status === 'full'
+        ? { value: map.synopsis.value, status: map.synopsis.status }
+        : null,
+  };
+}
+
+module.exports = {
+  getTranslations,
+  getPalaceContent,
+  getCoverage,
+  getTermTranslations,
+};

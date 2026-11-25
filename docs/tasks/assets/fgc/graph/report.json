@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-11-24T13:04:14.270Z",
+  "before": {
+    "sphereClass": true,
+    "nodes": 53,
+    "chips": 53,
+    "edges": 40,
+    "coreMode": "neutral",
+    "coreInPan": true,
+    "coreInWorld": false,
+    "fab": {
+      "w": 44,
+      "h": 44
+    },
+    "az": -5.734,
+    "px": 0,
+    "stageBox": {
+      "x": 1042.609375,
+      "y": 311.1875,
+      "width": 340.390625,
+      "height": 306,
+      "top": 311.1875,
+      "right": 1383,
+      "bottom": 617.1875,
+      "left": 1042.609375
+    }
+  },
+  "afterRotate": 134.236,
+  "afterPan": {
+    "px": 106.288,
+    "py": 80
+  },
+  "afterReset": {
+    "az": -18,
+    "pitch": -8,
+    "scale": 1,
+    "px": 0,
+    "py": 0
+  }
+}

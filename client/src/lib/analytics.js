@@ -18,6 +18,24 @@ const EVENT_NAMES = new Set([
   'video_unavailable',
   'leaderboard_view',
   'leaderboard_rate_limited',
+  'encyclopedia_term_view',
+  'encyclopedia_term_open',
+  'encyclopedia_filter_building',
+  'encyclopedia_reverse_click',
+  // 知识图谱
+  'graph_view',
+  'graph_node_click',
+  'graph_expand',
+  'graph_fallback',
+  // 3D 旋转
+  'graph_rotate',
+  'graph_drag',
+  'graph_reset',
+  // 卡片
+  'card_view',
+  'card_swap',
+  'card_drag',
+  
 ]);
 
 const ALLOWED_PROP_KEYS = new Set([
@@ -30,6 +48,9 @@ const ALLOWED_PROP_KEYS = new Set([
   'route_id',
   'category',
   'stage',
+  'entry_type',
+  'palace_id',
+  'result_count',
 ]);
 
 const OFF_KEY = 'ac4_analytics_off';

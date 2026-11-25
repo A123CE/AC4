@@ -1,0 +1,118 @@
+/* CardSwap.css —— 卡片组主题变量与尺寸适配
+ * 变量结构对齐参考实现 THEMES（--swap-*），由 CardSwap 注入到 .enc-deck：
+ * light 保持既有纸质视觉；dark 仅在显式 theme="dark" 时启用（页面默认仍为浅色）。
+ */
+
+.enc-deck {
+  --swap-tile: var(--enc-surface);
+  --swap-tile-edge: var(--enc-line);
+  --swap-tile-highlight: #ffffff;
+  --swap-ink: var(--ink);
+  --swap-muted: var(--enc-muted);
+  --swap-badge: var(--enc-sunken);
+  --swap-shadow: 0 2px 8px rgba(44, 44, 44, 0.06);
+}
+
+.enc-deck[data-card-theme='dark'] {
+  --swap-tile: linear-gradient(180deg, #3a3644 0%, #27242f 100%);
+  --swap-tile-edge: rgba(255, 255, 255, 0.07);
+  --swap-tile-highlight: rgba(255, 255, 255, 0.12);
+  --swap-ink: #f4f4f5;
+  --swap-muted: rgba(244, 244, 245, 0.72);
+  --swap-badge: rgba(255, 255, 255, 0.08);
+  --swap-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.8), 0 10px 24px -12px rgba(0, 0, 0, 0.55);
+}
+
+/* ---------- 卡面主题变量 ---------- */
+.enc-deck-card {
+  inline-size: min(var(--enc-deck-w, clamp(360px, 38vw, 700px)), calc(100% - 24px));
+  block-size: var(--enc-deck-h, var(--enc-card-h));
+  background: var(--swap-tile, var(--enc-surface));
+  border-color: var(--swap-tile-edge, var(--enc-line));
+  box-shadow: var(--swap-shadow, 0 2px 8px rgba(44, 44, 44, 0.06));
+  transform-origin: center center;
+  will-change: transform, opacity, filter;
+  transition:
+    transform var(--deck-move-ms, 700ms) var(--deck-ease, cubic-bezier(0.215, 0.61, 0.355, 1)),
+    opacity var(--deck-move-ms, 700ms) var(--deck-ease, cubic-bezier(0.215, 0.61, 0.355, 1)),
+    filter var(--deck-move-ms, 700ms) var(--deck-ease, cubic-bezier(0.215, 0.61, 0.355, 1)),
+    box-shadow 220ms ease;
+}
+
+.enc-deck-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 0 var(--swap-tile-highlight, #ffffff),
+    inset 0 0 0 1px var(--swap-tile-edge, var(--enc-line));
+  pointer-events: none;
+}
+
+.enc-deck-card:hover {
+  box-shadow:
+    0 18px 36px -20px rgba(44, 44, 44, 0.35),
+    0 6px 14px -8px rgba(44, 44, 44, 0.18),
+    var(--swap-shadow, 0 2px 8px rgba(44, 44, 44, 0.06));
+}
+
+/* 后层卡片遮罩：由卡片深度实时计算透明度，避免多张卡片文字重叠 */
+.enc-deck-card-shade {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--swap-tile, var(--enc-surface));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--deck-move-ms, 700ms) var(--deck-ease, ease);
+}
+
+.enc-deck-card.is-active {
+  box-shadow:
+    inset 0 0 0 2px var(--vermillion),
+    var(--swap-shadow, 0 2px 8px rgba(44, 44, 44, 0.06));
+}
+
+.enc-deck-card:focus-visible {
+  box-shadow:
+    inset 0 0 0 2px var(--vermillion),
+    0 0 0 2px var(--swap-tile, var(--enc-surface)),
+    0 0 0 4px var(--vermillion);
+}
+
+.enc-deck-card .enc-card-title {
+  color: var(--swap-ink, var(--ink));
+}
+
+.enc-deck-card .enc-card-synopsis,
+.enc-deck-card .enc-card-meta,
+.enc-deck-card .enc-card-index {
+  color: var(--swap-muted, var(--enc-muted));
+}
+
+.enc-deck-card .enc-card-art {
+  border-color: var(--swap-tile-edge, var(--enc-line));
+  background: var(--swap-badge, var(--enc-sunken));
+}
+
+.enc-deck-card .enc-card-badge--building,
+.enc-deck-card .enc-card-badge--3d {
+  background: var(--swap-badge, var(--enc-sunken));
+}
+
+/* ---------- 图谱收起态：沿用更大尺寸，同时保留 --enc-deck-w 覆盖能力 ---------- */
+.enc-detail-grid.is-graph-collapsed .enc-deck-card {
+  inline-size: min(var(--enc-deck-w, clamp(380px, 40vw, 760px)), calc(100% - 24px));
+}
+
+/* ---------- 入场动画开关（intro=false） ---------- */
+.enc-deck.no-intro .enc-deck-card {
+  transition-duration: 0ms;
+}
+
+@media (max-width: 720px) {
+  .enc-deck-card {
+    inline-size: min(var(--enc-deck-w, clamp(220px, 86vw, 440px)), calc(100% - 16px));
+  }
+}

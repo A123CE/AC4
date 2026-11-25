@@ -22,7 +22,13 @@
     "ci:gate": "npm run lint && npm run test && npm run test:contract && npm run schema:diff && npm run test:e2e",
     "lint": "cd client && npm run lint",
     "seo:check": "node scripts/seo-check.mjs",
-    "ugc:check": "node scripts/check-ugc-blocked.mjs"
+    "ugc:check": "node scripts/check-ugc-blocked.mjs",
+    "bg:hash": "node scripts/bg-content-hash.mjs",
+    "bg:measure": "node scripts/measure-bg-layout.mjs",
+    "bg:events": "node scripts/check-bg-events.mjs",
+    "bk:events": "node scripts/check-bk-events.mjs",
+    "enc3d:events": "node scripts/check-card-events.mjs",
+    "enc3d:measure": "node scripts/measure-enc-3d.mjs"
   },
   "keywords": [
     "visualization",

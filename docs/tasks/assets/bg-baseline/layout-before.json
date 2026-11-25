@@ -1,0 +1,84 @@
+{
+  "sampleId": "roof-ranking",
+  "capturedAt": "2026-11-23T15:12:44.648Z",
+  "combos": [
+    {
+      "viewport": "1920x1080",
+      "mode": "guide",
+      "url": "http://localhost:3001/encyclopedia",
+      "metrics": {
+        "detailClientWidth": 1580,
+        "paddingLeft": 40,
+        "paddingRight": 40,
+        "contentBox": 1500,
+        "articleWidth": 0,
+        "blankRatio": 100,
+        "scrollOverflow": false,
+        "readingChars": null,
+        "titleRect": null,
+        "cls": 0
+      },
+      "file": "1920-guide-before.png"
+    },
+    {
+      "viewport": "1920x1080",
+      "mode": "detail",
+      "url": "http://localhost:3001/encyclopedia?term=roof-ranking",
+      "metrics": {
+        "detailClientWidth": 1580,
+        "paddingLeft": 40,
+        "paddingRight": 40,
+        "contentBox": 1500,
+        "articleWidth": 1040,
+        "blankRatio": 30.7,
+        "scrollOverflow": false,
+        "readingChars": 116.7,
+        "titleRect": {
+          "width": 974,
+          "left": 413
+        },
+        "cls": 0
+      },
+      "file": "1920-detail-before.png"
+    },
+    {
+      "viewport": "1440x900",
+      "mode": "guide",
+      "url": "http://localhost:3001/encyclopedia",
+      "metrics": {
+        "detailClientWidth": 1100,
+        "paddingLeft": 40,
+        "paddingRight": 40,
+        "contentBox": 1020,
+        "articleWidth": 0,
+        "blankRatio": 100,
+        "scrollOverflow": false,
+        "readingChars": null,
+        "titleRect": null,
+        "cls": 0
+      },
+      "file": "1440-guide-before.png"
+    },
+    {
+      "viewport": "1440x900",
+      "mode": "detail",
+      "url": "http://localhost:3001/encyclopedia?term=roof-ranking",
+      "metrics": {
+        "detailClientWidth": 1100,
+        "paddingLeft": 40,
+        "paddingRight": 40,
+        "contentBox": 1020,
+        "articleWidth": 1020,
+        "blankRatio": 0,
+        "scrollOverflow": false,
+        "readingChars": 114.4,
+        "titleRect": {
+          "width": 954,
+          "left": 413
+        },
+        "cls": 0.0001
+      },
+      "file": "1440-detail-before.png"
+    }
+  ]
+}

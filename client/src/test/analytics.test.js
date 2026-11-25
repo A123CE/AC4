@@ -93,4 +93,130 @@ describe('analytics 匿名埋点', () => {
     expect(track('leaderboard_rate_limited', { category: '古建筑' })).toBe(true);
     expect(track('unknown_event', {})).toBe(false);
   });
+
+  it('建筑知识四类埋点登记且只保留白名单属性', () => {
+    expect(
+      track('encyclopedia_filter_building', {
+        category: 'building',
+        stage: 'tiantan',
+        result_count: 5,
+        q: '塔',
+        user_id: 1,
+      })
+    ).toBe(true);
+
+    const queue = _peekQueueForTest();
+    expect(queue[0].props).toEqual({
+      category: 'building',
+      stage: 'tiantan',
+      result_count: 5,
+    });
+
+    expect(
+      track('encyclopedia_term_view', { reason: 'list', entity_type: 'term', entity_id: 'x' })
+    ).toBe(true);
+    expect(
+      track('encyclopedia_term_open', { entity_type: 'term', entity_id: 'x' })
+    ).toBe(true);
+    expect(
+      track('encyclopedia_reverse_click', {
+        entity_type: 'term',
+        entity_id: 'x',
+        palace_id: 'tiantan',
+      })
+    ).toBe(true);
+  });
+
+  it('图谱四类事件可入队且只保留 12 个白名单键', () => {
+    const payload = {
+      q_hash: 'a'.repeat(64),
+      q_length: 3,
+      entity_type: 'term',
+      entity_id: 'tiantan-eaves',
+      channel: 'copy',
+      reason: 'render_error',
+      route_id: 'encyclopedia',
+      category: 'building',
+      stage: 'detail',
+      entry_type: 'building',
+      palace_id: 'tiantan',
+      result_count: 6,
+      term: '藻井',
+      query: '藻井',
+      content: '正文',
+    };
+
+    for (const eventName of ['graph_view', 'graph_node_click', 'graph_expand', 'graph_fallback']) {
+      expect(track(eventName, payload)).toBe(true);
+    }
+
+    const added = _peekQueueForTest().slice(-4);
+    expect(added).toHaveLength(4);
+
+    const allowed = [
+      'category',
+      'channel',
+      'entity_id',
+      'entity_type',
+      'entry_type',
+      'palace_id',
+      'q_hash',
+      'q_length',
+      'reason',
+      'result_count',
+      'route_id',
+      'stage',
+    ].sort();
+
+    for (const item of added) {
+      expect(Object.keys(item.props).sort()).toEqual(allowed);
+      expect(item.props).not.toHaveProperty('term');
+      expect(item.props).not.toHaveProperty('query');
+      expect(item.props).not.toHaveProperty('content');
+    }
+  });
+
+  it('3D 卡片与旋转六事件登记且只保留 12 键', () => {
+    for (const eventName of [
+      'card_view',
+      'card_swap',
+      'card_drag',
+      'graph_rotate',
+      'graph_drag',
+      'graph_reset',
+    ]) {
+      expect(track(eventName, { stage: 'deck_impression' })).toBe(true);
+    }
+
+    const payload = {
+      q_hash: 'a'.repeat(64),
+      q_length: 1,
+      entity_type: 'card',
+      entity_id: 'x',
+      channel: 'copy',
+      reason: 'r',
+      route_id: 'encyclopedia',
+      category: 'building',
+      stage: 'drag_end',
+      entry_type: 'building',
+      palace_id: 'p',
+      result_count: 1,
+      angle: 1,
+      fps: 60,
+      term: 't',
+      content: 'c',
+    };
+
+    expect(track('card_view', payload)).toBe(true);
+    const last = _peekQueueForTest().slice(-1)[0];
+    const allowed = [
+      'category', 'channel', 'entity_id', 'entity_type', 'entry_type',
+      'palace_id', 'q_hash', 'q_length', 'reason', 'result_count', 'route_id', 'stage',
+    ].sort();
+    expect(Object.keys(last.props).sort()).toEqual(allowed);
+    expect(last.props).not.toHaveProperty('angle');
+    expect(last.props).not.toHaveProperty('fps');
+    expect(last.props).not.toHaveProperty('term');
+    expect(last.props).not.toHaveProperty('content');
+  });
 });

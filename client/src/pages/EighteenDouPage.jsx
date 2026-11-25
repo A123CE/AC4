@@ -98,6 +98,7 @@ const COMPONENTS = [
 function ComponentCard({ comp, isActive, onClick }) {
   return (
     <button
+      className="t-title-sm"
       onClick={onClick}
       style={{
         display: 'flex',
@@ -112,7 +113,6 @@ function ComponentCard({ comp, isActive, onClick }) {
         cursor: 'pointer',
         transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
         textAlign: 'left',
-        fontFamily: "'Noto Serif SC', serif",
       }}
       aria-pressed={isActive}
     >
@@ -132,8 +132,8 @@ function ComponentCard({ comp, isActive, onClick }) {
 
       {/* 文字 */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{
-          fontSize: '0.9rem', fontWeight: 600,
+        <div className="t-title-sm" style={{
+          fontSize: 'var(--fs-body)',
           color: isActive ? 'var(--vermillion)' : 'var(--ink)',
           letterSpacing: '1px',
           transition: 'color 0.25s ease',
@@ -174,8 +174,8 @@ function DetailHeader({ comp }) {
         <i className={`fas ${comp.icon}`} style={{ fontSize: '1.3rem', color: comp.color }} />
       </div>
       <div>
-        <h3 style={{
-          margin: 0, fontSize: '1.1rem', fontWeight: 700,
+        <h3 className="t-section" style={{
+          margin: 0, fontSize: 'var(--fs-card-title)',
           color: 'var(--ink)', letterSpacing: '2px',
         }}>{comp.name}</h3>
         <p style={{
@@ -207,9 +207,9 @@ function DetailDashboard({ items }) {
             fontSize: '0.6rem', color: 'var(--ink-muted)',
             letterSpacing: '1px', marginBottom: 4,
           }}>{item.label}</div>
-          <div style={{
-            fontSize: '0.78rem', color: 'var(--ink-light)',
-            fontWeight: 600, lineHeight: 1.3,
+          <div className="t-body" style={{
+            fontSize: 'var(--fs-meta)', color: 'var(--ink-light)',
+            lineHeight: 1.3,
           }}>{item.value}</div>
         </div>
       ))}
@@ -242,8 +242,8 @@ function DetailTimeline({ events }) {
             zIndex: 1,
           }} />
           <div>
-            <span style={{
-              fontSize: '0.75rem', fontWeight: 700,
+            <span className="t-aux" style={{
+              fontSize: 'var(--fs-meta)',
               color: 'var(--vermillion)', letterSpacing: '0.5px',
             }}>{ev.year}</span>
             <p style={{
@@ -328,9 +328,9 @@ function DetailPanel({ component }) {
       {/* 历史沿革 */}
       {hist && (
         <div style={{ marginBottom: 18 }}>
-          <h4 style={{
-            fontSize: '0.8rem', color: 'var(--vermillion)',
-            fontWeight: 600, margin: '0 0 12px',
+          <h4 className="t-section-sm" style={{
+            fontSize: 'var(--fs-note)', color: 'var(--vermillion)',
+            margin: '0 0 12px',
             letterSpacing: '2px',
           }}>
             <i className="fas fa-clock-rotate-left" style={{ marginRight: 6, opacity: 0.7 }} />
@@ -343,9 +343,9 @@ function DetailPanel({ component }) {
       {/* 典故 */}
       {fact && (
         <div style={{ marginTop: 18 }}>
-          <h4 style={{
-            fontSize: '0.8rem', color: 'var(--imperial-yellow)',
-            fontWeight: 600, margin: '0 0 10px',
+          <h4 className="t-section-sm" style={{
+            fontSize: 'var(--fs-note)', color: 'var(--imperial-yellow)',
+            margin: '0 0 10px',
             letterSpacing: '2px',
           }}>
             <i className="fas fa-book-open" style={{ marginRight: 6, opacity: 0.7 }} />
@@ -442,6 +442,7 @@ export default function EighteenDouPage() {
         }}>
           {/* 返回按钮 */}
           <button
+            className="t-control"
             onClick={() => navigate('/')}
             style={{
               pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: 8,
@@ -451,8 +452,7 @@ export default function EighteenDouPage() {
               background: 'rgba(255,255,255,0.9)',
               backdropFilter: 'blur(12px)',
               color: '#2C2C2C', cursor: 'pointer',
-              fontFamily: "'Noto Serif SC', serif",
-              fontSize: '0.82rem', letterSpacing: '1px',
+              fontSize: 'var(--fs-note)', letterSpacing: '1px',
               boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
               transition: 'all 0.2s ease',
             }}
@@ -470,8 +470,8 @@ export default function EighteenDouPage() {
 
           {/* 标题 */}
           <div style={{ textAlign: 'center', pointerEvents: 'none' }}>
-            <h1 style={{
-              margin: 0, fontSize: '1.35rem', fontWeight: 700,
+            <h1 className="t-page-title" style={{
+              margin: 0, fontSize: 'var(--fs-section)',
               color: '#2C2C2C', letterSpacing: '6px',
             }}>清式十八斗</h1>
             <p style={{
@@ -555,10 +555,9 @@ export default function EighteenDouPage() {
             boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
             animation: 'fadeInUp 0.4s ease-out',
           }}>
-            <span style={{
-              fontSize: '0.8rem', color: 'var(--imperial-yellow)',
+            <span className="t-body" style={{
+              fontSize: 'var(--fs-note)', color: 'var(--imperial-yellow)',
               letterSpacing: '2px',
-              fontFamily: "'Noto Serif SC', serif",
             }}>
               <i className="fas fa-expand-alt" style={{ marginRight: 8 }} />
               拆解模式 — 按 E 合拢复原
@@ -593,8 +592,8 @@ export default function EighteenDouPage() {
           borderBottom: '1px solid var(--border-warm)',
           flexShrink: 0,
         }}>
-          <h3 style={{
-            margin: 0, fontSize: '0.9rem', fontWeight: 600,
+          <h3 className="t-body" style={{
+            margin: 0, fontSize: 'var(--fs-body)',
             color: 'var(--ink-light)', letterSpacing: '3px',
             display: 'flex', alignItems: 'center', gap: 8,
           }}>
@@ -640,8 +639,8 @@ export default function EighteenDouPage() {
               fontSize: '0.7rem', color: 'var(--ink-muted)',
               letterSpacing: '1px',
             }}>拆解进度</span>
-            <span style={{
-              fontSize: '0.72rem', fontWeight: 600,
+            <span className="t-aux" style={{
+              fontSize: 'var(--fs-meta)',
               color: exploded ? 'var(--imperial-yellow)' : 'var(--ink-muted)',
             }}>
               {Math.round(explodeProgress * 100)}%

@@ -206,7 +206,7 @@ export default function ExhibitionPage() {
       <div className="exhibition-page" style={styles.page}>
         <div style={styles.centered}>
           <div style={styles.spinner} />
-          <p style={styles.loadingText}>正在布展...</p>
+          <p className="t-body" style={styles.loadingText}>正在布展...</p>
         </div>
       </div>
     );
@@ -221,10 +221,10 @@ export default function ExhibitionPage() {
             className="fas fa-compass"
             style={{ fontSize: '1.8rem', color: 'var(--ink-muted)', marginBottom: 12 }}
           />
-          <h2 style={{ margin: '0 0 8px', fontFamily: "'Noto Serif SC', serif", color: 'var(--ink)' }}>
+          <h2 className="t-section" style={{ margin: '0 0 8px', color: 'var(--ink)' }}>
             内容已调整
           </h2>
-          <p style={styles.loadingText}>该建筑可能已下线或地址有误，继续看看其他建筑。</p>
+          <p className="t-body" style={styles.loadingText}>该建筑可能已下线或地址有误，继续看看其他建筑。</p>
 
           {recommendations.length > 0 && (
             <div className="exhibition-recommend">
@@ -232,7 +232,7 @@ export default function ExhibitionPage() {
                 <button
                   key={item.id}
                   onClick={() => handleNavigate(item.id)}
-                  style={styles.textButton}
+                  className="t-control" style={styles.textButton}
                 >
                   {item.name}
                 </button>
@@ -240,7 +240,7 @@ export default function ExhibitionPage() {
             </div>
           )}
 
-          <button onClick={() => navigate('/')} style={styles.textButton}>
+          <button onClick={() => navigate('/')} className="t-control" style={styles.textButton}>
             返回首页
           </button>
         </div>
@@ -289,14 +289,14 @@ export default function ExhibitionPage() {
 
       {/* 顶部导航 */}
       <div style={styles.topBar}>
-        <button onClick={() => navigate('/')} style={styles.navBtn}>
+        <button onClick={() => navigate('/')} className="t-control" style={styles.navBtn}>
           <i className="fas fa-arrow-left" />
           <span>返回</span>
         </button>
 
         <div style={{ textAlign: 'center', pointerEvents: 'none' }}>
-          <h2 style={styles.title}>{palace.name}</h2>
-          <p style={styles.subtitle}>{palace.dynasty} · {palace.category}</p>
+          <h2 className="t-page-title" style={styles.title}>{palace.name}</h2>
+          <p className="t-aux" style={styles.subtitle}>{palace.dynasty} · {palace.category}</p>
         </div>
 
         <div style={{ display: 'flex', gap: 8 }}>
@@ -347,20 +347,20 @@ export default function ExhibitionPage() {
         <div style={styles.bottomContent}>
           <div>
             <div style={styles.tagRow}>
-              <span style={styles.tag}>{formatBuiltYear(palace.built_year)}</span>
-              {palace.height && <span style={styles.tag}>{palace.height}</span>}
-              {palace.area && <span style={styles.tag}>{palace.area}</span>}
-              <span style={{ ...styles.tag, color: 'var(--imperial-yellow)', borderColor: 'rgba(200,150,12,0.3)' }}>{palace.style}</span>
+              <span className="t-aux" style={styles.tag}>{formatBuiltYear(palace.built_year)}</span>
+              {palace.height && <span className="t-aux" style={styles.tag}>{palace.height}</span>}
+              {palace.area && <span className="t-aux" style={styles.tag}>{palace.area}</span>}
+              <span className="t-aux" style={{ ...styles.tag, color: 'var(--imperial-yellow)', borderColor: 'rgba(200,150,12,0.3)' }}>{palace.style}</span>
             </div>
 
-            <h3 style={styles.buildingName}>{palace.name}</h3>
-            <p style={styles.buildingEng}>
+            <h3 className="t-page-title" style={styles.buildingName}>{palace.name}</h3>
+            <p className="t-aux" style={styles.buildingEng}>
               {palace.name_en} · {palace.dynasty} · {formatLocation(palace)}
             </p>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={styles.position}>#{currentIndex + 1} / {allPalaces.length}</span>
+            <span className="t-num" style={styles.position}>#{currentIndex + 1} / {allPalaces.length}</span>
             <i className={`fas fa-chevron-${infoExpanded ? 'down' : 'up'}`}
               style={{ color: 'var(--ink-muted)', fontSize: '0.7rem', transition: 'transform 0.3s ease' }} />
           </div>
@@ -369,9 +369,9 @@ export default function ExhibitionPage() {
         {/* 展开详情 */}
         {infoExpanded && (
           <div style={styles.expandedInfo}>
-            <p style={styles.desc}>{palace.description}</p>
+            <p className="t-body" style={styles.desc}>{palace.description}</p>
             {palace.significance && (
-              <p style={styles.significance}>
+              <p className="t-body" style={styles.significance}>
                 <i className="fas fa-feather-alt" style={{ marginRight: 8 }} />
                 {palace.significance}
               </p>
@@ -427,8 +427,7 @@ const styles = {
   },
   loadingText: {
     margin: 0,
-    fontFamily: "'Noto Serif SC', serif",
-    fontSize: '0.9rem',
+    fontSize: 'var(--fs-body)',
     color: 'var(--ink-muted)',
   },
   textButton: {
@@ -439,8 +438,7 @@ const styles = {
     background: 'var(--surface-glass)',
     color: 'var(--ink)',
     cursor: 'pointer',
-    fontFamily: "'Noto Serif SC', serif",
-    fontSize: '0.85rem',
+    fontSize: 'var(--fs-note)',
   },
   topBar: {
     position: 'absolute',
@@ -464,17 +462,13 @@ const styles = {
     padding: '9px 20px',
     color: 'var(--ink)',
     cursor: 'pointer',
-    fontFamily: "'Noto Serif SC', serif",
-    fontSize: '0.85rem',
-    fontWeight: 500,
+    fontSize: 'var(--fs-note)',
     transition: 'all 0.25s ease',
     boxShadow: 'var(--shadow-sm)',
   },
   title: {
     margin: 0,
-    fontFamily: "'Noto Serif SC', serif",
-    fontSize: '1.3rem',
-    fontWeight: 700,
+    fontSize: 'var(--fs-section)',
     color: 'var(--ink)',
     letterSpacing: '0.02em',
   },
@@ -482,7 +476,6 @@ const styles = {
     margin: '2px 0 0',
     fontSize: '0.72rem',
     color: 'var(--ink-muted)',
-    fontFamily: "'Noto Serif SC', serif",
   },
   iconBtn: {
     pointerEvents: 'auto',
@@ -547,27 +540,22 @@ const styles = {
     borderRadius: 10,
     background: 'rgba(247, 243, 235, 0.6)',
     border: '1px solid var(--border-warm)',
-    fontSize: '0.65rem',
+    fontSize: 'var(--fs-caption)',
     color: 'var(--ink-light)',
-    fontFamily: "'Noto Serif SC', serif",
   },
   buildingName: {
     margin: 0,
-    fontFamily: "'Noto Serif SC', serif",
-    fontSize: '1.6rem',
-    fontWeight: 700,
+    fontSize: 'var(--fs-page-title)',
     color: 'var(--ink)',
   },
   buildingEng: {
     margin: '3px 0 0',
     fontSize: '0.72rem',
     color: 'var(--ink-muted)',
-    fontFamily: "'Noto Sans SC', sans-serif",
   },
   position: {
-    fontSize: '0.7rem',
+    fontSize: 'var(--fs-caption)',
     color: 'var(--ink-muted)',
-    fontFamily: "'Noto Serif SC', serif",
   },
   expandedInfo: {
     maxWidth: 800,
@@ -580,7 +568,6 @@ const styles = {
     fontSize: '0.85rem',
     color: 'var(--ink-light)',
     lineHeight: 1.8,
-    fontFamily: "'Noto Serif SC', serif",
   },
   significance: {
     margin: '12px 0 0',
@@ -590,7 +577,6 @@ const styles = {
     borderLeft: '3px solid var(--vermillion)',
     fontSize: '0.78rem',
     color: 'var(--ink-light)',
-    fontFamily: "'Noto Serif SC', serif",
     lineHeight: 1.6,
   },
 };

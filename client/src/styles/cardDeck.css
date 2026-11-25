@@ -1,0 +1,376 @@
+
+
+/* cardDeck.css —— 卡片堆叠（批次 E / T-DECK-02~06）增量样式。
+ * 导入顺序在 encyclopedia.css 之后（main.jsx 已保证），仅覆盖不改原选择器语义。
+ * 令牌来源：client/src/styles/global.css :root（--fs-* / --fw-* / --font-*）。
+ */
+
+.enc-deck-stage {
+  transform: translate3d(
+    calc(var(--deck-shift, 0px) + var(--deck-dx, 0px) + var(--deck-px, 0px)),
+    calc(var(--deck-dy, 0px) + var(--deck-py, 0px)),
+    0
+  );
+}
+
+.enc-deck-tools {
+  position: absolute;
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.enc-deck-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  border: 1px solid var(--enc-line);
+  border-radius: 999px;
+  background: var(--enc-surface);
+  color: var(--enc-muted);
+  cursor: pointer;
+  transition:
+    border-color 140ms linear,
+    color 140ms linear;
+}
+
+.enc-deck-tool:hover {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-deck-tool:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: 2px;
+}
+
+.enc-deck-tool[aria-pressed='true'] {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-deck-tool:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.enc-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
+}
+
+.enc-card-head-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vermillion);
+  line-height: 1;
+}
+
+.enc-card-head .enc-card-title {
+  min-inline-size: 0;
+}
+
+/* ===== 预览浮层（T-DECK-05）===== */
+.enc-preview-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(24, 20, 16, 0.55);
+  backdrop-filter: blur(4px);
+}
+
+.enc-preview-dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  inline-size: min(980px, 100%);
+  max-block-size: 90vh;
+  border: 1px solid rgba(122, 100, 72, 0.24);
+  border-radius: 20px;
+  background-color: #faf7f0;
+  background-image: url('/textures/paper-light.svg');
+  background-size: 240px 240px;
+  background-repeat: repeat;
+  color: var(--ink);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 32px 80px -32px rgba(24, 20, 16, 0.5),
+    0 8px 24px -12px rgba(24, 20, 16, 0.28);
+  overflow: hidden;
+}
+
+.enc-preview-head {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px 14px;
+  border-block-end: 1px solid rgba(122, 100, 72, 0.18);
+  background: rgba(250, 247, 240, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.enc-preview-title {
+  flex: 1;
+  min-inline-size: 0;
+  margin: 0;
+  font-family: var(--enc-serif);
+  font-size: clamp(1.15rem, 1.6vw, 1.5rem);
+  font-weight: var(--fw-title);
+  line-height: 1.35;
+}
+
+.enc-preview-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 42px;
+  block-size: 42px;
+  padding: 0;
+  border: 1px solid rgba(122, 100, 72, 0.24);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--enc-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.enc-preview-close:hover,
+.enc-preview-close:focus-visible {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-preview-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(16px, 2vw, 26px);
+  padding: 20px 22px 22px;
+  overflow: auto;
+}
+
+.enc-preview-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  aspect-ratio: 4 / 3;
+  min-block-size: 220px;
+  max-block-size: 46vh;
+  border: 1px solid rgba(122, 100, 72, 0.2);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.42);
+  overflow: hidden;
+}
+
+.enc-preview-art img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.enc-preview-art-mark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--enc-muted);
+}
+
+.enc-preview-art-seal {
+  display: grid;
+  place-items: center;
+  inline-size: 76px;
+  block-size: 76px;
+  border: 1px solid rgba(122, 100, 72, 0.24);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--vermillion);
+  font-family: var(--enc-serif);
+  font-size: 2rem;
+}
+
+.enc-preview-art-label {
+  font-size: var(--fs-meta);
+  letter-spacing: 0.08em;
+}
+
+.enc-preview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-inline-size: 0;
+}
+
+.enc-preview-synopsis {
+  margin: 0;
+  color: var(--ink-light);
+  font-size: var(--fs-body);
+  line-height: 1.85;
+}
+
+.enc-preview-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.enc-preview-meta li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid rgba(122, 100, 72, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.enc-preview-meta-label {
+  color: var(--enc-muted);
+  font-size: var(--fs-caption);
+  letter-spacing: 0.08em;
+}
+
+.enc-preview-meta-value {
+  color: var(--ink);
+  font-size: var(--fs-note);
+  font-weight: var(--fw-body);
+}
+
+.enc-preview-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 22px 18px;
+  border-block-start: 1px solid rgba(122, 100, 72, 0.18);
+  background: rgba(250, 247, 240, 0.78);
+}
+
+.enc-preview-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.enc-preview-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.enc-preview-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  padding: 6px 14px;
+  border: 1px solid rgba(122, 100, 72, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.66);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-note);
+  font-weight: var(--fw-body);
+  cursor: pointer;
+}
+
+.enc-preview-btn:hover,
+.enc-preview-btn:focus-visible {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-preview-btn--primary {
+  border-color: var(--vermillion);
+  background: var(--vermillion);
+  color: #fff;
+}
+
+.enc-preview-btn--primary:hover,
+.enc-preview-btn--primary:focus-visible {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+.enc-preview-position {
+  color: var(--enc-muted);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 760px) {
+  .enc-preview-body {
+    grid-template-columns: 1fr;
+    padding: 16px 16px 18px;
+  }
+
+  .enc-preview-art {
+    aspect-ratio: 16 / 10;
+    min-block-size: 180px;
+    max-block-size: 34vh;
+  }
+
+  .enc-preview-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .enc-preview-foot {
+    padding: 12px 16px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .enc-preview-scrim {
+    padding: 12px;
+  }
+
+  .enc-preview-dialog {
+    max-block-size: 92vh;
+    border-radius: 16px;
+  }
+
+  .enc-preview-head {
+    padding: 14px 16px 12px;
+  }
+
+  .enc-preview-actions {
+    inline-size: 100%;
+  }
+
+  .enc-preview-actions .enc-preview-btn {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enc-preview-scrim,
+  .enc-preview-dialog,
+  .enc-preview-btn {
+    transition: none;
+  }
+}

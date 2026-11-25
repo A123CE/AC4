@@ -1,0 +1,302 @@
+
+
+/* graphSphere.css —— 知识图谱 3D 球体（批次 D + D2）
+ *
+ * 范围约束：
+ * - 主题只作用于 .enc-graph3d--sphere（页面其余区域保持浅色）
+ * - 字重/字号只引用 --fw-* / --fs-* 令牌，本文件禁止字面量与私有字重令牌
+ * - 卡片为圆角矩形 + 左侧 2px 色条，连线 1px 细线（对齐参考图）
+ * - 默认深色（--g3s-*），[data-graph-theme='light'] 覆盖为浅色（--g3l-*）
+ */
+
+.enc-graph3d--sphere {
+  --g3s-bg: #14171c;
+  --g3s-surface: #1a1e24;
+  --g3s-border: #2b323b;
+  --g3s-node-bg: #232a33;
+  --g3s-node-border: #3d4753;
+  --g3s-node-text: #cbd3df;
+  --g3s-node-bg-active: #2c3a4d;
+  --g3s-accent: #7fb0ff;
+  --g3s-edge: rgba(203, 211, 223, 0.18);
+  --g3s-core-ring: #7fb0ff;
+  --g3s-halo: rgba(127, 176, 255, 0.16);
+  --g3-chip-back-opacity: 0.32;
+}
+
+.enc-graph3d--sphere[data-graph-theme='light'] {
+  --g3s-bg: #f7f3eb;
+  --g3s-surface: #fdfbf6;
+  --g3s-border: #d4c9b8;
+  --g3s-node-bg: #ffffff;
+  --g3s-node-border: #c9bda9;
+  --g3s-node-text: #2c2c2c;
+  --g3s-node-bg-active: #f0e7d8;
+  --g3s-accent: #b83a2a;
+  --g3s-edge: rgba(44, 44, 44, 0.24);
+  --g3s-core-ring: #b83a2a;
+  --g3s-halo: rgba(184, 58, 42, 0.14);
+}
+
+.enc-graph3d-pan {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(var(--g3d-px, 0px), var(--g3d-py, 0px), 0);
+  transform-style: preserve-3d;
+}
+
+.enc-graph3d--sphere .enc-graph3d-stage {
+  background: var(--g3s-bg);
+  border-color: var(--g3s-border);
+  color: var(--g3s-node-text);
+}
+
+.enc-graph3d--sphere .enc-graph3d-stage:focus-within {
+  border-color: var(--g3s-accent);
+}
+
+.enc-graph3d--sphere .enc-graph3d-world {
+  transition: none;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.enc-graph3d--sphere .enc-graph3d-edges,
+.enc-graph3d--sphere .enc-graph3d-nodes {
+  transform-style: preserve-3d;
+}
+
+.enc-graph3d--sphere .enc-graph3d-edge {
+  background: var(--g3s-edge);
+  opacity: 1;
+}
+
+.enc-graph3d--sphere .enc-graph3d-edge[data-edge-kind='term'] {
+  background: none;
+  border-block-start: 1px dotted var(--g3s-edge);
+}
+
+.enc-graph3d--sphere .enc-graph3d-edge[data-edge-kind='peer'] {
+  background: none;
+  border-block-start: 1px dashed var(--g3s-edge);
+}
+
+.enc-graph3d--sphere .enc-graph3d-node {
+  inline-size: 0;
+  block-size: 0;
+  margin: 0;
+  padding: 0;
+  background: none;
+  color: var(--g3s-node-text);
+  font-family: var(--font-sans);
+  transform-style: preserve-3d;
+}
+
+.enc-graph3d--sphere .enc-graph3d-node[data-backfacing='true'] {
+  pointer-events: none;
+}
+
+.enc-graph3d--sphere .enc-graph3d-node[data-backfacing='true'] .enc-graph3d-chip {
+  opacity: var(--g3-chip-back-opacity, 0.32);
+}
+
+.enc-graph3d-chip {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-inline-size: 80px;
+  max-inline-size: 152px;
+  padding: 6px 12px;
+  border: 1px solid var(--g3s-node-border);
+  border-radius: 8px;
+  background: var(--g3s-node-bg);
+  color: var(--g3s-node-text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-note);
+  font-weight: var(--fw-body);
+  line-height: 1.35;
+  white-space: nowrap;
+  transform: translate(-50%, -50%) scale(var(--g3d-chip-inv-scale, 1));
+  transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+  transition:
+    background 140ms linear,
+    border-color 140ms linear,
+    opacity 140ms linear;
+}
+
+.enc-graph3d-chip[data-lines='2'] {
+  align-items: flex-start;
+  max-block-size: 56px;
+  white-space: normal;
+}
+
+.enc-graph3d-chip[data-lines='2'] .enc-graph3d-chip-text {
+  display: -webkit-box;
+  overflow: hidden;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.enc-graph3d-chip-bar {
+  flex: none;
+  inline-size: 2px;
+  block-size: 14px;
+  border-radius: 1px;
+  background: var(--g3s-accent);
+}
+
+.enc-graph3d-chip-bar[data-node-type='building'] {
+  background: #c8960c;
+}
+
+.enc-graph3d-chip-bar[data-node-type='category'] {
+  background: #d98a7a;
+}
+
+.enc-graph3d-chip-bar[data-node-type='dynasty'] {
+  background: #9bd0a6;
+}
+
+.enc-graph3d-chip-bar[data-node-type='region'] {
+  background: #9ec6e8;
+}
+
+.enc-graph3d-chip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.enc-graph3d--sphere .enc-graph3d-node:hover .enc-graph3d-chip,
+.enc-graph3d--sphere .enc-graph3d-node.is-active .enc-graph3d-chip,
+.enc-graph3d--sphere .enc-graph3d-node:focus-visible .enc-graph3d-chip {
+  border-color: var(--g3s-accent);
+  background: var(--g3s-node-bg-active);
+}
+
+.enc-graph3d--sphere .enc-graph3d-node.is-neighbor .enc-graph3d-chip {
+  border-color: var(--g3s-accent);
+}
+
+.enc-graph3d--sphere .enc-graph3d-node.is-selected .enc-graph3d-chip {
+  border-color: var(--g3s-accent);
+  box-shadow: inset 0 0 0 1px var(--g3s-accent);
+}
+
+.enc-graph3d--sphere .enc-graph3d-node.is-dimmed .enc-graph3d-chip {
+  opacity: 0.4;
+}
+
+.enc-graph3d-core {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transform: translate(-50%, -50%) scale(var(--g3d-scale, 1));
+  pointer-events: none;
+  z-index: 2;
+}
+
+.enc-graph3d-core-dot {
+  position: relative;
+  inline-size: 16px;
+  block-size: 16px;
+  border: 1px solid var(--g3s-core-ring);
+  border-radius: 50%;
+  box-shadow: 0 0 0 6px var(--g3s-halo);
+}
+
+.enc-graph3d-core-dot::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--g3s-accent);
+}
+
+.enc-graph3d-core-text {
+  color: var(--g3s-node-text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-aux);
+  white-space: nowrap;
+}
+
+.enc-graph3d-reset-fab {
+  position: absolute;
+  inset-block-end: 12px;
+  inset-inline-end: 12px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  border: 1px solid var(--g3s-node-border);
+  border-radius: 999px;
+  background: var(--g3s-surface);
+  color: var(--g3s-node-text);
+  font-size: var(--fs-body-lg);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 140ms linear,
+    color 140ms linear;
+}
+
+.enc-graph3d-reset-fab:hover {
+  border-color: var(--g3s-accent);
+  color: var(--g3s-accent);
+}
+
+.enc-graph3d-reset-fab:focus-visible {
+  outline: 2px solid var(--g3s-accent);
+  outline-offset: 2px;
+}
+
+.enc-graph3d--sphere .enc-graph3d-control {
+  background: var(--g3s-surface);
+  border-color: var(--g3s-node-border);
+  color: var(--g3s-node-text);
+}
+
+.enc-graph3d--sphere .enc-graph3d-control:hover {
+  border-color: var(--g3s-accent);
+  color: var(--g3s-accent);
+}
+
+.enc-graph3d--sphere .enc-graph3d-control[aria-pressed='true'] {
+  border-color: var(--g3s-accent);
+  color: var(--g3s-accent);
+}
+
+.enc-graph3d--sphere .enc-graph3d-hint {
+  color: var(--g3s-node-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enc-graph3d-chip,
+  .enc-graph3d-reset-fab {
+    transition: none;
+  }
+}
+
+@media print {
+  .enc-graph3d--sphere {
+    --g3s-bg: #ffffff;
+    --g3s-surface: #ffffff;
+    --g3s-node-bg: #ffffff;
+    --g3s-node-text: #111111;
+    --g3s-node-border: #777777;
+    --g3s-edge: rgba(0, 0, 0, 0.6);
+  }
+}

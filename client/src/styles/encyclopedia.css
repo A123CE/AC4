@@ -9,7 +9,7 @@
   --enc-sunken: #f6f1e4;
   --enc-line: var(--border-warm);
   --enc-muted: #7c736c;
-  --enc-serif: 'Noto Serif SC', 'Source Han Serif SC', 'STSong', serif;
+  --enc-serif: var(--font-serif-display);
 }
 
 .enc-art {
@@ -25,8 +25,8 @@
   gap: 10px;
   margin: 0;
   font-family: var(--enc-serif);
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-title);
   letter-spacing: 0.12em;
   color: var(--ink);
 }
@@ -94,8 +94,8 @@
   gap: 10px;
   margin: 0;
   font-family: var(--enc-serif);
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--fs-card-title);
+  font-weight: var(--fw-title);
   letter-spacing: 0.16em;
   color: var(--ink);
 }
@@ -110,7 +110,7 @@
 .enc-guide-hint {
   max-width: 46ch;
   margin: 12px 0 0 13px;
-  font-size: 13px;
+  font-size: var(--fs-note);
   line-height: 1.75;
   letter-spacing: 0.04em;
   color: var(--ink-light);
@@ -205,15 +205,15 @@
 
 .enc-guide-card .enc-guide-title {
   font-family: var(--enc-serif);
-  font-size: 14.5px;
-  font-weight: 700;
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-title);
   letter-spacing: 0.08em;
   color: var(--ink);
 }
 
 .enc-guide-card .enc-guide-desc {
   min-height: 42px;
-  font-size: 12px;
+  font-size: var(--fs-meta);
   line-height: 1.72;
   letter-spacing: 0.02em;
   color: var(--enc-muted);
@@ -225,7 +225,7 @@
   gap: 12px;
   margin-top: 18px;
   font-family: var(--enc-serif);
-  font-size: 12px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.14em;
   color: var(--enc-muted);
 }
@@ -239,7 +239,7 @@
   margin-top: auto;
   padding-top: 14px;
   border-top: 1px dashed var(--enc-line);
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.06em;
   color: var(--enc-muted);
 }
@@ -262,7 +262,7 @@
   justify-content: center;
   gap: 14px;
   min-height: 320px;
-  font-size: 13px;
+  font-size: var(--fs-note);
   color: var(--ink-light);
 }
 
@@ -283,7 +283,7 @@
   gap: 6px;
   padding: 3px 9px;
   border-radius: var(--radius-sm);
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.08em;
 }
 
@@ -300,8 +300,8 @@
 .enc-head-title {
   margin: 0 0 14px;
   font-family: var(--enc-serif);
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: var(--fs-display);
+  font-weight: var(--fw-title);
   letter-spacing: 0.14em;
   line-height: 1.25;
   color: var(--ink);
@@ -314,7 +314,7 @@
   padding: 15px 18px;
   border-radius: var(--radius-md);
   background: var(--enc-sunken);
-  font-size: 0.9rem;
+  font-size: var(--fs-body);
   line-height: 1.9;
   letter-spacing: 0.03em;
   color: var(--ink-light);
@@ -347,8 +347,8 @@
   gap: 10px;
   margin: 0;
   font-family: var(--enc-serif);
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-title);
   letter-spacing: 0.12em;
   color: var(--ink);
 }
@@ -367,7 +367,7 @@
 
 .enc-section-hint {
   flex-shrink: 0;
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.04em;
   color: var(--enc-muted);
 }
@@ -393,14 +393,14 @@
 
 .enc-diagram-titles strong {
   font-family: var(--enc-serif);
-  font-size: 13.5px;
-  font-weight: 700;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-title);
   letter-spacing: 0.08em;
   color: var(--ink);
 }
 
 .enc-diagram-titles span {
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.03em;
   color: var(--enc-muted);
 }
@@ -470,7 +470,7 @@
   border-radius: var(--radius-sm);
   background: #2f2419;
   color: #f6efe2;
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   line-height: 1.6;
   text-align: left;
   opacity: 0;
@@ -482,13 +482,13 @@
 
 .enc-hotspot-label strong {
   font-family: var(--enc-serif);
-  font-weight: 600;
+  font-weight: var(--fw-body);
   letter-spacing: 0.12em;
 }
 
 .enc-hotspot-label em {
   font-style: normal;
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   color: rgba(246, 239, 226, 0.78);
 }
 
@@ -517,7 +517,7 @@
   background: transparent;
   color: var(--ink-light);
   font-family: inherit;
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.04em;
   cursor: pointer;
   transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
@@ -563,7 +563,7 @@
 
 .dougong3d-info-eyebrow {
   margin: 0 0 8px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   letter-spacing: 0.16em;
   color: var(--enc-muted);
 }
@@ -571,15 +571,15 @@
 .dougong3d-info-name {
   margin: 0 0 8px;
   font-family: var(--enc-serif);
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--fs-section);
+  font-weight: var(--fw-title);
   letter-spacing: 0.16em;
   color: var(--ink);
 }
 
 .dougong3d-info-note {
   margin: 0 0 16px;
-  font-size: 12.5px;
+  font-size: var(--fs-note);
   line-height: 1.85;
   color: var(--ink-light);
 }
@@ -607,7 +607,7 @@
   background: rgba(253, 251, 246, 0.92);
   color: var(--ink-light);
   font-family: inherit;
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.06em;
   cursor: pointer;
   transition: border-color 0.18s ease, color 0.18s ease;
@@ -635,7 +635,7 @@
   background: transparent;
   color: var(--ink-light);
   font-family: var(--enc-serif);
-  font-size: 12px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.1em;
   cursor: pointer;
   transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
@@ -669,7 +669,7 @@
   align-items: center;
   gap: 7px;
   font-family: var(--enc-serif);
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.18em;
   color: var(--vermillion);
 }
@@ -677,8 +677,8 @@
 .enc-3d-text h3 {
   margin: 9px 0 7px;
   font-family: var(--enc-serif);
-  font-size: 17px;
-  font-weight: 700;
+  font-size: var(--fs-card-title);
+  font-weight: var(--fw-title);
   letter-spacing: 0.06em;
   color: var(--ink);
   text-wrap: balance;
@@ -687,7 +687,7 @@
 .enc-3d-text p {
   max-width: 62ch;
   margin: 0;
-  font-size: 12.5px;
+  font-size: var(--fs-note);
   line-height: 1.8;
   color: var(--ink-light);
 }
@@ -698,7 +698,7 @@
   align-items: center;
   gap: 8px;
   margin-top: 12px;
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.04em;
   color: var(--enc-muted);
 }
@@ -710,7 +710,7 @@
   background: transparent;
   color: var(--ink-light);
   font-family: inherit;
-  font-size: 11.5px;
+  font-size: var(--fs-meta);
   cursor: pointer;
   transition: border-color 0.18s ease, color 0.18s ease;
 }
@@ -731,8 +731,8 @@
   background: var(--vermillion);
   color: #fff;
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--fs-note);
+  font-weight: var(--fw-body);
   letter-spacing: 0.08em;
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease;
@@ -769,20 +769,20 @@
 }
 
 .enc-related-cat {
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   letter-spacing: 0.1em;
   color: var(--enc-muted);
 }
 
 .enc-related-name {
   font-family: var(--enc-serif);
-  font-size: 13px;
+  font-size: var(--fs-note);
   letter-spacing: 0.08em;
   color: var(--ink);
 }
 
 .enc-related-tag i {
-  font-size: 9px;
+  font-size: var(--fs-caption);
   color: var(--enc-muted);
 }
 
@@ -810,8 +810,8 @@
   background: var(--chip-bg);
   color: var(--chip-fg);
   padding: 5px 10px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-aux);
   letter-spacing: 0.06em;
   box-shadow: 0 3px 0 var(--chip-edge), 0 4px 8px var(--chip-glow);
   transition: transform 0.14s ease, box-shadow 0.14s ease,
@@ -819,7 +819,7 @@
 }
 
 .encyclopedia-page .encyclopedia-cat-chip i {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   opacity: 0.7;
 }
 
@@ -867,8 +867,8 @@
 
 .encyclopedia-page .encyclopedia-term-item-name {
   font-family: var(--enc-serif);
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-title);
   letter-spacing: 0.06em;
 }
 
@@ -905,7 +905,7 @@
   }
 
   .enc-guide-heading {
-    font-size: 16px;
+    font-size: var(--fs-card-title);
   }
 
   .enc-guide-hint {
@@ -943,7 +943,7 @@
   }
 
   .enc-head-title {
-    font-size: 1.55rem;
+    font-size: var(--fs-page-title);
   }
 
   .enc-section {
@@ -978,7 +978,7 @@
   }
 
   .dougong3d-info-name {
-    font-size: 17px;
+    font-size: var(--fs-card-title);
   }
 
   .enc-hotspot-label {
@@ -994,5 +994,1382 @@
   .enc-hotspot-dot,
   .enc-hotspot-label {
     transition: none;
+  }
+}
+
+/* ===== 建筑知识双主轴（T-BK-15，仅在末尾追加） ===== */
+.enc-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.enc-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-warm, #d4c9b8);
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--ink, #2c2c2c);
+  font-size: var(--fs-meta);
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.enc-filter-chip:hover {
+  border-color: rgba(196, 30, 58, 0.35);
+}
+
+.enc-filter-chip.active {
+  border-color: rgba(196, 30, 58, 0.5);
+  background: rgba(196, 30, 58, 0.1);
+  color: #8a2418;
+}
+
+.enc-filter-chip:focus-visible,
+.enc-filter-more:focus-visible,
+.enc-filter-count:focus-visible {
+  outline: 2px solid #8a2418;
+  outline-offset: 2px;
+}
+
+.enc-filter-chip--ghost {
+  background: transparent;
+}
+
+.enc-filter-chip--clear {
+  margin-top: 4px;
+}
+
+.enc-filter-count {
+  margin-left: 4px;
+  font-size: var(--fs-caption);
+  color: var(--ink-light, #5a5252);
+}
+
+.enc-filter-more {
+  border: none;
+  background: none;
+  color: var(--ink-light, #5a5252);
+  font-size: var(--fs-meta);
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.enc-badge--building {
+  /* #ffffff on #8a2418 ≈ 7.4:1 */
+  background: #8a2418;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: var(--fs-caption);
+  line-height: 1.6;
+}
+
+.enc-group-head {
+  padding: 10px 4px 6px;
+  margin-top: 6px;
+  font-size: var(--fs-meta);
+  letter-spacing: 0.06em;
+  color: var(--ink-light, #5a5252);
+  border-bottom: 1px solid rgba(212, 201, 184, 0.65);
+}
+
+.enc-result-count {
+  margin: 6px 0;
+  font-size: var(--fs-meta);
+  color: var(--ink-light, #5a5252);
+}
+
+.enc-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.enc-coverage {
+  font-size: var(--fs-meta);
+  color: var(--ink-light, #5a5252);
+}
+
+@media (max-width: 900px) {
+  .enc-filter-bar {
+    max-height: 132px;
+    overflow-y: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enc-filter-chip {
+    transition: none;
+  }
+}
+/* ===== 知识图谱全局样式（T-BG-11，仅末尾追加） =====
+   变量与 lib/encyclopediaGraph.js 的 GRAPH_CONFIG 对齐：
+   --enc-graph-w: GRAPH_WIDTH.min/max（320~420）
+   --enc-graph-rail-w: GRAPH_WIDTH.rail（52）
+   --enc-reading-measure: 74ch（§13.4 行宽目标 60~75ch）
+*/
+.enc-detail-grid {
+  --enc-detail-pad: 24px;
+  --enc-detail-gap: 28px;
+  --enc-graph-w: clamp(320px, 26vw, 420px);
+  --enc-graph-rail-w: 52px;
+  --enc-reading-measure: 74ch;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--enc-graph-w);
+  gap: var(--enc-detail-gap);
+  align-items: start;
+  min-width: 0;
+}
+
+.enc-detail-main {
+  min-width: 0;
+  container-type: inline-size;
+}
+
+/* 卡片播放范围居中于整个详情列（绿色框） */
+.enc-detail-main--deck {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-block-size: calc(100vh - 73px - 64px);
+}
+
+.enc-detail-main--deck .enc-deck {
+  margin-block: 0;
+}
+
+@media (max-width: 720px) {
+  .enc-detail-main--deck {
+    min-block-size: calc(100vh - 73px - 36px);
+  }
+}
+
+.enc-article.enc-article--fluid {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.enc-reading.encyclopedia-article-content {
+  max-width: var(--enc-reading-measure);
+  margin-inline: auto;
+  overflow-wrap: anywhere;
+}
+
+.encyclopedia-page-lead {
+  margin: 6px 0 0;
+  color: var(--ink-light);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+
+/* ---------- 面板 ---------- */
+.enc-graph-panel {
+  position: sticky;
+  top: 84px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 280px;
+  max-height: calc(100vh - 73px - 64px);
+  padding: 16px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--radius-lg);
+  background: var(--paper-white);
+  color: var(--ink);
+  overflow: auto;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+}
+
+.enc-graph-panel--loading .enc-graph-skeleton {
+  flex: 1;
+  min-height: 220px;
+  border-radius: 8px;
+  background: var(--border-warm);
+  opacity: 0.4;
+}
+
+.enc-graph-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.enc-graph-title {
+  margin: 0;
+  font-size: var(--fs-card-title);
+  color: var(--ink);
+}
+
+.enc-graph-hint {
+  margin: 0;
+  font-size: var(--fs-meta);
+  line-height: 1.5;
+  color: var(--ink-light);
+}
+
+.enc-graph-toggle {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 3px 8px;
+  border: 1px solid var(--enc-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-light);
+  font-size: var(--fs-meta);
+  cursor: pointer;
+}
+
+.enc-graph-toggle:focus-visible,
+.enc-graph-tool:focus-visible,
+.enc-graph-list button:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: 2px;
+}
+
+/* ---------- 图例（形状 + 线型双编码） ---------- */
+.enc-graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 6px 0;
+  border-top: 1px solid var(--enc-line);
+  border-bottom: 1px solid var(--enc-line);
+}
+
+.enc-graph-legend-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.enc-graph-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-caption);
+  color: var(--ink-light);
+  white-space: nowrap;
+}
+
+.enc-graph-legend-shape {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper-white);
+  flex: 0 0 auto;
+}
+
+.enc-graph-legend-shape--building {
+  border-radius: 2px;
+  border-color: var(--vermillion);
+}
+
+.enc-graph-legend-shape--category {
+  border: none;
+  border-radius: 0;
+  background: var(--ink-light);
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+
+.enc-graph-legend-shape--dynasty {
+  border-radius: 0;
+  transform: rotate(45deg);
+  width: 8px;
+  height: 8px;
+}
+
+.enc-graph-legend-shape--region {
+  border: none;
+  border-radius: 0;
+  background: var(--ink-light);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.enc-graph-legend-line {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  border-top: 1.5px solid var(--ink-light);
+  flex: 0 0 auto;
+}
+
+.enc-graph-legend-line--term {
+  border-top-style: dashed;
+}
+
+.enc-graph-legend-line--peer {
+  border-top-style: dotted;
+}
+
+/* ---------- 画布 ---------- */
+.enc-graph-canvas {
+  flex: 1;
+  min-height: 240px;
+}
+
+.enc-graph-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: calc(100vh - 73px - 200px);
+  touch-action: none;
+  user-select: none;
+}
+
+.enc-graph-svg:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: 2px;
+}
+
+.enc-graph-edge {
+  fill: none;
+  stroke: var(--ink-light);
+  stroke-width: 1;
+  opacity: 0.35;
+}
+
+.enc-graph-edge--primary {
+  stroke: var(--vermillion);
+  stroke-width: 1.6;
+  opacity: 0.6;
+}
+
+.enc-graph-edge--palace {
+  stroke: var(--ink-light);
+  stroke-width: 1.2;
+  opacity: 0.45;
+}
+
+.enc-graph-edge--term {
+  stroke: var(--ink-light);
+  stroke-width: 1;
+  opacity: 0.35;
+}
+
+.enc-graph-edge--peer {
+  stroke: var(--ink-light);
+  stroke-width: 0.8;
+  opacity: 0.28;
+}
+
+.enc-graph-node {
+  outline: none;
+  cursor: pointer;
+}
+
+.enc-graph-node-shape {
+  fill: var(--paper-white);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  transition: stroke-width 0.12s ease, stroke 0.12s ease;
+}
+
+.enc-graph-node-shape--building {
+  stroke: var(--vermillion);
+}
+
+.enc-graph-node-shape--category {
+  stroke: var(--ink-light);
+  stroke-width: 2;
+}
+
+.enc-graph-node-shape--dynasty,
+.enc-graph-node-shape--region {
+  stroke: var(--ink-light);
+}
+
+.enc-graph-node.is-center .enc-graph-node-shape {
+  stroke-width: 2.5;
+}
+
+.enc-graph-node.is-neighbor .enc-graph-node-shape {
+  stroke: var(--vermillion);
+  stroke-width: 2;
+}
+
+.enc-graph-node.is-dimmed {
+  opacity: 0.28;
+}
+
+.enc-graph-node:focus-visible .enc-graph-node-shape {
+  stroke: var(--vermillion);
+  stroke-width: 2.5;
+}
+
+.enc-graph-node-label {
+  fill: var(--ink);
+  font-size: var(--fs-meta);
+  pointer-events: none;
+}
+
+.enc-graph-node-hit {
+  stroke: transparent;
+}
+
+.enc-graph-node-state {
+  fill: none;
+  stroke: none;
+}
+
+/* ---------- 规模、工具、跳过 ---------- */
+.enc-graph-scale {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--ink-light);
+}
+
+.enc-graph-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.enc-graph-tool {
+  padding: 3px 8px;
+  border: 1px solid var(--enc-line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-light);
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
+
+.enc-graph-skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  padding: 4px 8px;
+  background: var(--paper-white);
+  border: 1px solid var(--vermillion);
+  color: var(--vermillion);
+  font-size: var(--fs-meta);
+  z-index: 2;
+}
+
+.enc-graph-skip:focus {
+  left: 8px;
+  top: 8px;
+}
+
+/* ---------- 空态与降级 ---------- */
+.enc-graph-empty,
+.enc-graph-fallback {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 4px;
+  color: var(--ink-light);
+  font-size: var(--fs-note);
+  line-height: 1.6;
+}
+
+.enc-graph-empty p,
+.enc-graph-fallback p {
+  margin: 0;
+}
+
+.enc-graph-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.enc-graph-list button {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--enc-line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  font-size: var(--fs-meta);
+  cursor: pointer;
+}
+
+/* ---------- 折叠条（不得 display:none） ---------- */
+.enc-graph-panel--rail {
+  width: var(--enc-graph-rail-w);
+  min-width: var(--enc-graph-rail-w);
+  max-width: var(--enc-graph-rail-w);
+  padding: 6px;
+  min-height: 180px;
+}
+
+.enc-graph-toggle--rail {
+  writing-mode: vertical-rl;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  font-size: var(--fs-meta);
+  letter-spacing: 0.08em;
+}
+
+/* ---------- 列表模式 ---------- */
+.enc-graph-panel--list .enc-graph-list {
+  max-height: calc(100vh - 240px);
+  overflow: auto;
+}
+
+/* ---------- 图谱收起：向右收拢并让出卡片空间 ---------- */
+@media (min-width: 1284px) {
+  .enc-detail-grid.is-graph-collapsed {
+    grid-template-columns: minmax(0, 1fr);
+    position: relative;
+  }
+
+  .enc-detail-grid.is-graph-collapsed .enc-detail-main {
+    grid-column: 1;
+    grid-row: 1;
+    padding-inline-end: calc(var(--enc-graph-rail-w) + 14px);
+  }
+
+  .enc-detail-grid.is-graph-collapsed .enc-graph-panel--rail {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+    align-self: start;
+    position: sticky;
+    top: 84px;
+  }
+
+  .enc-detail-grid.is-graph-collapsed .enc-deck-card {
+    inline-size: clamp(340px, 38vw, 720px);
+  }
+}
+
+/* ---------- 断点 ---------- */
+@media (max-width: 1439px) {
+  .enc-detail-grid {
+    --enc-graph-w: 320px;
+    --enc-detail-gap: 20px;
+  }
+}
+
+@media (max-width: 1283px) {
+  .enc-detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .enc-graph-panel {
+    position: static;
+    order: -1;
+    max-height: none;
+    width: 100%;
+  }
+
+  .enc-graph-panel--rail {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    min-height: 0;
+    padding: 4px;
+  }
+
+  .enc-graph-toggle--rail {
+    writing-mode: horizontal-tb;
+    min-height: 34px;
+  }
+
+  .enc-graph-svg {
+    max-height: 420px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .enc-detail-grid {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .enc-detail-grid {
+    gap: 12px;
+  }
+
+  .enc-graph-panel {
+    padding: 10px;
+  }
+}
+
+@container (max-width: 780px) {
+  .enc-guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media print {
+  .enc-graph-panel {
+    display: none;
+  }
+
+  .enc-detail-grid {
+    display: block;
+  }
+
+  .enc-article.enc-article--fluid {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enc-graph-panel,
+  .enc-graph-node-shape,
+  .enc-graph-tool,
+  .enc-graph-toggle {
+    transition: none;
+    animation: none;
+  }
+}/* ==========================================================================
+ * 百科 3D 卡片组（T-CARD-15）
+ * 仅追加：纸质视觉契约，只用描边 / 位移 / 透明度，无渐变、无玻璃质感。
+ * ========================================================================== */
+
+.enc-deck {
+  --enc-card-h: clamp(400px, 46vh, 580px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-block-size: 68vh;
+  margin-block: 4px 18px;
+  color: var(--ink);
+  font-family: var(--enc-serif);
+}
+
+@media (max-height: 860px) {
+  .enc-deck {
+    --enc-card-h: 360px;
+  }
+}
+
+.enc-deck-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-block-size: 240px;
+  block-size: clamp(420px, 62vh, 720px);
+  max-inline-size: 100%;
+  overflow: hidden;
+  touch-action: pan-y;
+  perspective: var(--deck-perspective, 900px);
+  transform-style: preserve-3d;
+  transform: translate3d(
+    calc(var(--deck-shift, 0px) + var(--deck-px, 0px)),
+    var(--deck-py, 0px),
+    0
+  );
+}
+
+.enc-deck-card {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  inline-size: clamp(320px, 34vw, 620px);
+  block-size: var(--enc-card-h);
+  padding: 14px 16px 12px;
+  border: 1px solid var(--enc-line);
+  border-radius: var(--deck-radius, 18px);
+  background: var(--enc-surface);
+  box-shadow: 0 2px 8px rgba(44, 44, 44, 0.06);
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  cursor: pointer;
+  outline: none;
+  overflow: hidden;
+  will-change: transform, opacity;
+  transition:
+    transform var(--deck-spring-ms, 300ms) var(--deck-spring, ease),
+    opacity 160ms linear;
+}
+
+.enc-deck-card.is-active {
+  box-shadow:
+    inset 0 0 0 2px var(--vermillion),
+    0 2px 8px rgba(44, 44, 44, 0.06);
+}
+
+.enc-deck-card:focus-visible {
+  box-shadow:
+    inset 0 0 0 2px var(--vermillion),
+    0 0 0 2px var(--enc-surface),
+    0 0 0 4px var(--vermillion);
+}
+
+
+.enc-deck.is-flat .enc-deck-card {
+  transition-duration: 0ms;
+}
+
+.enc-deck.is-dragging .enc-deck-card {
+  will-change: auto;
+}
+
+.enc-deck.is-dragging .enc-deck-card.is-active {
+  transition: none;
+}
+
+.enc-card-badge--building,
+.enc-card-badge--3d {
+  position: absolute;
+  inset-block-start: 10px;
+  padding: 1px 6px;
+  border: 1px solid var(--enc-line);
+  border-radius: 999px;
+  background: var(--enc-sunken);
+  color: var(--enc-muted);
+  font-size: var(--fs-caption);
+  line-height: 18px;
+  pointer-events: none;
+}
+
+.enc-card-badge--building {
+  inset-inline-start: 12px;
+}
+
+.enc-card-badge--3d {
+  inset-inline-end: 12px;
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-card-art {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 148px;
+  margin-block-start: 18px;
+  border: 1px dashed var(--enc-line);
+  border-radius: 10px;
+  background: var(--enc-sunken);
+  color: var(--enc-muted);
+  overflow: hidden;
+}
+
+.enc-card-art img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.enc-card-art-mark {
+  font-size: var(--fs-page-title);
+  font-weight: var(--fw-title);
+  letter-spacing: 2px;
+  opacity: 0.6;
+}
+
+.enc-card-title {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--enc-serif);
+  font-size: var(--fs-card-title);
+  font-weight: var(--fw-title);
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.enc-card-synopsis {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--enc-muted);
+  font-size: var(--fs-note);
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.enc-card-meta {
+  margin-block-start: auto;
+  color: var(--enc-muted);
+  font-size: var(--fs-meta);
+}
+
+.enc-card-index {
+  position: absolute;
+  inset-block-end: 10px;
+  inset-inline-end: 14px;
+  color: var(--enc-muted);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.enc-card-body {
+  display: contents;
+}
+
+.enc-card-skip,
+.enc-deck-hint,
+.enc-deck-status,
+.enc-graph3d-hint {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.enc-card-skip:focus-visible {
+  inset-block-start: 8px;
+  inset-inline-start: 8px;
+  inline-size: auto;
+  block-size: auto;
+  margin: 0;
+  padding: 6px 10px;
+  clip-path: none;
+  border: 1px solid var(--vermillion);
+  background: var(--enc-surface);
+  color: var(--vermillion);
+}
+
+.enc-deck-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 10px;
+}
+
+.enc-deck-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-inline-size: 32px;
+  min-block-size: 32px;
+  padding: 4px 8px;
+  border: 1px solid var(--enc-line);
+  border-radius: 8px;
+  background: var(--enc-surface);
+  color: var(--ink-light);
+  font-family: var(--enc-serif);
+  font-size: var(--fs-meta);
+  cursor: pointer;
+}
+
+.enc-deck-toggle {
+  padding-inline: 6px;
+}
+
+.enc-deck-toggle-label {
+  display: none;
+}
+
+.enc-deck-control:hover {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-deck-control:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: 2px;
+}
+
+.enc-deck-toggle[aria-pressed='false'] {
+  border-color: var(--enc-muted);
+}
+
+.enc-deck-toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.enc-deck-empty {
+  padding: 22px 18px;
+  border: 1px dashed var(--enc-line);
+  border-radius: 12px;
+  background: var(--enc-sunken);
+}
+
+.enc-deck-empty-text {
+  margin: 0 0 10px;
+  color: var(--enc-muted);
+  font-family: var(--enc-serif);
+  font-size: var(--fs-body);
+}
+
+.enc-deck-empty-action {
+  padding: 6px 14px;
+  border: 1px solid var(--vermillion);
+  border-radius: 8px;
+  background: var(--enc-surface);
+  color: var(--vermillion);
+  font-family: var(--enc-serif);
+  cursor: pointer;
+}
+
+.enc-deck-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--enc-line);
+  border-radius: 12px;
+  background: var(--enc-surface);
+  overflow: hidden;
+}
+
+.enc-deck-list li + li {
+  border-block-start: 1px solid var(--enc-line);
+}
+
+.enc-deck-list-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  inline-size: 100%;
+  min-block-size: 48px;
+  padding: 10px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--enc-serif);
+  text-align: start;
+  cursor: pointer;
+}
+
+.enc-deck-list-item[aria-current='true'] {
+  box-shadow: inset 3px 0 0 var(--vermillion);
+  background: var(--enc-sunken);
+}
+
+.enc-deck-list-item:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: -2px;
+}
+
+.enc-deck-more {
+  position: sticky;
+  inset-block-end: 0;
+  align-self: flex-start;
+  z-index: 1;
+  margin-block-start: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--enc-line);
+  border-radius: 8px;
+  background: var(--enc-surface);
+  color: var(--ink-light);
+  font-family: var(--enc-serif);
+  cursor: pointer;
+}
+
+.enc-deck-error {
+  padding: 16px;
+  border: 1px dashed var(--enc-line);
+  border-radius: 12px;
+  background: var(--enc-sunken);
+  color: var(--enc-muted);
+  font-family: var(--enc-serif);
+}
+
+.enc-deck-error p {
+  margin: 0 0 8px;
+}
+
+.enc-back-to-deck {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-block-end: 14px;
+  padding: 5px 12px;
+  border: 1px solid var(--enc-line);
+  border-radius: 8px;
+  background: var(--enc-surface);
+  color: var(--ink-light);
+  font-family: var(--enc-serif);
+  font-size: var(--fs-note);
+  cursor: pointer;
+}
+
+.enc-back-to-deck:hover,
+.enc-back-to-deck:focus-visible {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-no-select,
+.enc-no-select * {
+  user-select: none;
+}
+
+@media (max-width: 720px) {
+  .enc-deck {
+    --enc-card-h: clamp(300px, 46vh, 360px);
+    max-block-size: 55vh;
+  }
+
+  .enc-deck-stage {
+    block-size: clamp(260px, 46vh, 380px);
+  }
+
+  .enc-deck-card {
+    inset-inline-start: 9%;
+    inline-size: clamp(210px, 72vw, 340px);
+  }
+}/* ==========================================================================
+ * 百科 3D 知识图谱（T-CARD-16）
+ * 仅追加：分层 DOM + CSS 3D，节点/边均为普通元素；无渐变、无玻璃质感。
+ * ========================================================================== */
+
+.enc-graph3d {
+  --g3d-perspective: 1100px;
+  position: relative;
+  display: block;
+  margin-block-start: 10px;
+}
+
+.enc-graph3d-stage {
+  position: relative;
+  block-size: clamp(260px, 34vh, 430px);
+  max-inline-size: 100%;
+  overflow: hidden;
+  touch-action: pan-y;
+  perspective: var(--g3d-perspective, 1100px);
+  perspective-origin: 50% 50%;
+  background: var(--enc-surface);
+  border: 1px solid var(--enc-line);
+  border-radius: 12px;
+}
+
+@media (min-width: 1284px) {
+  .enc-graph3d-stage {
+    block-size: clamp(360px, 48vh, 560px);
+  }
+
+  .enc-graph-panel--loading {
+    min-block-size: clamp(480px, calc(48vh + 120px), 680px);
+  }
+}
+
+.enc-graph3d-stage:focus-within {
+  border-color: var(--vermillion);
+}
+
+.enc-graph3d-world {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 0;
+  block-size: 0;
+  transform-style: preserve-3d;
+  transform:
+    scale3d(var(--g3d-scale, 1), var(--g3d-scale, 1), 1)
+    rotateX(var(--g3d-pitch, -8deg))
+    rotateY(var(--g3d-az, -18deg));
+  transition: transform 120ms linear;
+}
+
+.enc-graph3d-edges,
+.enc-graph3d-nodes {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 0;
+  block-size: 0;
+  transform-style: preserve-3d;
+}
+
+.enc-graph3d-edges {
+  pointer-events: none;
+}
+
+.enc-graph3d-edge {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 1px;
+  block-size: 1px;
+  background: var(--ink-light);
+  transform-origin: 0 50%;
+  opacity: 0.7;
+}
+
+.enc-graph3d-edge[data-edge-kind='term'] {
+  background: none;
+  border-block-start: 1px dotted var(--ink-light);
+}
+
+.enc-graph3d-edge[data-edge-kind='peer'] {
+  background: none;
+  border-block-start: 1px dashed var(--ink-light);
+}
+
+.enc-graph3d-node {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 28px;
+  block-size: 28px;
+  margin-block-start: -14px;
+  margin-inline-start: -14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-family: var(--enc-serif);
+  transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.enc-graph3d-node:focus {
+  outline: none;
+}
+
+.enc-graph3d-shape {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 1px solid var(--ink-light);
+  border-radius: 50%;
+  background: var(--enc-surface);
+  box-shadow: inset 0 0 0 0 transparent;
+  transition:
+    box-shadow 140ms linear,
+    opacity 140ms linear;
+}
+
+.enc-graph3d-shape[data-node-type='building'] {
+  border-radius: 3px;
+  background: var(--enc-sunken);
+}
+
+.enc-graph3d-shape[data-node-type='category'] {
+  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  border-radius: 0;
+}
+
+.enc-graph3d-shape[data-node-type='dynasty'] {
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  border-radius: 0;
+}
+
+.enc-graph3d-shape[data-node-type='region'] {
+  border-radius: 50%;
+  background: var(--enc-sunken);
+}
+
+.enc-graph3d-node:hover .enc-graph3d-shape,
+.enc-graph3d-node.is-active .enc-graph3d-shape {
+  border-color: var(--vermillion);
+  box-shadow: inset 0 0 0 2px var(--vermillion);
+}
+
+.enc-graph3d-node:focus-visible .enc-graph3d-shape {
+  border-color: var(--vermillion);
+  box-shadow:
+    inset 0 0 0 2px var(--vermillion),
+    0 0 0 2px var(--enc-surface),
+    0 0 0 4px var(--vermillion);
+}
+
+.enc-graph3d-node.is-neighbor .enc-graph3d-shape {
+  border-color: var(--vermillion);
+}
+
+.enc-graph3d-node.is-selected .enc-graph3d-shape {
+  box-shadow: inset 0 0 0 2px var(--vermillion);
+}
+
+.enc-graph3d-node.is-dimmed .enc-graph3d-shape,
+.enc-graph3d-node.is-dimmed .enc-graph3d-label {
+  opacity: 0.4;
+}
+
+.enc-graph3d-label {
+  position: absolute;
+  inset-block-start: 30px;
+  inset-inline-start: 50%;
+  display: block;
+  inline-size: max-content;
+  max-inline-size: 7em;
+  translate: -50% 0;
+  color: var(--ink);
+  font-size: clamp(11px, calc(12px * var(--g3d-inv-scale, 1)), 14px);
+  line-height: 1.25;
+  text-align: center;
+  text-shadow: none;
+  pointer-events: none;
+  transform:
+    rotateY(calc(-1 * var(--g3d-az, 0deg)))
+    rotateX(calc(-1 * var(--g3d-pitch, 0deg)));
+}
+
+.enc-graph3d-label-line {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.enc-graph3d-node[data-backfacing='true'] .enc-graph3d-label {
+  opacity: 0;
+}
+
+.enc-graph3d-node[data-backfacing='true'] .enc-graph3d-shape {
+  opacity: 0.55;
+}
+
+.enc-graph3d-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 12px;
+}
+
+.enc-graph3d-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-inline-size: 44px;
+  min-block-size: 32px;
+  padding: 4px 10px;
+  border: 1px solid var(--enc-line);
+  border-radius: 8px;
+  background: var(--enc-surface);
+  color: var(--ink-light);
+  font-family: var(--enc-serif);
+  font-size: var(--fs-note);
+  cursor: pointer;
+}
+
+.enc-graph3d-control:hover {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-graph3d-control:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: 2px;
+}
+
+.enc-graph3d-control[aria-pressed='true'] {
+  border-color: var(--vermillion);
+  color: var(--vermillion);
+}
+
+.enc-graph3d-control:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (pointer: coarse) {
+  .enc-graph3d-control,
+  .enc-deck-control {
+    min-block-size: 44px;
+  }
+}
+
+.enc-graph-panel--25d .enc-graph-canvas {
+  perspective: 900px;
+  padding: 6%;
+  overflow: hidden;
+}
+
+.enc-graph-panel--25d .enc-graph-svg {
+  transform: rotateX(-8deg) rotateY(-18deg) scale(0.98);
+  transform-origin: 50% 50%;
+  transition: transform 160ms linear;
+}
+
+@media print {
+  .enc-deck,
+  .enc-graph-panel--3d,
+  .enc-graph3d,
+  .enc-back-to-deck {
+    display: none !important;
+  }
+
+  .enc-graph-panel--25d .enc-graph-svg {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enc-deck-card,
+  .enc-deck-control,
+  .enc-graph3d-world,
+  .enc-graph3d-shape,
+  .enc-graph3d-label,
+  .enc-graph3d-control,
+  .enc-graph-panel--25d .enc-graph-svg {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+/* ==========================================================================
+ * 首帧占位（T-CARD-21 / 设计 §5.6）：数据就绪前后高度不变，避免 CLS
+ * ========================================================================== */
+
+.enc-deck {
+  /* 首屏占位与舞台同源（T-CLOSE-02）：无控制条后仅保留提示行高度 */
+  min-block-size: calc(clamp(420px, 62vh, 720px) + 28px);
+}
+
+.enc-graph-panel--loading,
+.enc-graph-canvas,
+.enc-graph-panel--list {
+  min-block-size: 240px;
+}
+/* T-CARD-21：列表降级自身滚动，高度不超过 55vh */
+.enc-deck.is-list {
+  overflow-y: auto;
+}
+
+.enc-graph-panel--list.enc-graph-panel--loading {
+  min-block-size: 55vh;
+}/* T-CARD-21：顶栏文案在数据加载前后保持同高，避免整体下移 */
+.profile-title-sub {
+  block-size: 1.4em;
+  overflow: hidden;
+}
+
+.encyclopedia-page-lead {
+  block-size: 1.5em;
+  overflow: hidden;
+}/* T-CARD-21：加载骨架占满首屏，避免加载完成后滚动条突然出现造成横向位移 */
+.profile-loading {
+  min-block-size: 100vh;
+}@media (max-width: 480px) {
+  .profile-title-sub {
+    block-size: 2.6em;
+  }
+
+  .encyclopedia-page-lead {
+    block-size: 2.8em;
   }
 }

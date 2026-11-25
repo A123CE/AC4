@@ -1,0 +1,159 @@
+{
+  "generatedAt": "2026-11-24T10:14:42.266Z",
+  "baseUrl": "http://localhost:3001",
+  "viewports": [
+    {
+      "viewport": "2560x1440",
+      "scrollWidth": 2560,
+      "clientWidth": 2560,
+      "deckH": 462,
+      "viewportH": 1440,
+      "deckRatio": 0.321,
+      "cards": 5,
+      "list": false,
+      "flat": false,
+      "graphW": 420,
+      "graphKind": "full3d",
+      "cls": 0.0081,
+      "fcpMs": 1128,
+      "overflow": false
+    },
+    {
+      "viewport": "1920x1080",
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "deckH": 462,
+      "viewportH": 1080,
+      "deckRatio": 0.428,
+      "cards": 5,
+      "list": false,
+      "flat": false,
+      "graphW": 420,
+      "graphKind": "full3d",
+      "cls": 0.0003,
+      "fcpMs": 1040,
+      "overflow": false
+    },
+    {
+      "viewport": "1440x900",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "deckH": 405,
+      "viewportH": 900,
+      "deckRatio": 0.45,
+      "cards": 5,
+      "list": false,
+      "flat": false,
+      "graphW": 374,
+      "graphKind": "full3d",
+      "cls": 0.0006,
+      "fcpMs": 1036,
+      "overflow": false
+    },
+    {
+      "viewport": "1284x900",
+      "scrollWidth": 1284,
+      "clientWidth": 1284,
+      "deckH": 405,
+      "viewportH": 900,
+      "deckRatio": 0.45,
+      "cards": 4,
+      "list": false,
+      "flat": false,
+      "graphW": 320,
+      "graphKind": "full3d",
+      "cls": 0.0008,
+      "fcpMs": 1084,
+      "overflow": false
+    },
+    {
+      "viewport": "1025x900",
+      "scrollWidth": 1025,
+      "clientWidth": 1025,
+      "deckH": 405,
+      "viewportH": 900,
+      "deckRatio": 0.45,
+      "cards": 3,
+      "list": false,
+      "flat": false,
+      "graphW": 605,
+      "graphKind": "25d",
+      "cls": 0.0792,
+      "fcpMs": 1052,
+      "overflow": false
+    },
+    {
+      "viewport": "721x900",
+      "scrollWidth": 721,
+      "clientWidth": 721,
+      "deckH": 405,
+      "viewportH": 900,
+      "deckRatio": 0.45,
+      "cards": 3,
+      "list": false,
+      "flat": false,
+      "graphW": 641,
+      "graphKind": "2d",
+      "cls": 0.0669,
+      "fcpMs": 1052,
+      "overflow": false
+    },
+    {
+      "viewport": "375x812",
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "deckH": 447,
+      "viewportH": 812,
+      "deckRatio": 0.55,
+      "cards": 0,
+      "list": true,
+      "flat": true,
+      "graphW": 323,
+      "graphKind": "list",
+      "cls": 0.0013,
+      "fcpMs": 1056,
+      "overflow": false
+    }
+  ],
+  "firstPaint": {
+    "limitMs": 200,
+    "cold": {
+      "label": "cold",
+      "wallMs": 1546,
+      "graphRenderMs": 1.8,
+      "fcpMs": 1080,
+      "domContentLoadedMs": 1039.1,
+      "marks": []
+    },
+    "warm": {
+      "label": "warm",
+      "wallMs": 1739,
+      "graphRenderMs": 2.4,
+      "fcpMs": 1280,
+      "domContentLoadedMs": 1231.1,
+      "marks": []
+    },
+    "worstRenderMs": 2.4
+  },
+  "fps": {
+    "desktop": 59.9,
+    "mobile": 59.9,
+    "desktopLimit": 50,
+    "mobileLimit": 45
+  },
+  "cls": {
+    "max": 0.0792,
+    "limit": 0.02
+  },
+  "bundle": {
+    "available": true,
+    "jsGzip": 718630,
+    "cssGzip": 49030,
+    "files": 5
+  },
+  "edgeDownsample": false,
+  "pass": false,
+  "failures": [
+    "cls:0.0792"
+  ]
+}

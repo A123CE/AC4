@@ -1,6 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { formatBuiltYear } from '../lib/museumMeta';
-import { getRecommendations, getPalaceContent } from '../api';
+import { getRecommendations, getPalaceContent, getEncyclopediaTerms } from '../api';
+import { track } from '../lib/analytics';
 import { useI18n } from '../context/I18nContext';
 import CollectionButton from './CollectionButton';
 import ShareButton from './ShareButton';
@@ -184,6 +186,58 @@ function DetailPanel({ palace, palaces = [], onNavigate, loading = false }) {
     setCollapsed(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const navigate = useNavigate();
+  const [knowledgeOpen, setKnowledgeOpen] = useState(false);
+  const [knowledge, setKnowledge] = useState(null);
+  const [knowledgeLoading, setKnowledgeLoading] = useState(false);
+  const knowledgeRequestedRef = useRef(false);
+
+  useEffect(() => {
+    setKnowledgeOpen(false);
+    setKnowledge(null);
+    setKnowledgeLoading(false);
+    knowledgeRequestedRef.current = false;
+  }, [palace?.id]);
+
+  const toggleKnowledge = async () => {
+    const next = !knowledgeOpen;
+    setKnowledgeOpen(next);
+    if (!next || knowledgeRequestedRef.current || !palace?.id) return;
+
+    knowledgeRequestedRef.current = true;
+    setKnowledgeLoading(true);
+    try {
+      const res = await getEncyclopediaTerms({ building: palace.id, page_size: 50 });
+      const list = res.data?.data || [];
+      const entries = list.filter((item) => item.entry_type === 'building');
+      const crafts = list.filter((item) => item.entry_type !== 'building');
+      setKnowledge({ entries, crafts });
+      if (entries.length + crafts.length > 0) {
+        track('encyclopedia_term_view', {
+          entity_type: 'palace',
+          entity_id: palace.id,
+          reason: 'detail_panel',
+        });
+      }
+    } catch {
+      setKnowledge({ entries: [], crafts: [] });
+    } finally {
+      setKnowledgeLoading(false);
+    }
+  };
+
+  const openKnowledgeTerm = (termId) => {
+    track('encyclopedia_reverse_click', {
+      entity_type: 'term',
+      entity_id: termId,
+      palace_id: palace.id,
+    });
+    navigate(`/encyclopedia?term=${encodeURIComponent(termId)}&from=detail`);
+  };
+
+  const knowledgeEmpty =
+    Boolean(knowledge) && knowledge.entries.length === 0 && knowledge.crafts.length === 0;
+
   // 加载骨架屏
   if (loading) {
     return (
@@ -216,6 +270,17 @@ function DetailPanel({ palace, palaces = [], onNavigate, loading = false }) {
             {t('detail.title', '卷宗详情')}
           </h3>
           <div className="detail-header-actions">
+            <button
+              type="button"
+              className="detail-action"
+              title={t('detail.knowledgeLink', '查看该建筑的知识')}
+              aria-label={t('detail.knowledgeLink', '查看该建筑的知识')}
+              onClick={() =>
+                navigate(`/encyclopedia?building=${encodeURIComponent(palace.id)}&from=detail`)
+              }
+            >
+              <i className="fas fa-book-open" />
+            </button>
             <CollectionButton palaceId={palace.id} variant="icon" />
             <ShareButton
               type="palace"
@@ -462,6 +527,89 @@ function DetailPanel({ palace, palaces = [], onNavigate, loading = false }) {
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {!knowledgeEmpty && (
+          <div className={`detail-accordion-section${knowledgeOpen ? '' : ' collapsed'}`}>
+            <div
+              className="detail-accordion-header"
+              role="button"
+              tabIndex={0}
+              aria-expanded={knowledgeOpen}
+              onClick={toggleKnowledge}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  toggleKnowledge();
+                }
+              }}
+            >
+              <div className="detail-accordion-header-left">
+                <i className="fas fa-book-open"></i>
+                <span>关联建筑知识</span>
+                <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--ink-light, #5a5252)' }}>
+                  来自营造法式
+                </span>
+              </div>
+              <i className="fas fa-chevron-down detail-accordion-chevron"></i>
+            </div>
+            {knowledgeOpen && (
+              <div className="detail-accordion-body">
+                {knowledgeLoading ? (
+                  <div className="detail-empty-state">
+                    <i className="fas fa-spinner fa-spin"></i> 加载中…
+                  </div>
+                ) : (
+                  <>
+                    {knowledge?.entries?.length > 0 && (
+                      <div style={{ marginBottom: 12 }}>
+                        <h5 style={{ margin: '8px 0 6px', fontSize: 12, color: 'var(--ink-light, #5a5252)' }}>
+                          本建筑的专属知识
+                        </h5>
+                        <div className="related-list">
+                          {knowledge.entries.map((term) => (
+                            <button
+                              key={term.id}
+                              type="button"
+                              className="related-item"
+                              onClick={() => openKnowledgeTerm(term.id)}
+                            >
+                              <span>{term.term}</span>
+                              {term.synopsis && (
+                                <span className="related-reason">{term.synopsis}</span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {knowledge?.crafts?.length >= 3 && (
+                      <div>
+                        <h5 style={{ margin: '8px 0 6px', fontSize: 12, color: 'var(--ink-light, #5a5252)' }}>
+                          相关营造术语
+                        </h5>
+                        <div className="enc-related-tags">
+                          {knowledge.crafts.map((term) => (
+                            <button
+                              key={term.id}
+                              type="button"
+                              className="enc-related-tag"
+                              onClick={() => openKnowledgeTerm(term.id)}
+                            >
+                              <span className="enc-related-name">{term.term}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {knowledge && knowledge.entries.length === 0 && knowledge.crafts.length < 3 && (
+                      <div className="detail-empty-state">暂未收录该建筑的知识</div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

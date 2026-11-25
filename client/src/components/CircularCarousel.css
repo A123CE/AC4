@@ -142,13 +142,13 @@
 }
 
 .circular-carousel__title {
-  font-size: 14px;
+  font-size: var(--fs-body);
   letter-spacing: 2px;
   color: var(--ink, #3c2415);
 }
 
 .circular-carousel__subtitle {
-  font-size: 12px;
+  font-size: var(--fs-meta);
   opacity: 0.6;
 }
 

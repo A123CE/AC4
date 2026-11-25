@@ -45,5 +45,129 @@
   },
   "common": {
     "greeting": "Hello, {name}"
+  },
+  "encyclopedia": {
+    "page": {
+      "title": "The Yingzao Fashi",
+      "subtitle": "Ancient Chinese architecture knowledge · {count} entries · {rate}% building coverage",
+      "lead": "Filter by building, element, dynasty or region — the graph on the right shows the same relationships",
+      "back": "Back to the palace"
+    },
+    "guide": {
+      "heading": "How to start",
+      "hint": "Enter from a building or an element to read the related knowledge",
+      "flow": {
+        "pick": "Pick an entry",
+        "diagram": "Read the diagram",
+        "model": "Open in 3D"
+      },
+      "foot": "Pick a category card, or choose an entry from the list on the left",
+      "lead": "Pick an element or a building; the graph on the right shows how they connect",
+      "cardDesc": "Start with {label}"
+    },
+    "graph": {
+      "title": "Knowledge graph",
+      "hint": "Start from a building or an element, then follow the lines to keep reading",
+      "legend": {
+        "node": {
+          "building": "Building",
+          "term": "Entry",
+          "category": "Category",
+          "dynasty": "Dynasty",
+          "region": "Region"
+        },
+        "edge": {
+          "primary": "Primary link",
+          "palace": "Related building",
+          "term": "Related entry",
+          "peer": "Same domain"
+        }
+      },
+      "scale": "Showing {shown} of {total} nodes",
+      "collapse": "Collapse graph",
+      "expand": "Expand graph",
+      "reset": "Reset view",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "listView": "List view",
+      "skip": "Skip graph and read the article",
+      "loading": "Loading the knowledge graph",
+      "empty": "No related items under current filters",
+      "fallback": "Graph unavailable; showing a related list instead",
+      "nodeLabel": "{type}: {label}",
+      "unavailableTarget": "This item is no longer available"
+    },
+    "filter": {
+      "all": "All",
+      "building": "By building",
+      "category": "By element",
+      "dynasty": "By dynasty",
+      "region": "By region",
+      "reset": "Reset filters",
+      "more": "More"
+    },
+    "group": {
+      "building": "Architecture files · building-specific knowledge",
+      "craft": "Craft terms",
+      "count": "{{count}} items"
+    },
+    "empty": {
+      "title": "No matching entries",
+      "hint": "Try clearing filters or open a building detail",
+      "clear": "Clear filters"
+    },
+    "coverage": {
+      "label": "Building knowledge coverage",
+      "value": "{{covered}} / {{total}} buildings"
+    },
+    "knowledge": {
+      "title": "Related building knowledge",
+      "fromDetail": "View this building’s knowledge",
+      "empty": "Not yet documented"
+    },
+    "englishComingSoon": "English edition in progress",
+    "summaryInChinese": "Summary in Chinese",
+    "card": {
+      "deckLabel": "Architecture knowledge cards, {count} in total",
+      "hint": "Use arrow keys to move, Enter to select, Esc to go back",
+      "cardLabel": "{title}, {category}, {type}, card {index} of {total}",
+      "type": {
+        "building": "Building-specific",
+        "craft": "General term"
+      },
+      "badge": {
+        "building": "Building",
+        "threeD": "3D",
+        "threeDLabel": "3D model available"
+      },
+      "unnamed": "Untitled entry",
+      "uncategorized": "Uncategorized",
+      "skip": "Skip cards, go to article",
+      "prev": "Previous card ({index} of {total})",
+      "next": "Next card ({index} of {total})",
+      "pause": "Pause autoplay",
+      "play": "Resume autoplay",
+      "autoplayOff": "Autoplay paused",
+      "dragHint": "Drag horizontally to switch cards",
+      "empty": "No entries match the current filters",
+      "emptyAction": "Clear filters",
+      "error": "Cards unavailable, switched to list",
+      "degraded": "Switched to flat view, all actions available",
+      "backToDeck": "Back to card selection"
+    },
+    "graph3d": {
+      "stageLabel": "3D knowledge graph",
+      "hint": "Drag to rotate, scroll to zoom, select a node to continue",
+      "rotateOn": "Pause rotation",
+      "rotateOff": "Resume rotation",
+      "rotateOnShort": "Auto-rotation on",
+      "rotateOffShort": "Auto-rotation off",
+      "reset": "Reset view",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "backfacing": "Back-facing labels hidden; still readable and clickable",
+      "degraded25d": "Switched to static 3D view",
+      "degraded2d": "Switched to flat graph"
+    }
   }
 }

@@ -1,0 +1,73 @@
+{
+  "generatedAt": "2026-11-24T12:25:11.948Z",
+  "baseUrl": "http://localhost:3001",
+  "note": "fonts.gstatic.com 被阻断后采集（不改脚本，等价于网络可达环境）",
+  "viewports": [
+    {
+      "viewport": "1920x1080",
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "deckH": 462,
+      "viewportH": 1080,
+      "cards": 0,
+      "cls": 0.0133,
+      "overflow": false,
+      "deckRatio": 0.428
+    },
+    {
+      "viewport": "1440x900",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "deckH": 405,
+      "viewportH": 900,
+      "cards": 0,
+      "cls": 0.022,
+      "overflow": false,
+      "deckRatio": 0.45
+    },
+    {
+      "viewport": "1284x800",
+      "scrollWidth": 1284,
+      "clientWidth": 1284,
+      "deckH": 405,
+      "viewportH": 800,
+      "cards": 0,
+      "cls": 0.0002,
+      "overflow": false,
+      "deckRatio": 0.506
+    },
+    {
+      "viewport": "1024x768",
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "deckH": 405,
+      "viewportH": 768,
+      "cards": 0,
+      "cls": 0.084,
+      "overflow": false,
+      "deckRatio": 0.527
+    },
+    {
+      "viewport": "768x1024",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "deckH": 461,
+      "viewportH": 1024,
+      "cards": 0,
+      "cls": 0.0019,
+      "overflow": false,
+      "deckRatio": 0.45
+    },
+    {
+      "viewport": "375x812",
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "deckH": 447,
+      "viewportH": 812,
+      "cards": 0,
+      "cls": 0,
+      "overflow": false,
+      "deckRatio": 0.55
+    }
+  ]
+}

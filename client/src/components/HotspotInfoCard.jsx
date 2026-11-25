@@ -143,12 +143,10 @@ export default function HotspotInfoCard({
             }}>
               <i className={`fas ${hotspot?.icon || 'fa-circle-info'}`} />
             </span>
-            <h4 style={{
+            <h4 className="t-section-sm" style={{
               margin: 0,
-              fontFamily: "'Noto Serif SC', serif",
-              fontSize: '0.95rem',
+              fontSize: 'var(--fs-body-lg)',
               color: 'var(--ink)',
-              fontWeight: 700,
             }}>
               {hotspot?.label || '建筑构件'}
             </h4>
@@ -204,10 +202,9 @@ export default function HotspotInfoCard({
                 border: '1px solid var(--border-warm)',
                 borderRadius: 20,
                 padding: '6px 14px',
-                fontSize: '0.75rem',
+                fontSize: 'var(--fs-note)',
                 color: 'var(--vermillion)',
                 cursor: 'pointer',
-                fontFamily: "'Noto Serif SC', serif",
                 transition: 'all 0.2s ease',
               }}
               onMouseEnter={(e) => {

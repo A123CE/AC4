@@ -1,0 +1,9 @@
+@media (max-width: 480px) {
+  .profile-title-sub {
+    block-size: 2.6em;
+  }
+
+  .encyclopedia-page-lead {
+    block-size: 2.8em;
+  }
+}

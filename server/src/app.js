@@ -68,6 +68,20 @@ app.use(seoRoutes);
 // 分享卡片页 — 置于静态与 API 之后、SPA fallback 之前
 app.use('/share', sharePageRoutes);
 
+const ENCYCLOPEDIA_FILTER_KEYS = ['building', 'entry_type', 'category', 'dynasty', 'region', 'q'];
+
+function shouldNoindex(pathname, rawQuery = '') {
+  if (['/search', '/profile', '/curator'].includes(pathname)) return true;
+  if (pathname === '/encyclopedia') {
+    const query = String(rawQuery).includes('?')
+      ? String(rawQuery).split('?')[1]
+      : String(rawQuery);
+    const params = new URLSearchParams(query);
+    return ENCYCLOPEDIA_FILTER_KEYS.some((key) => params.has(key));
+  }
+  return false;
+}
+
 // SPA fallback：公开深链刷新不 404
 app.get('*', (req, res, next) => {
   if (
@@ -79,7 +93,7 @@ app.get('*', (req, res, next) => {
     return next();
   }
 
-  if (['/search', '/profile', '/curator'].includes(req.path)) {
+  if (shouldNoindex(req.path, req.originalUrl)) {
     res.set('X-Robots-Tag', 'noindex, follow');
   }
 
@@ -89,3 +103,4 @@ app.get('*', (req, res, next) => {
 });
 
 module.exports = app;
+module.exports.shouldNoindex = shouldNoindex;

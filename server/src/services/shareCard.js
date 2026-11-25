@@ -137,8 +137,8 @@ async function loadTranslationCoverage(entityType, entityId) {
     );
     const statusMap = new Map(rows.map((row) => [row.field, row.status]));
     return {
-      hasName: statusMap.get('name') === 'full',
-      hasDescription: statusMap.get('description') === 'full',
+      hasName: statusMap.get(entityType === 'term' ? 'term' : 'name') === 'full',
+      hasDescription: statusMap.get(entityType === 'term' ? 'synopsis' : 'description') === 'full',
     };
   } catch (err) {
     console.error('读取译文覆盖失败:', err.message);
@@ -177,7 +177,7 @@ async function getShareContent(type, id) {
 
   if (type === 'term') {
     const [rows] = await pool.execute(
-      `SELECT id, term, synopsis, image_paths FROM encyclopedia_terms WHERE id = ?`,
+      `SELECT id, term, synopsis, image_paths FROM encyclopedia_terms WHERE id = ? AND status = 'published'`,
       [id]
     );
     const term = rows[0];
@@ -223,7 +223,7 @@ async function shareEntityExists(type, id) {
   }
   if (type === 'term') {
     const [[row]] = await pool.execute(
-      'SELECT COUNT(*) AS total FROM encyclopedia_terms WHERE id = ?',
+      "SELECT COUNT(*) AS total FROM encyclopedia_terms WHERE id = ? AND status = 'published'",
       [id]
     );
     return Number(row.total) > 0;

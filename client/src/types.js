@@ -141,3 +141,66 @@ export function toISO(value) {
   }
   return date.toISOString();
 }
+/**
+ * @typedef {Object} TermSummary
+ * @property {string} id
+ * @property {string} term
+ * @property {string|null} synopsis
+ * @property {string} category
+ * @property {'craft'|'building'} entry_type
+ * @property {string|null} primary_palace_id
+ * @property {string|null} primary_palace_name
+ * @property {string[]} related_palaces
+ * @property {string[]} related_palace_names
+ * @property {string[]} related_terms
+ * @property {string[]} knowledge_dimensions
+ * @property {number} sort_order
+ * @property {number|null} level_value
+ * @property {boolean} has_3d
+ */
+
+/**
+ * @typedef {Object} TermDetail
+ * @property {string} id
+ * @property {string} content
+ * @property {TermSummary} [summary]
+ * @property {Object|null} primary_building
+ * @property {{term?: {value: string, status: string}, synopsis?: {value: string, status: string}}} translations
+ * @property {boolean} fact_checked
+ * @property {boolean} rights_checked
+ */
+
+/**
+ * @typedef {Object} BuildingFilterOption
+ * @property {string} id
+ * @property {string} name
+ * @property {string|null} dynasty
+ * @property {string|null} region
+ * @property {number} entry_count
+ * @property {number} craft_count
+ * @property {boolean} covered
+ * @property {boolean} has_3d
+ */
+
+/**
+ * @typedef {Object} CoverageStats
+ * @property {number} published_terms
+ * @property {number} draft_terms
+ * @property {number} expected_min
+ * @property {number} min_floor
+ * @property {boolean} meets_minimum
+ * @property {number} coverage_rate
+ * @property {number} covered_buildings
+ * @property {number} non_forbidden_total
+ * @property {number} invalid_primary_refs
+ */
+
+/**
+ * @typedef {Object} EncyclopediaTaxonomy
+ * @property {BuildingFilterOption[]} buildings
+ * @property {string[]} dynasties
+ * @property {string[]} regions
+ * @property {{value: string, count: number}[]} entry_types
+ * @property {{category: string, category_icon: string|null, entry_type: string, count: number, sort: number}[]} categories
+ * @property {Object} totals
+ */

@@ -1,0 +1,8 @@
+/* T-CARD-21：顶栏文案在数据加载前后保持同高，避免整体下移 */
+.profile-title-sub {
+  min-block-size: 2.6em;
+}
+
+.encyclopedia-page-lead {
+  min-block-size: 2.8em;
+}
