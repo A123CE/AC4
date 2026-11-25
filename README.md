@@ -19,7 +19,7 @@
 - **营造拆解**: 程序化建筑支持台基 / 柱网梁架 / 斗拱 / 屋顶 / 装饰五层独立显隐，并可一键拆解层叠，直观展示中国木构建筑的营造层次
 - **热点系统**: 3D 场景中的可交互脉冲标记，点击查看构件讲解
 - **3D 皮肤**: 默认模式 / 线稿模式 / 雪景模式 / 古画模式，可用答题积分解锁
-- **清式十八斗**: 斗拱构件的独立拆解展示页
+
 - **沉浸式展览**: 明亮优雅的博物馆展览风格独立页面
 
 ### 知识模块
@@ -125,7 +125,7 @@ cd server && npm start
 | `/encyclopedia` | 营造法式百科 | 古建筑知识库 |
 | `/quiz` | 翰林院答题 | 答题 + 统计 + 成就 |
 | `/exhibition/:id` | 沉浸式展览 | 单建筑 3D 展览页（支持 GLB 与程序化模型） |
-| `/douba-eighteen` | 清式十八斗 | 斗拱构件拆解展示 |
+
 | `/profile` | 个人中心 | 足迹、收藏、徽章、皮肤 |
 
 > 注意：前端页面路由使用 `/gallery`，而静态资源 `/models/*` 由 Vite 代理到后端，二者互不冲突。
@@ -253,7 +253,7 @@ acvisual 4/
 │   │   ├── api.js               # API 请求封装（axios + JWT 拦截器）
 │   │   ├── context/
 │   │   │   └── AuthContext.jsx  # 全局认证状态
-│   │   ├── pages/               # 9 个页面（见"页面路由"）
+│   │   ├── pages/               # 页面组件（见"页面路由"）
 │   │   ├── lib/
 │   │   │   └── modelLoader.js       # GLB 加载 / 归一化 / 自动构图
 │   │   ├── components/          # 组件库
@@ -266,7 +266,7 @@ acvisual 4/
 │   │   │   │   ├── architectureUtils.js # 曲面屋顶／檐口几何工具
 │   │   │   │   └── LayerGroup.jsx       # 分层显隐与拆解动画
 │   │   │   ├── ExhibitionViewer.jsx # 沉浸式展览查看器
-│   │   │   ├── EighteenDouViewer.jsx # 十八斗拆解查看器
+
 │   │   │   ├── HotspotSystem.jsx    # 3D 热点系统
 │   │   │   ├── HotspotInfoCard.jsx  # 热点信息卡片
 │   │   │   ├── PalaceList.jsx       # 宫殿列表
@@ -351,11 +351,18 @@ acvisual 4/
 
 ### 静态资源说明
 
-`images/`、`models/`、`videos/` 目录存放宫殿图片、GLB/GLTF 模型与视频，由于体积较大**不随 git 仓库提交**（见 `.gitignore`）。数据库中的路径引用这些目录，新环境需自行放置对应资源。
+`images/`、`models/` 目录存放宫殿图片与 GLB 模型，通过 **Git LFS** 随仓库一起版本管理（见 `.gitattributes`）。首次使用前请确认已安装 Git LFS：
+
+```bash
+git lfs install
+git clone https://github.com/A123CE/AC4.git
+```
+
+若克隆时提示缺少 LFS 文件，在仓库目录执行 `git lfs pull` 即可补齐。
 
 ## 环境变量
 
-后端支持通过环境变量配置（均提供默认值）：
+后端通过环境变量配置，其中数据库密码与 JWT 密钥需要自行设置：
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
@@ -363,7 +370,23 @@ acvisual 4/
 | `DB_HOST` | `localhost` | 数据库地址 |
 | `DB_PORT` | `3306` | 数据库端口 |
 | `DB_USER` | `root` | 数据库用户 |
-| `DB_PASSWORD` | — | 数据库密码 |
+| `DB_PASSWORD` | — | 数据库密码（**必须设置**） |
 | `DB_NAME` | `ac4_db` | 数据库名 |
-| `JWT_SECRET` | — | JWT 签名密钥（**生产环境必须设置**） |
+| `JWT_SECRET` | — | JWT 签名密钥（**生产环境必须设置**；未设置时每次启动随机生成，重启后旧 token 失效） |
 | `JWT_EXPIRES_IN` | `7d` | Token 有效期 |
+
+Windows（PowerShell）：
+
+```powershell
+$env:DB_PASSWORD="你的数据库密码"
+$env:JWT_SECRET="自定义长随机字符串"
+npm run dev
+```
+
+macOS / Linux：
+
+```bash
+export DB_PASSWORD='你的数据库密码'
+export JWT_SECRET='自定义长随机字符串'
+npm run dev
+```

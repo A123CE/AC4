@@ -16,13 +16,6 @@ npm-debug.log*
 .tmp-*
 .arts/
 server/scripts/_tmp-*
-# 大型二进制文件 - 单独存放，不提交到git
-models/**/*.glb
-models/**/*.gltf
+# 模型与图片由 Git LFS 管理（见 .gitattributes），不要在此忽略
 videos/**/*
-images/**/*.jpg
-images/**/*.jpeg
-images/**/*.png
-images/**/*.webp
-images/**/*.ktx2
 static-version
