@@ -3,7 +3,7 @@ const path = require('path');
 const pool = require('../db');
 
 const SHARE_CHANNELS = new Set(['copy', 'system', 'wechat', 'weibo', 'link']);
-const SHARE_TYPES = new Set(['palace', 'term', 'route']);
+const SHARE_TYPES = new Set(['palace', 'term']);
 const DEFAULT_OG_IMAGE = '/images/brand/og-default.webp';
 const FALLBACK_OG_IMAGE = '/images/posters/gugong.webp';
 const SITE_NAME = '华夏古建';
@@ -69,7 +69,7 @@ function buildCanonical(origin, type, id) {
   const base = String(origin || '').replace(/\/+$/, '');
   if (type === 'palace') return `${base}/exhibition/${encodeURIComponent(id)}`;
   if (type === 'term') return `${base}/encyclopedia?term=${encodeURIComponent(id)}`;
-  if (type === 'route') return `${base}/routes/${encodeURIComponent(id)}`;
+
   return `${base}/`;
 }
 

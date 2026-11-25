@@ -14,7 +14,7 @@ const sharePageRoutes = require('./routes/sharePage');
 const assetsRoutes = require('./routes/assets');
 const searchRoutes = require('./routes/search');
 const taxonomyRoutes = require('./routes/taxonomy');
-const routeRoutes = require('./routes/routes');
+
 const recommendRoutes = require('./routes/recommend');
 const contentRoutes = require('./routes/content');
 const hotspotRoutes = require('./routes/hotspots');
@@ -51,7 +51,7 @@ app.use('/api/share', shareRoutes);
 app.use('/api/assets', assetsRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/taxonomy', taxonomyRoutes);
-app.use('/api/routes', routeRoutes);
+
 app.use('/api/recommend', recommendRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/hotspots', hotspotRoutes);

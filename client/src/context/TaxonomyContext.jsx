@@ -13,7 +13,7 @@ const EMPTY_TAXONOMY = {
   regions: [],
   dynasties: [],
   terms: [],
-  routes: [],
+
 };
 
 const TaxonomyContext = createContext(null);

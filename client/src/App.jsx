@@ -10,11 +10,9 @@ import TimelinePage from './pages/TimelinePage';
 import EncyclopediaPage from './pages/EncyclopediaPage';
 import ProfilePage from './pages/ProfilePage';
 import ExhibitionPage from './pages/ExhibitionPage';
-import EighteenDouPage from './pages/EighteenDouPage';
 import QuizPage from './pages/QuizPage';
 import CuratorPage from './pages/CuratorPage';
 import SearchPage from './pages/SearchPage';
-import RoutePage from './pages/RoutePage';
 import RouteGuard from './components/guards/RouteGuard';
 import GlobalSearchDialog from './components/GlobalSearchDialog';
 import SkipLink from './components/SkipLink';
@@ -77,26 +75,8 @@ const ROUTES = [
     meta: { publicReadonly: true },
   },
   {
-    path: '/routes',
-    element: <RoutePage />,
-    guard: 'public',
-    meta: { publicReadonly: true },
-  },
-  {
-    path: '/routes/:id',
-    element: <RoutePage />,
-    guard: 'public',
-    meta: { publicReadonly: true },
-  },
-  {
     path: '/exhibition/:id',
     element: <ExhibitionPage />,
-    guard: 'public',
-    meta: { publicReadonly: true },
-  },
-  {
-    path: '/douba-eighteen',
-    element: <EighteenDouPage />,
     guard: 'public',
     meta: { publicReadonly: true },
   },

@@ -24,8 +24,7 @@ async function buildTaxonomy() {
     regions: regions.map((row) => row.region),
     dynasties: dynasties.map((row) => row.dynasty),
     terms: terms.map((row) => row.category),
-    // 路线表由 T-S2-05 提供
-    routes: [],
+
   };
 }
 

@@ -19,7 +19,7 @@ router.get('/robots.txt', (req, res) => {
     'Allow: /',
     'Allow: /exhibition/',
     'Allow: /encyclopedia',
-    'Allow: /routes',
+
     'Allow: /share/',
     'Disallow: /api/',
     'Disallow: /profile',

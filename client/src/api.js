@@ -227,17 +227,7 @@ export const searchSuggest = (q = '') =>
 export const getTaxonomy = () => api.get('/taxonomy');
 
 // ============================================================
-//  主题导览路线
-// ============================================================
 
-export const getRoutes = () => api.get('/routes');
-
-export const getRoute = (routeId) => api.get(`/routes/${routeId}`);
-
-export const updateRouteProgress = (routeId, stopOrder) =>
-  api.put(`/routes/${routeId}/progress`, { stop_order: stopOrder });
-
-// ============================================================
 //  个性化推荐
 // ============================================================
 

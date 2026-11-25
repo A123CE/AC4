@@ -18,7 +18,7 @@ const NAV_LABEL_KEYS = {
   '/timeline': 'nav.timeline',
   '/gallery': 'nav.gallery',
   '/encyclopedia': 'nav.encyclopedia',
-  '/routes': 'nav.routes',
+
   '/quiz': 'nav.quiz',
   '/curator?new=1': 'nav.upload',
   '/curator': 'nav.curator',
@@ -45,7 +45,7 @@ const NAV_GROUPS = [
     items: [
       { key: '/gallery', label: '3D 模型展厅', icon: 'fa-cube' },
       { key: '/encyclopedia', label: '建筑知识科普', icon: 'fa-book-open' },
-      { key: '/routes', label: '主题导览路线', icon: 'fa-route' },
+
       { key: '/quiz', label: '营造问答', icon: 'fa-pen-ruler' },
     ],
   },

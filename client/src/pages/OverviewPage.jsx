@@ -8,7 +8,7 @@ import RecommendationRail from '../components/RecommendationRail';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 import { useClassroomView } from '../context/ClassroomViewContext';
-import { getPalaces, getRecommendations, getRoutes } from '../api';
+import { getPalaces, getRecommendations } from '../api';
 import '../styles/overview.css';
 
 const DYNASTY_TAGS = ['唐', '宋', '元', '明', '清'];
@@ -34,7 +34,7 @@ export default function OverviewPage() {
   const { isLoggedIn, user } = useAuth();
   const { t } = useI18n();
   const { enabled: classroomEnabled } = useClassroomView();
-  const [firstRouteId, setFirstRouteId] = useState(null);
+
   const isAdmin = user?.role === 'admin';
   const [palaces, setPalaces] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -286,22 +286,6 @@ export default function OverviewPage() {
     navigate('/gallery', { state: { selectPalaceId: palace.id } });
   };
 
-  useEffect(() => {
-    if (!classroomEnabled) return undefined;
-    let mounted = true;
-
-    getRoutes()
-      .then((res) => {
-        if (!mounted || !res?.data?.success) return;
-        const first = (res.data.data || [])[0];
-        setFirstRouteId(first?.id || null);
-      })
-      .catch(() => {});
-
-    return () => {
-      mounted = false;
-    };
-  }, [classroomEnabled]);
 
   // 3D 模型浏览 → 沉浸式 3D 展览页
   const handleModel = (palace) => {
@@ -349,13 +333,7 @@ export default function OverviewPage() {
           >
             <button
               type="button"
-              className="profile-pref-toggle on"
-              onClick={() => navigate(firstRouteId ? `/routes/${firstRouteId}` : '/routes')}
-            >
-              主题路线
-            </button>
-            <button
-              type="button"
+
               className="profile-pref-toggle"
               onClick={() => navigate('/quiz?mode=practice&view=classroom')}
             >

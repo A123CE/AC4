@@ -63,22 +63,6 @@ async function getPopularity() {
   }
 }
 
-async function getNextStops(palaceId) {
-  try {
-    const [rows] = await pool.execute(
-      `SELECT rs.route_id, cr.name AS route_name, next.palace_id AS next_id
-       FROM route_stops rs
-       JOIN route_stops next
-         ON next.route_id = rs.route_id AND next.stop_order = rs.stop_order + 1
-       JOIN curated_routes cr ON cr.id = rs.route_id
-       WHERE rs.palace_id = ? AND cr.is_published = 1`,
-      [palaceId]
-    );
-    return new Map(rows.map((row) => [row.next_id, row.route_name]));
-  } catch {
-    return new Map();
-  }
-}
 
 function fallbackItems(candidates, limit, excludeId, excludeIds, popularity) {
   return candidates
@@ -169,10 +153,6 @@ async function recommend({ userId = null, scene = 'home', palaceId = null, limit
         const topViewedCandidate = topViewed
           ? byId.get(topViewed.palace_id)
           : null;
-        const nextStops =
-          scene === 'detail' && palaceId
-            ? await getNextStops(palaceId)
-            : new Map();
 
         const scored = candidates
           .filter((candidate) => candidate.id !== palaceId)
@@ -199,14 +179,9 @@ async function recommend({ userId = null, scene = 'home', palaceId = null, limit
 
             if (viewedCount.has(candidate.id)) score -= 1;
 
-            const routeName = nextStops.get(candidate.id);
-            if (routeName) score += 10;
-
             let reason = null;
 
-            if (routeName) {
-              reason = { code: 'route_next', text: `路线下一站：${routeName}` };
-            } else if (collectedShared.length > 0) {
+            if (collectedShared.length > 0) {
               reason = {
                 code: 'because_collected',
                 text: `与你收藏的${collectedNames[0] || '建筑'}相似`,
