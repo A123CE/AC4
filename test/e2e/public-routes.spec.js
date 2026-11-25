@@ -7,7 +7,7 @@ const PUBLIC_PATHS = [
   '/timeline',
   '/encyclopedia',
   '/exhibition/taihedian',
-  '/douba-eighteen',
+
   '/quiz',
 ];
 

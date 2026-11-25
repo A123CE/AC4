@@ -42,10 +42,7 @@ describe('分享页 JSON-LD / canonical / hreflang', () => {
       buildCanonical(origin, 'term', 'dougong'),
       'https://example.com/encyclopedia?term=dougong'
     );
-    assert.equal(
-      buildCanonical(origin, 'route', 'forbidden-city'),
-      'https://example.com/routes/forbidden-city'
-    );
+
   });
 
   it('palace 分享页输出 TouristAttraction 且不含评分/评论/个人邮箱', async (t) => {

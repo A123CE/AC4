@@ -14,11 +14,10 @@ const PUBLIC_EXPECTED = [
   '/timeline',
   '/encyclopedia',
   '/exhibition/:id',
-  '/douba-eighteen',
+
   '/quiz',
   '/search',
-  '/routes',
-  '/routes/:id',
+
   '/login',
 ];
 

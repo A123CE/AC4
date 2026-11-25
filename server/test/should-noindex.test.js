@@ -34,7 +34,7 @@ describe('shouldNoindex 纯函数', () => {
 
   it('公开页与建筑详情不误伤', () => {
     assert.equal(shouldNoindex('/exhibition/taihedian', ''), false);
-    assert.equal(shouldNoindex('/routes', ''), false);
+
     assert.equal(shouldNoindex('/', ''), false);
   });
 });

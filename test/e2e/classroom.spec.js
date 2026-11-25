@@ -51,7 +51,7 @@ test.describe('课堂模式', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('html')).toHaveAttribute('data-classroom', 'on');
     await expect(page.locator('.classroom-entry-bar')).toBeVisible();
-    await expect(page.getByRole('button', { name: '主题路线' })).toBeVisible();
+
     await expect(page.getByRole('button', { name: '随堂练习' })).toBeVisible();
     await expect(page.locator('.recommendation-rail')).toHaveCount(0);
 

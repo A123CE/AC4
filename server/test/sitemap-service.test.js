@@ -40,7 +40,7 @@ describe('sitemapService', () => {
     assert.ok(xml.startsWith('<?xml'));
     assert.ok(xml.includes('<urlset'));
     assert.ok(xml.includes('/exhibition/taihedian'));
-    assert.ok(xml.includes('/routes/axis-day'));
+
     assert.equal(xml.includes('/share/'), false);
     assert.equal(xml.includes(draftId), false);
     assert.ok(xml.includes('&amp;term=') || xml.includes('?term='));

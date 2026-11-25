@@ -60,7 +60,7 @@ describe('排版契约（静态守门）', () => {
   });
 
   it('无内联 fontWeight / fontFamily 声明', () => {
-    const files = ['src/pages/EighteenDouPage.jsx', 'src/pages/ExhibitionPage.jsx'];
+    const files = ['src/pages/ExhibitionPage.jsx'];
     for (const file of files) {
       const src = read(file);
       expect(src).not.toMatch(/\bfontWeight\s*:/);

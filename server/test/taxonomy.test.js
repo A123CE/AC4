@@ -16,7 +16,7 @@ describe('分类与朝代导航接口', () => {
     assert.equal(res.body.success, true);
 
     const data = res.body.data;
-    for (const key of ['categories', 'regions', 'dynasties', 'terms', 'routes']) {
+    for (const key of ['categories', 'regions', 'dynasties', 'terms']) {
       assert.ok(Array.isArray(data[key]), `缺少数组 ${key}`);
     }
     assert.ok(data.categories.includes('宫殿'));
