@@ -5,7 +5,7 @@ function getConfig(overrides = {}) {
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT) || 3306,
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'Zsf/20050827',
+    password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME || process.env.DB_TEST_NAME || 'ac4_test',
     multipleStatements: true,
     charset: 'utf8mb4',

@@ -1,7 +1,8 @@
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-// JWT 密钥 — 生产环境需通过环境变量注入
-const JWT_SECRET = process.env.JWT_SECRET || 'gu_gong_visual_secret_key_2024';
+// JWT 密钥 — 生产环境必须通过环境变量注入；未注入时随机生成（重启后旧 token 失效）
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 /**
